@@ -1,0 +1,30 @@
+:VARS: {
+    score
+    deaths
+
+    float damage = 0.5
+
+    OBJECT player
+    OBJECT enemy
+    OBJECT[] enemies
+
+    #comment example
+    TEXT scoreText
+}
+
+:START: {
+	score = 0
+	deaths = 0
+
+	player.icon = !CIRCLE
+	enemy.icon = !TRIANGLE
+}
+
+:UPDATE: {
+	player.x += $JOYSTICK_X
+	player.y += $JOYSTICK_Y
+}
+
+spawnEnemy() {
+	enemies.add(CREATE_NEW(enemy))
+}
