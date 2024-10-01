@@ -10,5 +10,5 @@ all : squiggly.o tokenizer.o linter.o
 	$(CC) -Wall -Werror -I$(INCL) -c $< -o $@
 
 clean :
-	rm -rf squiggly
+	rm -f squiggly
 	rm -f *.o

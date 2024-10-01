@@ -5,6 +5,7 @@
 #include <string>
 
 #include "tokenizer.h"
+#include "linter.h"
 
 int main(int argc, char** argv) {
     //quick check to make sure file was passed as input to the program
@@ -26,6 +27,9 @@ int main(int argc, char** argv) {
     //read from the input file
     std::string temp;
     while(std::getline(file, temp)) {
+        if(temp.empty())
+            continue; //skip empty lines
+
         fileLines.push_back(temp);
     }
     file.close();
