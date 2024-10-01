@@ -2,13 +2,18 @@ CC = g++
 
 SRC = src/
 INCL = include/
+OBJ = objs/
 
-all : squiggly.o tokenizer.o linter.o
-	$(CC) -Wall -Werror -I$(INCL) -o squiggly squiggly.o tokenizer.o linter.o
+all : ${OBJ}squiggly.o ${OBJ}tokenizer.o ${OBJ}linter.o
+	$(CC) -Wall -Werror -I$(INCL) -o squiggly ${OBJ}squiggly.o ${OBJ}tokenizer.o ${OBJ}linter.o
 
-%.o : ${SRC}%.cpp
+${OBJ}%.o : ${SRC}%.cpp
+	@if [ ! -d ${OBJ} ]; then \
+		mkdir ${OBJ}; \
+	fi
+
 	$(CC) -Wall -Werror -I$(INCL) -c $< -o $@
 
 clean :
 	rm -f squiggly
-	rm -f *.o
+	rm -rf ${OBJ}*.o
