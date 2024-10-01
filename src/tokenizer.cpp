@@ -12,9 +12,11 @@ std::vector<std::vector<TokenizedLine>> functions_tok = std::vector<std::vector<
 
 //helper functions
 void clearTokenized();
-void findCode(std::string header, std::vector<std::string>& lines, size_t& start, size_t& end);
+void findCode(std::string header, std::vector<std::string>& lines, size_t& start, size_t& end, bool err=false);
 void findOpenCloseBraces(std::vector<std::string>& lines, size_t& start, size_t& end);
 void tokenizeSection(std::vector<std::string>& lines, std::vector<TokenizedLine>& tokenBuff, size_t start, size_t end);
+
+
 
 /*
     Parse the code line by line and build a tokenized version of the script.
@@ -26,15 +28,17 @@ void Tokenizer::tokenize(std::vector<std::string>& lines)
     //clear out any script that might still be in memory
     clearTokenized();
 
-    int start = 0;
-    int end = 0;
+    size_t start = 0;
+    size_t end = 0;
 
-    findCode(VAR_FUNC_HEAD, lines, start, end);
-    tokenizeSection(lines, varsBlock_tok, start, end);
+    findCode(VAR_FUNC_HEAD, lines, start, end, true);
+    //tokenizeSection(lines, varsBlock_tok, start, end);
 
     //clear memory after tokenizing
     lines.clear();
 }
+
+
 
 //reset all of the tokenized objects to be empty (clear memory of old program if it exists)
 void clearTokenized() {
@@ -50,7 +54,7 @@ void clearTokenized() {
 }
 
 //finds the start and end locations for code segments with specific headers (system functions called automatically)
-void findCode(std::string header, std::vector<std::string>& lines, size_t& start, size_t& end) 
+void findCode(std::string header, std::vector<std::string>& lines, size_t& start, size_t& end, bool err) 
 {
     //scan for vars function (declares all variables)
     size_t found;
@@ -58,20 +62,51 @@ void findCode(std::string header, std::vector<std::string>& lines, size_t& start
         found = lines[i].find(header);
         if(found != std::string::npos) {
             start = i;
-            findOpenCloseBraces(start, end);
+            findOpenCloseBraces(lines, start, end);
+            return;
         }
+    }
+
+    if(err) { //show an error if the function was not in fact found (again, linter should take care of this, but just in case...)
+        clearTokenized();
+        lines.clear();
+        std::cerr << "Failed to find required " << header << " function. Quitting..." << std::endl;
+        std::exit(0);
     }
 }
 
 //from any start position, find the location of where the opening braces are closed
+//once again, this method assumes that the linter has done its job correctly in the syntax
+//check and there are NO MISSING BRACES
 void findOpenCloseBraces(std::vector<std::string>& lines, size_t& start, size_t& end) 
 {
+    //each opening brace will be pushed to the stack. each closing brace will remove from the stack
+    //once the stack is empty, the program will stop, having found the last brace to the function specified
     std::vector<char> stack;
 
-    //find first opening brace
+    bool foundFirst = false; //don't start considering a stack empty until the first open brace is found
 
+    //find first opening brace
     for(size_t i=start; i<lines.size(); i++) {
-        //for(int i=0; i<)
+
+        //loop through each line to find an opening brace
+        for(char letter : lines[i]) {
+            if(letter == '{') {
+                if(!foundFirst) {
+                    start = i; //mark the new start location
+                    foundFirst = true;
+                }
+                stack.push_back(letter);
+            }
+            else if(letter == '}' && foundFirst) {
+                stack.erase(stack.begin() + stack.size()-1);
+            }
+
+            if(stack.size() == 0 && foundFirst) {
+                end = i+1;
+                return;
+            }
+        }
     }
 }
 
