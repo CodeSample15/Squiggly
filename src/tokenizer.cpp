@@ -10,12 +10,14 @@ std::vector<TokenizedLine> mainLoop_tok = std::vector<TokenizedLine>();
 std::vector<std::vector<TokenizedLine>> functions_tok = std::vector<std::vector<TokenizedLine>>();
 
 
-//helper functions
+//helper functions prototypes--------------------------------------------------------------------------------------------
 void clearTokenized();
-void findCode(std::string header, std::vector<std::string>& lines, size_t& start, size_t& end, bool err=false);
-void findOpenCloseBraces(std::vector<std::string>& lines, size_t& start, size_t& end);
-void tokenizeSection(std::vector<std::string>& lines, std::vector<TokenizedLine>& tokenBuff, size_t start, size_t end);
 
+void findCode(std::string header, std::vector<std::string>& lines, size_t& start, size_t& end, bool err=false);
+
+void findOpenCloseBraces(std::vector<std::string>& lines, size_t& start, size_t& end);
+
+void tokenizeSection(std::vector<std::string>& lines, std::vector<TokenizedLine>& tokenBuff, size_t start, size_t end);
 
 
 /*
@@ -25,17 +27,28 @@ void tokenizeSection(std::vector<std::string>& lines, std::vector<TokenizedLine>
 */
 void Tokenizer::tokenize(std::vector<std::string>& lines)
 {
+    std::cout << "Tokenizing code...\t";
+
     //clear out any script that might still be in memory
     clearTokenized();
 
     size_t start = 0;
     size_t end = 0;
 
+    //find and tokenize all of the non optional functions in the code
     findCode(VAR_FUNC_HEAD, lines, start, end, true);
-    //tokenizeSection(lines, varsBlock_tok, start, end);
+    tokenizeSection(lines, varsBlock_tok, start, end);
+
+    // findCode(START_FUNC_HEAD, lines, start, end, true);
+    // tokenizeSection(lines, varsBlock_tok, start, end);
+
+    // findCode(UPDATE_FUNC_HEAD, lines, start, end, true);
+    // tokenizeSection(lines, varsBlock_tok, start, end);
 
     //clear memory after tokenizing
     lines.clear();
+
+    std::cout << "Done" << std::endl;;
 }
 
 
@@ -110,6 +123,29 @@ void findOpenCloseBraces(std::vector<std::string>& lines, size_t& start, size_t&
     }
 }
 
-void tokenizeSection(std::vector<std::string>& lines, std::vector<TokenizedLine>& tokenBuff, size_t start, size_t end) {
-    
+/*
+    Go to the section of the code specified with the start and end lines variables and go
+    line by line to tokenize the program into a tokenBuff
+*/
+void tokenizeSection(std::vector<std::string>& lines, std::vector<TokenizedLine>& tokenBuff, size_t start, size_t end) 
+{
+    TokenizedLine line;
+
+    //loop through the code starting and ending at the provided lines and store the tokenized strings in the tokenBuff
+    for(size_t i=start+1; i<end-1; i++) {
+        //search for assignments
+        size_t found = lines[i].find("=");
+        if(found != std::string::npos) {
+            //found an assignment line
+            //line.type = LineType.ASSIGN;
+
+            //std::string left = "";
+            //for(int i=0; i<)
+
+            continue;
+        }
+
+        //search for branches
+        //found = lines[i]
+    }
 }
