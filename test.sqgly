@@ -18,6 +18,10 @@
 
 	player.icon = !CIRCLE
 	enemy.icon = !TRIANGLE
+
+    if (damage == 0.5) {
+        #this is a test
+    }
 }
 
 :UPDATE: {

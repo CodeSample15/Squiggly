@@ -7,6 +7,7 @@ void Linter::preprocess(std::vector<std::string>& lines)
 {
     std::cout << "Preprocessing script...\t";
 
+    //remove unecessary whitespace
     for(size_t i=0; i < lines.size(); i++) {
         for(size_t j=0; j<lines[i].length(); j++) {
             if(lines[i][j] == ' ' || lines[i][j] == '\t') {
@@ -19,6 +20,18 @@ void Linter::preprocess(std::vector<std::string>& lines)
                     j--;
                 }
             }
+            else if(lines[i][j] == COMMENT_PREFIX) { //remove comments
+                lines[i].erase(j, lines[i].length());
+                break;
+            }
+        }
+    }
+
+    //delete empty lines
+    for(size_t i=0; i < lines.size(); i++) {
+        if(lines[i].length() == 0) {
+            lines.erase(lines.begin() + i);
+            i--;
         }
     }
 
