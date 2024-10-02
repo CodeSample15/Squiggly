@@ -38,7 +38,7 @@ int main(int argc, char** argv) {
     Linter::preprocess(fileLines);
 
     //Run tokenizer
-    //Tokenizer::tokenize(fileLines);
+    Tokenizer::tokenize(fileLines);
 
     //TODO: Run script
 

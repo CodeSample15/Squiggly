@@ -5,24 +5,31 @@
 #include <iostream>
 
 namespace Tokenizer {
-    typedef enum Type {
-        CALL,
-        BRANCH,
-        ASSIGN,
-        NAME
-    } LineType;
+    enum LineType {
+        CALL,           //calling a function
+        BRANCH,         //if/else statements
+        ASSIGN,         //assign a variable to a value
+        DECLARE,        //declare a variable
+        DECLARE_ASSIGN, //declare a variable and assign a value in one line
+        FUNC_NAME       //name of a function / header of some code
+    };
 
     typedef struct Line {
         LineType type;
+        int srcLine; // line of code in the source file so programmers have better error tracing
 
+        //CALL
         int callLineNum;
         std::string params;
 
+        //BRANCH
         int branchLineNumTRUE;
         int branchLineNumFALSE;
 
-        std::string leftAssign;
-        std::string rightAssign;
+        //ASSIGN
+        std::string assignDst;
+        std::string assignSrc;
+        std::string assignType; //DECLARE ASSIGN
 
         std::string funcName;
     } TokenizedLine;

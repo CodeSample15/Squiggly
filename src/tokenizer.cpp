@@ -133,16 +133,37 @@ void tokenizeSection(std::vector<std::string>& lines, std::vector<TokenizedLine>
 
     //loop through the code starting and ending at the provided lines and store the tokenized strings in the tokenBuff
     for(size_t i=start+1; i<end-1; i++) {
-        //search for assignments
-        size_t found = lines[i].find("=");
-        if(found != std::string::npos) {
+        //search for assignments (equals character)
+        size_t found;
+        if((found = lines[i].find("=")) != std::string::npos) {
             //found an assignment line
-            //line.type = LineType.ASSIGN;
+            line.type = LineType::ASSIGN;
+            line.srcLine = i;
 
-            //std::string left = "";
-            //for(int i=0; i<)
+            std::string dst = lines[i].substr(0, found);
+            std::string src = lines[i].substr(found+1, lines[i].length());
 
-            continue;
+            //check to see if the dst is also declaring a variable type
+            found = dst.find(" ");
+            if(found != std::string::npos) {
+                line.type = LineType::DECLARE_ASSIGN;
+
+                std::string type = dst.substr(0, found);
+                dst = dst.substr(found+1, dst.length());
+
+                line.assignType = type;
+            }
+
+            line.assignDst = dst;
+            line.assignSrc = src;
+
+            tokenBuff.push_back(line);
+        }
+        else if(true) {
+            
+        }
+        else {
+            std::cout << "\nError! Unrecognized syntax at line " << i << ". Skipping...\t";
         }
 
         //search for branches
