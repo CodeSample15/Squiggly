@@ -20,7 +20,7 @@ int main(int argc, char** argv) {
     std::ifstream file;
     file.open(argv[1]);
     if(!file.is_open()) {
-        std::cout << "Could not find file \'" << argv[0] << "\' in current directory. Exiting..." << std::endl;
+        std::cout << "Could not find file \'" << argv[1] << "\' in current directory. Exiting..." << std::endl;
         return 0;
     }
 
