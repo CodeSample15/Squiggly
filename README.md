@@ -21,6 +21,9 @@ An esoteric language designed to be a quick way to develop games using scripts
     1. This interpreter (when built and ran from the `main` branch) will open it's own graphical window when running a script where you can play and test games!
     2. When this interpreter is ported over to embedded systems, it will allow those same scripts to be played on any portable mini-consoles built using arduino (and raspberry pis in the future)!
     3. If you like experimenting with crappy software, this is definitely a fun way to do so (in my unbiased opinion).
+- **Why did you call it that?**
+    - This project is named "squiggly" due to it's syntax looking kind of squiggly. That's really the only reason.
+    - The project was going to be named "squiggle" but according to [the complete list of esoteric languages](https://esolangs.org/wiki/Language_list), the name "squiggle" is already taken.
 
 ## Example squiggly syntax:
 
