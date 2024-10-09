@@ -8,6 +8,7 @@ namespace Tokenizer {
     enum LineType {
         CALL,           //calling a function
         BRANCH,         //if/else statements
+        BRANCH_ELSE,    //else statements (uses if/else values)
         ASSIGN,         //assign a variable to a value
         DECLARE,        //declare a variable
         DECLARE_ASSIGN, //declare a variable and assign a value in one line
@@ -25,13 +26,14 @@ namespace Tokenizer {
         //BRANCH
         std::string booleanExpression;
         ssize_t branchLineNumTRUE;
-        ssize_t branchLineNumFALSE;
+        ssize_t branchLineNumEND;
         ssize_t branchLineNumELSE;
 
         //ASSIGN
         std::string assignDst;
         std::string assignSrc;
         std::string assignType; //DECLARE ASSIGN
+        std::string assignOperator; //=, -=, +=, etc
 
         std::string funcName;
     } TokenizedLine;

@@ -12,7 +12,7 @@ void Linter::preprocess(std::vector<std::string>& lines)
         for(size_t j=0; j<lines[i].length(); j++) {
             if(lines[i][j] == ' ' || lines[i][j] == '\t') {
                 //check to see if there is whitespace, that it's not being used to separate two distinct strings
-               bool rightGood = j+1 < lines[i].length() && !std::isalpha(lines[i][j+1]);
+               bool rightGood = j+1 >= lines[i].length() || !std::isalpha(lines[i][j+1]);
                bool leftGood = j-1 >= 0 && !std::isalpha(lines[i][j-1]);
 
                 if(lines[i][j] == '\t' || rightGood || leftGood) {
