@@ -8,7 +8,7 @@ An esoteric language designed to be a quick way to develop games using scripts
 
 ## Build/Run instructions:
 
-* From root of directory, run `make`
+* From the root directory of the project, run `make`
 * To run: `./squiggly <FILENAME>`
 
 ## *...why?*
@@ -48,8 +48,8 @@ Test code can be found in the `/test_scripts` folder, but the general syntax loo
 	score = 0
 	deaths = 0
 
-	player.icon = !CIRCLE
-	enemy.icon = !TRIANGLE
+	player.icon = @CIRCLE
+	enemy.icon = @TRIANGLE
 
     if (damage == 0.5) {
         

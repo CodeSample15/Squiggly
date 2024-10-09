@@ -16,15 +16,17 @@ namespace Tokenizer {
 
     typedef struct Line {
         LineType type;
-        int srcLine; // line of code in the source file so programmers have better error tracing
+        size_t srcLine; // line of code in the source file so programmers have better error tracing
 
         //CALL
-        int callLineNum;
+        std::string callFuncName;
         std::string params;
 
         //BRANCH
-        int branchLineNumTRUE;
-        int branchLineNumFALSE;
+        std::string booleanExpression;
+        ssize_t branchLineNumTRUE;
+        ssize_t branchLineNumFALSE;
+        ssize_t branchLineNumELSE;
 
         //ASSIGN
         std::string assignDst;
@@ -34,7 +36,6 @@ namespace Tokenizer {
         std::string funcName;
     } TokenizedLine;
 
-    void lint(std::vector<std::string> lines); //TODO: write linter to check code before being sent over to tokenizer
     void tokenize(std::vector<std::string>& lines);
 }
 
