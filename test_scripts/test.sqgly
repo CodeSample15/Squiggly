@@ -26,8 +26,7 @@
     else if(damage == 0.1) {
         score = 6
         score = 4
-    } else 
-    {
+    } else {
         score = 65
     }
 

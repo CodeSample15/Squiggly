@@ -317,6 +317,9 @@ void tokenizeSection(std::vector<std::string>& lines, std::vector<TokenizedLine>
 
             i--;
         }
+        else if(lines[i].length() == 1 && (lines[i][0] == '{' || lines[i][0] == '}')) {
+            continue; //ignore lines with just { or }
+        }
         else {
             std::cerr << "\nError! Unrecognized syntax at line \'" << lines[i] << "\'. Skipping..." << std::endl;
         }
@@ -357,7 +360,7 @@ void discoverUserFuncs(std::vector<std::string>& lines)
 
 bool checkForElse(std::vector<std::string>& lines, size_t endOfIf, size_t& elseLine) {
     //big long ugly boolean that checks for an else at the end of an if statement
-    if(lines[endOfIf-1].find("else") == 0
+    if(lines[endOfIf-1].find("else") != std::string::npos
     || lines[endOfIf-1].find("else if(") != std::string::npos) {
         elseLine = endOfIf-1; //same line as the closing brace of the if statement
         return true;
@@ -374,7 +377,7 @@ bool checkForElse(std::vector<std::string>& lines, size_t endOfIf, size_t& elseL
 
 bool checkForElse(std::vector<std::string>& lines, size_t endOfIf) {
     //big long ugly boolean that checks for an else at the end of an if statement
-    if(lines[endOfIf-1].find("else{") != std::string::npos
+    if(lines[endOfIf-1].find("else") != std::string::npos
     || lines[endOfIf-1].find("else if(") != std::string::npos) {
         return true;
     }
@@ -411,7 +414,7 @@ void printTokenBuff(std::vector<TokenizedLine>& buffer) {
                 break;
             
             case LineType::BRANCH:
-                std::cout << "BRANCH " << buffer[i].booleanExpression << "\tTRUE: " << buffer[i].branchLineNumTRUE << "\tEND: " << buffer[i].branchLineNumEND << "\tELSE: " << buffer[i].branchLineNumELSE << std::endl;
+                std::cout << "BRANCH " << buffer[i].booleanExpression << "   TRUE: " << buffer[i].branchLineNumTRUE << "   END: " << buffer[i].branchLineNumEND << "   ELSE: " << buffer[i].branchLineNumELSE << std::endl;
                 break;
 
             case LineType::BRANCH_ELSE:
