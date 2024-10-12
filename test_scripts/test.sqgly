@@ -13,8 +13,10 @@
 }
 
 :START: {
-	score = 0
+	int score = 0
 	deaths = 0
+
+    deaths += 5
 
 	player.icon = @CIRCLE
 	enemy.icon = @TRIANGLE

@@ -21,6 +21,8 @@ void findOpenCloseBraces(std::vector<std::string>& lines, size_t& start, size_t&
 void findOpenCloseParenthesis(std::string line, size_t& start, size_t& end);
 //tokenize a section starting from a start location and an end location, storing the result in tokenBuff
 void tokenizeSection(std::vector<std::string>& lines, std::vector<TokenizedLine>& tokenBuff, size_t start, size_t end);
+//tokenize an if statement
+//void tokenizeIf(std::vector<std::string>& lines, std::vector<TokenizedLine>& tokenBuff, );
 //search for functions defined by the programmer
 void discoverUserFuncs(std::vector<std::string>& lines);
 std::vector<std::string> userFuncNames; //this is what discoverUserFuncs is going to edit
@@ -29,6 +31,8 @@ bool checkForElse(std::vector<std::string>& lines, size_t endOfIf, size_t& elseL
 bool checkForElse(std::vector<std::string>& lines, size_t endOfIf);
 //returns the number of times a specific character appears in a line
 int countNumCharacters(std::string line, char character);
+//for errors (exit program)
+inline void tokenizerError(std::string msg);
 //for debug purposes
 void printTokenBuff(std::vector<TokenizedLine>& buffer);
 
@@ -99,10 +103,7 @@ void findCode(std::string header, std::vector<std::string>& lines, size_t& start
     }
 
     if(err) { //show an error if the function was not in fact found (again, linter should take care of this, but just in case...)
-        clearTokenized();
-        lines.clear();
-        std::cerr << "Failed to find required " << header << " function. Quitting..." << std::endl;
-        std::exit(0);
+        tokenizerError("Unable to find " + header + " in code!");
     }
 }
 
@@ -194,29 +195,54 @@ void tokenizeSection(std::vector<std::string>& lines, std::vector<TokenizedLine>
         if((found = lines[i].find("=")) != std::string::npos && countNumCharacters(lines[i], '=') == 1) {
             //found an assignment line
             line.type = LineType::ASSIGN;
+            line.assignOperator = "=";
 
             /*
                 Assign linetype:
                     std::string assignDst;
                     std::string assignSrc;
                     std::string assignType; //DECLARE ASSIGN
+                    std::string assignOperator;
             */
 
-            line.srcLine = i;
+            //check for special assigns (+=, -=, /=, *=)
+            size_t assignFound;
+            size_t offset = 1; //if a special assign is found, increase this to 2 so that the source assign substring can be found
+            if((assignFound = lines[i].find("+=")) != std::string::npos) {
+                line.assignOperator = "+=";
+                found = assignFound;
+                offset = 2;
+            } else if((assignFound = lines[i].find("-=")) != std::string::npos) {
+                line.assignOperator = "-=";
+                found = assignFound;
+                offset = 2;
+            } else if((assignFound = lines[i].find("/=")) != std::string::npos) {
+                line.assignOperator = "/=";
+                found = assignFound;
+                offset = 2;
+            } else if((assignFound = lines[i].find("*=")) != std::string::npos) {
+                line.assignOperator = "*=";
+                found = assignFound;
+                offset = 2;
+            }
 
-            //may God have mercy on us all... (this is the worst looking code I've ever written)
+            //some ugly code but just roll with it
             std::string dst = lines[i].substr(0, found);
-            std::string src = lines[i].substr(found+1, lines[i].length());
+            std::string src = lines[i].substr(found+offset, lines[i].length()); //here is the ONLY place offset will be used, ignore the value from this point on
 
             //check to see if the dst is also declaring a variable type
             found = dst.find(" ");
             if(found != std::string::npos) {
+                if(line.assignOperator.compare("=") != 0) { //declarations should NOT be combined with special assigns (+=, -=, etc) since the variable won't have a value yet
+                    tokenizerError("Can not perform " + line.assignOperator + " when declaring variable");
+                }
+
                 line.type = LineType::DECLARE_ASSIGN;
 
-                std::string type = dst.substr(0, found);
+                std::string varType = dst.substr(0, found);
                 dst = dst.substr(found+1, dst.length());
 
-                line.assignType = type;
+                line.assignType = varType;
             }
 
             line.assignDst = dst;
@@ -227,9 +253,6 @@ void tokenizeSection(std::vector<std::string>& lines, std::vector<TokenizedLine>
         else if((found = lines[i].find("if(")) == 0) { //should be found at 0 (first thing in the string)
             //this string parsing method is a mess but just go with it...
             line.type = LineType::BRANCH;
-            line.branchLineNumTRUE = -1;
-            line.branchLineNumEND = -1;
-            line.branchLineNumELSE = -1;
 
             /*
                 Branch linetime:
@@ -238,6 +261,12 @@ void tokenizeSection(std::vector<std::string>& lines, std::vector<TokenizedLine>
                     size_t branchLineNumFALSE;
                     size_t branchLineNumELSE;
             */
+
+            //TODO: FOR THE LOVE OF GOD PLEASE REFACTOR THIS CODE
+
+            line.branchLineNumTRUE = -1;
+            line.branchLineNumEND = -1;
+            line.branchLineNumELSE = -1;
 
             size_t ifExpressStart = 0;
             size_t ifExpressEnd = 0;
@@ -400,6 +429,11 @@ int countNumCharacters(std::string line, char character) {
     return count;
 }
 
+inline void tokenizerError(std::string message) {
+    clearTokenized();
+    throw std::runtime_error("Tokenizer Failed! : " + message);
+}
+
 /*
     This line is useful for debugging the tokenizer.
     Allows you to print out the tokenized version of a script and also demonstrated what values are used for what in the TokenizedLine struct
@@ -422,7 +456,7 @@ void printTokenBuff(std::vector<TokenizedLine>& buffer) {
                 break;
 
             case LineType::ASSIGN:
-                std::cout << "ASSIGN \'" << buffer[i].assignDst << "\' to \'" << buffer[i].assignSrc << "\'" << std::endl;
+                std::cout << "ASSIGN \'" << buffer[i].assignDst << "\' to \'" << buffer[i].assignSrc << "\' using " << buffer[i].assignOperator << std::endl;
                 break;
 
             case LineType::DECLARE:
@@ -430,7 +464,7 @@ void printTokenBuff(std::vector<TokenizedLine>& buffer) {
                 break;
 
             case LineType::DECLARE_ASSIGN:
-                std::cout << "DECLARE ASSIGN \'" << buffer[i].assignType << " " << buffer[i].assignDst << "\' \'" << buffer[i].assignSrc << "\'" << std::endl;
+                std::cout << "DECLARE-ASSIGN \'" << buffer[i].assignType << " " << buffer[i].assignDst << "\' \'" << buffer[i].assignSrc << "\'" << std::endl;
                 break;
 
             case LineType::FUNC_NAME:

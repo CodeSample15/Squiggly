@@ -9,6 +9,7 @@ namespace Tokenizer {
         CALL,           //calling a function
         BRANCH,         //if/else statements
         BRANCH_ELSE,    //else statements (uses if/else values)
+        LOOP,
         ASSIGN,         //assign a variable to a value
         DECLARE,        //declare a variable
         DECLARE_ASSIGN, //declare a variable and assign a value in one line
@@ -28,6 +29,9 @@ namespace Tokenizer {
         ssize_t branchLineNumTRUE;
         ssize_t branchLineNumEND;
         ssize_t branchLineNumELSE;
+
+        //LOOP
+        std::string loopTimes;
 
         //ASSIGN
         std::string assignDst;

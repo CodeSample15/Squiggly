@@ -3,6 +3,7 @@
 #include <sstream>
 #include <vector>
 #include <string>
+#include <exception>
 
 #include "tokenizer.h"
 #include "linter.h"
@@ -38,7 +39,12 @@ int main(int argc, char** argv) {
     Linter::preprocess(fileLines);
 
     //Run tokenizer
-    Tokenizer::tokenize(fileLines);
+    try {
+        Tokenizer::tokenize(fileLines);
+    } catch(const std::exception& e) {
+        std::cerr << "\n" << e.what() << std::endl;
+        return 0;
+    }
 
     //TODO: Run script
 
