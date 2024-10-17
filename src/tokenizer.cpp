@@ -255,7 +255,7 @@ void tokenizeSection(std::vector<std::string>& lines, std::vector<TokenizedLine>
             line.type = LineType::BRANCH;
 
             /*
-                Branch linetime:
+                Branch linetype:
                     std::string booleanExpression;
                     size_t branchLineNumTRUE;
                     size_t branchLineNumFALSE;
@@ -346,15 +346,53 @@ void tokenizeSection(std::vector<std::string>& lines, std::vector<TokenizedLine>
 
             i--;
         }
+        else if((found = lines[i].find(LOOP_HEADER)) != std::string::npos) {
+            line.type = LineType::LOOP;
+
+            /*
+                Loop linetype:
+                    std::string loopTimes;
+                    size_t loopEnd;
+            */
+
+            //find the scope of the loop
+            size_t loopStart = i;
+            size_t loopEnd;
+            findOpenCloseBraces();
+
+            line.loopEnd = loopEnd;
+
+            //parse the number of loops
+            if((found = lines[i].find(" ")) != std::string::npos) {
+                if(loopStart == i) {
+                    //if the braces start on the same line of the loop declaration
+                }
+                else {
+                    //if the braces start on the line after the loop declaration
+                }
+            }
+            else {
+                tokenizerError("Error parsing loop statement. Incorrect format.");
+            }
+
+            tokenBuff.push_back(line);
+        } 
         else if(lines[i].length() == 1 && (lines[i][0] == '{' || lines[i][0] == '}')) {
             continue; //ignore lines with just { or }
         }
         else {
+            //will change this to a proper tokenizerError message when testing is finished
             std::cerr << "\nError! Unrecognized syntax at line \'" << lines[i] << "\'. Skipping..." << std::endl;
         }
     }
 }
 
+/*
+    Loop through the untokenized lines to discover programmer-defined function heads.
+
+    Once found, record the name of the function to the userFuncNames global vector for future
+    querying.
+*/
 void discoverUserFuncs(std::vector<std::string>& lines) 
 {
     userFuncNames.clear();
@@ -387,6 +425,11 @@ void discoverUserFuncs(std::vector<std::string>& lines)
     }
 }
 
+/*
+    The two methods below search for else/else-if tokens at the end of a specific line
+
+    The line number given should be the end line number of a if statement closing brace
+*/
 bool checkForElse(std::vector<std::string>& lines, size_t endOfIf, size_t& elseLine) {
     //big long ugly boolean that checks for an else at the end of an if statement
     if(lines[endOfIf-1].find("else") != std::string::npos
@@ -419,7 +462,11 @@ bool checkForElse(std::vector<std::string>& lines, size_t endOfIf) {
     return false;
 }
 
+/*
+    Offers some basic utility to the program
+*/
 int countNumCharacters(std::string line, char character) {
+    //count the number of times a specific character appears in a string
     int count = 0;
     for(size_t i=0; i<line.length(); i++) {
         if(line[i] == character) {
@@ -429,6 +476,10 @@ int countNumCharacters(std::string line, char character) {
     return count;
 }
 
+/*
+    Simple utility for returning a non-crashing error message to the main code (will be useful when ported to different devices
+    since it allows us to control how a device handles an error. For PCs, the code will simply exit)
+*/
 inline void tokenizerError(std::string message) {
     clearTokenized();
     throw std::runtime_error("Tokenizer Failed! : " + message);

@@ -10,6 +10,8 @@
 #define START_FUNC_HEAD ":START:"
 #define UPDATE_FUNC_HEAD ":UPDATE:"
 
+#define LOOP_HEADER "REPEAT"
+
 //Special characters to look for
 #define COMMENT_PREFIX '#'
 

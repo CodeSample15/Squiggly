@@ -32,14 +32,10 @@
         score = 65
     }
 
-    player.icon = @TRIANGLE
-    enemy.icon = @CIRCLE
-
-    if(true) {
-        #nothing
+    #case sensitive
+    REPEAT 4 {
+        score += 1
     }
-
-    test = 5.2
 }
 
 :UPDATE: {

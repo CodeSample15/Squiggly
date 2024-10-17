@@ -1,6 +1,6 @@
 # Squiggly
 
-An esoteric language designed to be a quick way to develop games using scripts
+An [esoteric language](https://en.wikipedia.org/wiki/Esoteric_programming_language) designed to be a quick way to develop games using scripts
 
 > WARNING: This project is still in development and does not function.
 
@@ -15,6 +15,7 @@ An esoteric language designed to be a quick way to develop games using scripts
 
 - **Why did you make this project?** 
     - Good question! The goal of this project is to eventually have an interpreter capable of being easily ported to any embedded system, allowing for a way for people to easily develop game scripts that can be ran and tested on their computer before being downloaded to a portable player.
+    - This language is designed around game development. It will come with built in functionality to make game design easier.
 - **Why doesn't this do anything?**
     - Cuz I'm not done yet. Please wait until this message doesn't appear in the README.
 - **Why should I use this project?**
@@ -52,7 +53,11 @@ Test code can be found in the `/test_scripts` folder, but the general syntax loo
 	enemy.icon = @TRIANGLE
 
     if (damage == 0.5) {
-        
+        deaths += 1
+    }
+
+    REPEAT 5 {
+        score += 1
     }
 }
 
