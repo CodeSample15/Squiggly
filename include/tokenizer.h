@@ -32,6 +32,7 @@ namespace Tokenizer {
 
         //LOOP
         std::string loopTimes;
+        size_t loopStart;
         size_t loopEnd;
 
         //ASSIGN

@@ -33,8 +33,9 @@
     }
 
     #case sensitive
-    REPEAT 4 {
+    repeat(10) {
         score += 1
+        deaths -= 1
     }
 }
 

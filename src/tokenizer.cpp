@@ -289,7 +289,7 @@ void tokenizeSection(std::vector<std::string>& lines, std::vector<TokenizedLine>
             else
                 line.branchLineNumEND = tokenBuff.size() + tempBuff.size() + 1;
             
-            tokenBuff.push_back(line);
+            tokenBuff.push_back(line); //push back the if statement
 
             //extend code that was in the tempbuffer
             for(TokenizedLine line : tempBuff) {
@@ -358,24 +358,41 @@ void tokenizeSection(std::vector<std::string>& lines, std::vector<TokenizedLine>
             //find the scope of the loop
             size_t loopStart = i;
             size_t loopEnd;
-            findOpenCloseBraces();
+            findOpenCloseBraces(lines, loopStart, loopEnd);
 
-            line.loopEnd = loopEnd;
+            line.loopStart = tokenBuff.size() + 1;
 
             //parse the number of loops
-            if((found = lines[i].find(" ")) != std::string::npos) {
-                if(loopStart == i) {
-                    //if the braces start on the same line of the loop declaration
-                }
-                else {
-                    //if the braces start on the line after the loop declaration
-                }
+            if((found = lines[i].find("(")) != std::string::npos) {
+                //find the index of where the loop amount substring ends
+                size_t loopArgStart = found;
+                size_t loopArgEnd = 0;
+                findOpenCloseParenthesis(lines[i], loopArgStart, loopArgEnd);
+
+                //read the loop times statement from the line
+                line.loopTimes = lines[i].substr(found+1, (loopArgEnd - loopArgStart)-1);
+
+                //empty parenthesis: no argument passed to the loop function
+                if(line.loopTimes.length() == 0)
+                    tokenizerError("No argument passed to repeat statement!");
+
+                //tokenize the insize of the loop
+                std::vector<TokenizedLine> tempBuff;
+                tokenizeSection(lines, tempBuff, loopStart, loopEnd);
+
+                //determine which instruction the loop should jump to when finished
+                line.loopEnd = tempBuff.size() + tokenBuff.size() + 1;
+
+                //push back the finished tokenized line and add the instructions stored in the temporary buffer
+                tokenBuff.push_back(line);
+                for(TokenizedLine line : tempBuff)
+                    tokenBuff.push_back(line);
+                    
+                i = loopEnd;
             }
             else {
-                tokenizerError("Error parsing loop statement. Incorrect format.");
+                tokenizerError("Error parsing loop statement. Incorrect format:\n'" + lines[i] + "'");
             }
-
-            tokenBuff.push_back(line);
         } 
         else if(lines[i].length() == 1 && (lines[i][0] == '{' || lines[i][0] == '}')) {
             continue; //ignore lines with just { or }
@@ -506,8 +523,12 @@ void printTokenBuff(std::vector<TokenizedLine>& buffer) {
                 std::cout << "ELSE END: " << buffer[i].branchLineNumEND << std::endl;
                 break;
 
+            case LineType::LOOP:
+                std::cout << "LOOP " << buffer[i].loopTimes << " TIMES START=" << buffer[i].loopStart << ", END=" << buffer[i].loopEnd << std::endl;
+                break;
+
             case LineType::ASSIGN:
-                std::cout << "ASSIGN \'" << buffer[i].assignDst << "\' to \'" << buffer[i].assignSrc << "\' using " << buffer[i].assignOperator << std::endl;
+                std::cout << "ASSIGN \'" << buffer[i].assignDst << "\' to \'" << buffer[i].assignSrc << "\' using '" << buffer[i].assignOperator << "'" << std::endl;
                 break;
 
             case LineType::DECLARE:
