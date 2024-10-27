@@ -31,6 +31,8 @@ bool checkForElse(std::vector<std::string>& lines, size_t endOfIf, size_t& elseL
 bool checkForElse(std::vector<std::string>& lines, size_t endOfIf);
 //returns the number of times a specific character appears in a line
 int countNumCharacters(std::string line, char character);
+//find user functions in a line of code (for searching for function calls). Returns the name of the function found
+std::string searchForUserFunctions(std::string line);
 //for errors (exit program)
 inline void tokenizerError(std::string msg);
 //for debug purposes
@@ -188,10 +190,13 @@ void tokenizeSection(std::vector<std::string>& lines, std::vector<TokenizedLine>
 {
     TokenizedLine line;
 
+    std::string functionName; //for detecting user function calls in a line
+
     //loop through the code starting and ending at the provided lines and store the tokenized strings in the tokenBuff
     for(size_t i=start+1; i<end-1; i++) {
-        //search for assignments (equals character)
         size_t found;
+
+        //search for assignments (equals character)
         if((found = lines[i].find("=")) != std::string::npos && countNumCharacters(lines[i], '=') == 1) {
             //found an assignment line
             line.type = LineType::ASSIGN;
@@ -296,11 +301,13 @@ void tokenizeSection(std::vector<std::string>& lines, std::vector<TokenizedLine>
                 tokenBuff.push_back(line);
             }
 
-            i = ifEnd;
+            i = ifEnd-1;
 
             //tokenize additional if-else statements
             size_t elseLocation = 0; //value set within checkForElse
             while(checkForElse(lines, ifEnd, elseLocation)) {
+                i++; //move up to the else / ifelse statement
+
                 bool elseFound = false; //when an 'else' statement is found by itself, that's the end of the branch statement
                 line.branchLineNumTRUE = -1;
                 line.branchLineNumEND = -1;
@@ -338,13 +345,11 @@ void tokenizeSection(std::vector<std::string>& lines, std::vector<TokenizedLine>
                     tokenBuff.push_back(line);
                 }
 
-                i = ifEnd;
+                i = ifEnd-1;
 
                 if(elseFound)
                     break; //all done, don't risk errors
             }
-
-            i--;
         }
         else if((found = lines[i].find(LOOP_HEADER)) != std::string::npos) {
             line.type = LineType::LOOP;
@@ -388,12 +393,26 @@ void tokenizeSection(std::vector<std::string>& lines, std::vector<TokenizedLine>
                 for(TokenizedLine line : tempBuff)
                     tokenBuff.push_back(line);
                     
-                i = loopEnd;
+                i = loopEnd-1;
             }
             else {
                 tokenizerError("Error parsing loop statement. Incorrect format:\n'" + lines[i] + "'");
             }
-        } 
+        }
+        else if((functionName = searchForUserFunctions(lines[i])).length() != 0) {
+            line.type = LineType::CALL;
+
+            line.callFuncName = functionName;
+
+            size_t paramsStart = 0;
+            size_t paramsEnd = 0;
+
+            findOpenCloseParenthesis(lines[i], paramsStart, paramsEnd); //parse parameters passed to function
+            line.params = lines[i].substr(paramsStart+1, paramsEnd-paramsStart-1);
+            std::cout << line.params << std::endl;
+
+            tokenBuff.push_back(line);
+        }
         else if(lines[i].length() == 1 && (lines[i][0] == '{' || lines[i][0] == '}')) {
             continue; //ignore lines with just { or }
         }
@@ -436,7 +455,7 @@ void discoverUserFuncs(std::vector<std::string>& lines)
 
                 i = end-1; //jump to new position
             } catch (...) {
-                std::cerr << "Error parsing function name: \'" << lines[i] << "\'" << std::endl;
+                tokenizerError("Error parsing function name: \'" + lines[i] + "\'");
             }
         }
     }
@@ -477,6 +496,28 @@ bool checkForElse(std::vector<std::string>& lines, size_t endOfIf) {
     }
 
     return false;
+}
+
+/*
+    Allows the tokenizer to find user defined function calls
+    Input is a line to search, and the output is the name of the user defined function that is being called in the line
+
+    As of right now, Squiggly does not support return statements in functions, meaning for functions to change values in one part of code, they have to
+    use global variables.
+
+    Because of this, searching for functions is easier since there should be no reason that the location of the function call is anywhere but
+    the first character of a line. In the future, this will have to change to allow function calls to be detected from anywhere in a line, treated
+    as a variable, and evaluated to a value if it returns something. Right now this allows the development of Squiggly to be sped up slightly, but
+    in a future update I'd like to revisit this approach
+*/
+std::string searchForUserFunctions(std::string line) {
+    for(std::string funName : userFuncNames) {
+        if(line.find(funName + "(") == 0) {
+            return funName;
+        }
+    }
+
+    return ""; //return an empty string otherwise
 }
 
 /*

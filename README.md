@@ -56,7 +56,7 @@ Test code can be found in the `/test_scripts` folder, but the general syntax loo
         deaths += 1
     }
 
-    REPEAT 5 {
+    REPEAT(5) {
         score += 1
     }
 }

@@ -21,22 +21,18 @@
 	player.icon = @CIRCLE
 	enemy.icon = @TRIANGLE
 
-    if (damage == 0.5) {
-        score = 5
-        anotherTest = 23
-    }
-    else if(damage == 0.1) {
-        score = 6
-        score = 4
-    } else {
-        score = 65
-    }
-
     #case sensitive
     repeat(10) {
         score += 1
         deaths -= 1
     }
+
+    if (damage == 0.5) {
+        score = 5
+        anotherTest = 23
+    }
+
+    spawnEnemy()
 }
 
 :UPDATE: {
