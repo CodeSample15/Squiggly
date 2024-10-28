@@ -57,16 +57,17 @@ void Tokenizer::tokenize(std::vector<std::string>& lines)
     size_t end = 0;
 
     //find and tokenize all of the non optional functions in the code
-    // findCode(VAR_FUNC_HEAD, lines, start, end, true);
-    // tokenizeSection(lines, varsBlock_tok, start, end);
+    findCode(VAR_FUNC_HEAD, lines, start, end, true);
+    tokenizeSection(lines, varsBlock_tok, start, end);
 
     findCode(START_FUNC_HEAD, lines, start, end, true);
     tokenizeSection(lines, startBlock_tok, start, end);
 
-    // findCode(UPDATE_FUNC_HEAD, lines, start, end, true);
-    // tokenizeSection(lines, mainLoop_tok, start, end);
+    findCode(UPDATE_FUNC_HEAD, lines, start, end, true);
+    tokenizeSection(lines, mainLoop_tok, start, end);
 
     //tokenize all of the user defined functions
+    
 
     //clear memory after tokenizing
     lines.clear();
@@ -409,7 +410,6 @@ void tokenizeSection(std::vector<std::string>& lines, std::vector<TokenizedLine>
 
             findOpenCloseParenthesis(lines[i], paramsStart, paramsEnd); //parse parameters passed to function
             line.params = lines[i].substr(paramsStart+1, paramsEnd-paramsStart-1);
-            std::cout << line.params << std::endl;
 
             tokenBuff.push_back(line);
         }
