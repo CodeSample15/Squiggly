@@ -189,8 +189,6 @@ void findOpenCloseParenthesis(std::string line, size_t& start, size_t& end) {
 */
 void tokenizeSection(std::vector<std::string>& lines, std::vector<TokenizedLine>& tokenBuff, size_t start, size_t end) 
 {
-    TokenizedLine line;
-
     std::string functionName; //for detecting user function calls in a line
 
     //loop through the code starting and ending at the provided lines and store the tokenized strings in the tokenBuff
@@ -200,6 +198,8 @@ void tokenizeSection(std::vector<std::string>& lines, std::vector<TokenizedLine>
         //search for assignments (equals character)
         if((found = lines[i].find("=")) != std::string::npos && countNumCharacters(lines[i], '=') == 1) {
             //found an assignment line
+            AssignLine line;
+
             line.type = LineType::ASSIGN;
             line.assignOperator = "=";
 
@@ -257,6 +257,8 @@ void tokenizeSection(std::vector<std::string>& lines, std::vector<TokenizedLine>
             tokenBuff.push_back(line);
         }
         else if((found = lines[i].find("if(")) == 0) { //should be found at 0 (first thing in the string)
+            BranchLine line;
+
             //this string parsing method is a mess but just go with it...
             line.type = LineType::BRANCH;
 
@@ -353,6 +355,8 @@ void tokenizeSection(std::vector<std::string>& lines, std::vector<TokenizedLine>
             }
         }
         else if((found = lines[i].find(LOOP_HEADER)) != std::string::npos) {
+            LoopLine line;
+
             line.type = LineType::LOOP;
 
             /*
@@ -401,6 +405,8 @@ void tokenizeSection(std::vector<std::string>& lines, std::vector<TokenizedLine>
             }
         }
         else if((functionName = searchForUserFunctions(lines[i])).length() != 0) {
+            CallLine line;
+
             line.type = LineType::CALL;
 
             line.callFuncName = functionName;
@@ -548,40 +554,56 @@ inline void tokenizerError(std::string message) {
     Allows you to print out the tokenized version of a script and also demonstrated what values are used for what in the TokenizedLine struct
 */
 void printTokenBuff(std::vector<TokenizedLine>& buffer) {
+    //for casting the TokenizedLine into its childrens' forms
+    CallLine* callLine;
+    BranchLine* branchLine;
+    LoopLine* loopLine;
+    AssignLine* assignLine;
+    DeclareLine* declareLine;
+    FuncNameLine* funcNameLine;
+
     for(size_t i=0; i<buffer.size(); i++) {
         std::cout << i << ": ";
 
         switch(buffer[i].type) {
             case LineType::CALL:
-                std::cout << "CALL " << buffer[i].callFuncName << "(" << buffer[i].params << ")" << std::endl;
+                callLine = (CallLine*)&buffer[i]; //some implicit casting (dangerous but we know what we're doing here)
+                std::cout << "CALL " << callLine->callFuncName << "(" << callLine->params << ")" << std::endl;
                 break;
             
             case LineType::BRANCH:
-                std::cout << "BRANCH " << buffer[i].booleanExpression << "   TRUE: " << buffer[i].branchLineNumTRUE << "   END: " << buffer[i].branchLineNumEND << "   ELSE: " << buffer[i].branchLineNumELSE << std::endl;
+                branchLine = (BranchLine*)&buffer[i];
+                std::cout << "BRANCH " << branchLine->booleanExpression << "   TRUE: " << branchLine->branchLineNumTRUE << "   END: " << branchLine->branchLineNumEND << "   ELSE: " << branchLine->branchLineNumELSE << std::endl;
                 break;
 
             case LineType::BRANCH_ELSE:
-                std::cout << "ELSE END: " << buffer[i].branchLineNumEND << std::endl;
+                branchLine = (BranchLine*)&buffer[i];
+                std::cout << "ELSE END: " << branchLine->branchLineNumEND << std::endl;
                 break;
 
             case LineType::LOOP:
-                std::cout << "LOOP " << buffer[i].loopTimes << " TIMES START=" << buffer[i].loopStart << ", END=" << buffer[i].loopEnd << std::endl;
+                loopLine = (LoopLine*)&buffer[i];
+                std::cout << "LOOP " << loopLine->loopTimes << " TIMES START=" << loopLine->loopStart << ", END=" << loopLine->loopEnd << std::endl;
                 break;
 
             case LineType::ASSIGN:
-                std::cout << "ASSIGN \'" << buffer[i].assignDst << "\' to \'" << buffer[i].assignSrc << "\' using '" << buffer[i].assignOperator << "'" << std::endl;
+                assignLine = (AssignLine*)&buffer[i];
+                std::cout << "ASSIGN \'" << assignLine->assignDst << "\' to \'" << assignLine->assignSrc << "\' using '" << assignLine->assignOperator << "'" << std::endl;
                 break;
 
             case LineType::DECLARE:
-                std::cout << "DECLARE \'" << buffer[i].assignType << " " << buffer[i].assignDst << std::endl;;
+                declareLine = (DeclareLine*)&buffer[i];
+                std::cout << "DECLARE \'" << declareLine->varType << " " << declareLine->varName << std::endl;;
                 break;
 
             case LineType::DECLARE_ASSIGN:
-                std::cout << "DECLARE-ASSIGN \'" << buffer[i].assignType << " " << buffer[i].assignDst << "\' \'" << buffer[i].assignSrc << "\'" << std::endl;
+                assignLine = (AssignLine*)&buffer[i];
+                std::cout << "DECLARE-ASSIGN \'" << assignLine->assignType << " " << assignLine->assignDst << "\' \'" << assignLine->assignSrc << "\'" << std::endl;
                 break;
 
             case LineType::FUNC_NAME:
-                std::cout << "FUNC " << buffer[i].funcName << std::endl;
+                funcNameLine = (FuncNameLine*)&buffer[i];
+                std::cout << "FUNC " << funcNameLine->funcName << std::endl;
                 break;
 
             default:

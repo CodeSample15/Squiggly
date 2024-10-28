@@ -16,34 +16,55 @@ namespace Tokenizer {
         FUNC_NAME       //name of a function / header of some code
     };
 
-    typedef struct Line {
-        LineType type;
-        size_t srcLine; // line of code in the source file so programmers have better error tracing
+    //base tokenized line class
+    class TokenizedLine {
+        public:
+            LineType type;
+            size_t srcLine; // line of code in the source file so programmers have better error tracing (NOT IMPLEMENTED YET)
+    };
 
-        //CALL
-        std::string callFuncName;
-        std::string params;
+    //tokenized line varients
+    class CallLine : public TokenizedLine {
+        public:
+            std::string callFuncName;
+            std::string params;
+    };
 
-        //BRANCH
-        std::string booleanExpression;
-        ssize_t branchLineNumTRUE;
-        ssize_t branchLineNumEND;
-        ssize_t branchLineNumELSE;
+    class BranchLine : public TokenizedLine {
+        public:
+            std::string booleanExpression;
+            ssize_t branchLineNumTRUE;
+            ssize_t branchLineNumEND;
+            ssize_t branchLineNumELSE;
+    };
 
-        //LOOP
-        std::string loopTimes;
-        size_t loopStart;
-        size_t loopEnd;
+    class LoopLine : public TokenizedLine {
+        public:
+            std::string loopTimes;
+            size_t loopStart;
+            size_t loopEnd;
+    };
 
-        //ASSIGN
-        std::string assignDst;
-        std::string assignSrc;
-        std::string assignType; //DECLARE ASSIGN
-        std::string assignOperator; //=, -=, +=, etc
+    class AssignLine : public TokenizedLine {
+        public: //linetype can be either ASSIGN or DECLARE_ASSIGN
+            std::string assignDst;
+            std::string assignSrc;
+            std::string assignType; //DECLARE ASSIGN
+            std::string assignOperator; //=, -=, +=, etc
+    };
 
-        std::string funcName;
-    } TokenizedLine;
+    class DeclareLine : public TokenizedLine {
+        public:
+            std::string varName;
+            std::string varType;
+    };
 
+    class FuncNameLine : public TokenizedLine {
+        public:
+            std::string funcName;
+    };
+
+    //method that other scripts will be using
     void tokenize(std::vector<std::string>& lines);
 }
 
