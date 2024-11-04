@@ -1,18 +1,19 @@
+#include <iostream>
+
 #include "tokenizer.h"
 #include "linter.h"
 
 using namespace Tokenizer;
 
 //init extern variables
-std::vector<TokenizedLine> varsBlock_tok = std::vector<TokenizedLine>();
-std::vector<TokenizedLine> startBlock_tok = std::vector<TokenizedLine>();
-std::vector<TokenizedLine> mainLoop_tok = std::vector<TokenizedLine>();
-std::vector<std::vector<TokenizedLine>> functions_tok = std::vector<std::vector<TokenizedLine>>();
+std::vector< std::shared_ptr<TokenizedLine> > varsBlock_tok = std::vector< std::shared_ptr<TokenizedLine> >();
+std::vector< std::shared_ptr<TokenizedLine> > startBlock_tok = std::vector< std::shared_ptr<TokenizedLine> >();
+std::vector< std::shared_ptr<TokenizedLine> > mainLoop_tok = std::vector< std::shared_ptr<TokenizedLine> >();
+std::vector<std::vector< std::shared_ptr<TokenizedLine> >> functions_tok = std::vector<std::vector< std::shared_ptr<TokenizedLine> >>();
 
 
 //helper functions prototypes--------------------------------------------------------------------------------------------
-//clear out the last function that was tokenized
-void clearTokenized();
+
 //find the line of code which contains a specific header (used for finding functions)
 void findCode(std::string header, std::vector<std::string>& lines, size_t& start, size_t& end, bool err=false);
 //for finding the scope of the code enclosed by open and close braces
@@ -20,7 +21,7 @@ void findOpenCloseBraces(std::vector<std::string>& lines, size_t& start, size_t&
 //same thing but only searches one line instead of several
 void findOpenCloseParenthesis(std::string line, size_t& start, size_t& end);
 //tokenize a section starting from a start location and an end location, storing the result in tokenBuff
-void tokenizeSection(std::vector<std::string>& lines, std::vector<TokenizedLine>& tokenBuff, size_t start, size_t end);
+void tokenizeSection(std::vector<std::string>& lines, std::vector< std::shared_ptr<TokenizedLine> >& tokenBuff, size_t start, size_t end);
 //tokenize an if statement
 //void tokenizeIf(std::vector<std::string>& lines, std::vector<TokenizedLine>& tokenBuff, );
 //search for functions defined by the programmer
@@ -36,7 +37,7 @@ std::string searchForUserFunctions(std::string line);
 //for errors (exit program)
 inline void tokenizerError(std::string msg);
 //for debug purposes
-void printTokenBuff(std::vector<TokenizedLine>& buffer);
+void printTokenBuff(std::vector< std::shared_ptr<TokenizedLine> >& buffer);
 
 /*
     Parse the code line by line and build a tokenized version of the script.
@@ -47,9 +48,6 @@ void Tokenizer::tokenize(std::vector<std::string>& lines)
 {
     std::cout << "Tokenizing code...\t";
 
-    //clear out any script that might still be in memory
-    clearTokenized();
-
     //find all user-defined functions
     discoverUserFuncs(lines);
 
@@ -57,8 +55,8 @@ void Tokenizer::tokenize(std::vector<std::string>& lines)
     size_t end = 0;
 
     //find and tokenize all of the non optional functions in the code
-    findCode(VAR_FUNC_HEAD, lines, start, end, true);
-    tokenizeSection(lines, varsBlock_tok, start, end);
+    //findCode(VAR_FUNC_HEAD, lines, start, end, true);
+    //tokenizeSection(lines, varsBlock_tok, start, end);
 
     findCode(START_FUNC_HEAD, lines, start, end, true);
     tokenizeSection(lines, startBlock_tok, start, end);
@@ -73,22 +71,10 @@ void Tokenizer::tokenize(std::vector<std::string>& lines)
     lines.clear();
 
     std::cout << "Done" << std::endl;
+
+    #if TOK_DEBUGGING
     printTokenBuff(startBlock_tok);
-}
-
-
-
-//reset all of the tokenized objects to be empty (clear memory of old program if it exists)
-void clearTokenized() {
-    varsBlock_tok.clear();
-    startBlock_tok.clear();
-    mainLoop_tok.clear();
-
-    //clear all of the user defined functions stored in the array
-    for(size_t i=0; i<functions_tok.size(); i++) {
-        functions_tok[i].clear();
-    }
-    functions_tok.clear();
+    #endif
 }
 
 //finds the start and end locations for code segments with specific headers (system functions called automatically)
@@ -187,7 +173,7 @@ void findOpenCloseParenthesis(std::string line, size_t& start, size_t& end) {
     Go to the section of the code specified with the start and end lines variables and go
     line by line to tokenize the program into a tokenBuff
 */
-void tokenizeSection(std::vector<std::string>& lines, std::vector<TokenizedLine>& tokenBuff, size_t start, size_t end) 
+void tokenizeSection(std::vector<std::string>& lines, std::vector< std::shared_ptr<TokenizedLine> >& tokenBuff, size_t start, size_t end) 
 {
     std::string functionName; //for detecting user function calls in a line
 
@@ -198,10 +184,10 @@ void tokenizeSection(std::vector<std::string>& lines, std::vector<TokenizedLine>
         //search for assignments (equals character)
         if((found = lines[i].find("=")) != std::string::npos && countNumCharacters(lines[i], '=') == 1) {
             //found an assignment line
-            AssignLine line;
+            std::shared_ptr<AssignLine> line = std::make_shared<AssignLine>(AssignLine());
 
-            line.type = LineType::ASSIGN;
-            line.assignOperator = "=";
+            line->type = LineType::ASSIGN;
+            line->assignOperator = "=";
 
             /*
                 Assign linetype:
@@ -215,19 +201,19 @@ void tokenizeSection(std::vector<std::string>& lines, std::vector<TokenizedLine>
             size_t assignFound;
             size_t offset = 1; //if a special assign is found, increase this to 2 so that the source assign substring can be found
             if((assignFound = lines[i].find("+=")) != std::string::npos) {
-                line.assignOperator = "+=";
+                line->assignOperator = "+=";
                 found = assignFound;
                 offset = 2;
             } else if((assignFound = lines[i].find("-=")) != std::string::npos) {
-                line.assignOperator = "-=";
+                line->assignOperator = "-=";
                 found = assignFound;
                 offset = 2;
             } else if((assignFound = lines[i].find("/=")) != std::string::npos) {
-                line.assignOperator = "/=";
+                line->assignOperator = "/=";
                 found = assignFound;
                 offset = 2;
             } else if((assignFound = lines[i].find("*=")) != std::string::npos) {
-                line.assignOperator = "*=";
+                line->assignOperator = "*=";
                 found = assignFound;
                 offset = 2;
             }
@@ -239,28 +225,28 @@ void tokenizeSection(std::vector<std::string>& lines, std::vector<TokenizedLine>
             //check to see if the dst is also declaring a variable type
             found = dst.find(" ");
             if(found != std::string::npos) {
-                if(line.assignOperator.compare("=") != 0) { //declarations should NOT be combined with special assigns (+=, -=, etc) since the variable won't have a value yet
-                    tokenizerError("Can not perform " + line.assignOperator + " when declaring variable");
+                if(line->assignOperator.compare("=") != 0) { //declarations should NOT be combined with special assigns (+=, -=, etc) since the variable won't have a value yet
+                    tokenizerError("Can not perform " + line->assignOperator + " when declaring variable");
                 }
 
-                line.type = LineType::DECLARE_ASSIGN;
+                line->type = LineType::DECLARE_ASSIGN;
 
                 std::string varType = dst.substr(0, found);
                 dst = dst.substr(found+1, dst.length());
 
-                line.assignType = varType;
+                line->assignType = varType;
             }
 
-            line.assignDst = dst;
-            line.assignSrc = src;
+            line->assignDst = dst;
+            line->assignSrc = src;
 
             tokenBuff.push_back(line);
         }
         else if((found = lines[i].find("if(")) == 0) { //should be found at 0 (first thing in the string)
-            BranchLine line;
+            std::shared_ptr<BranchLine> line = std::make_shared<BranchLine>(BranchLine());
 
             //this string parsing method is a mess but just go with it...
-            line.type = LineType::BRANCH;
+            line->type = LineType::BRANCH;
 
             /*
                 Branch linetype:
@@ -272,36 +258,36 @@ void tokenizeSection(std::vector<std::string>& lines, std::vector<TokenizedLine>
 
             //TODO: FOR THE LOVE OF GOD PLEASE REFACTOR THIS CODE
 
-            line.branchLineNumTRUE = -1;
-            line.branchLineNumEND = -1;
-            line.branchLineNumELSE = -1;
+            line->branchLineNumTRUE = -1;
+            line->branchLineNumEND = -1;
+            line->branchLineNumELSE = -1;
 
             size_t ifExpressStart = 0;
             size_t ifExpressEnd = 0;
             findOpenCloseParenthesis(lines[i], ifExpressStart, ifExpressEnd);
-            line.booleanExpression = lines[i].substr(3, ifExpressEnd-3); //extract the boolean expression from the if statement
+            line->booleanExpression = lines[i].substr(3, ifExpressEnd-3); //extract the boolean expression from the if statement
 
             //find scope of the if statement
             size_t ifStart = i;
             size_t ifEnd = 0;
             findOpenCloseBraces(lines, ifStart, ifEnd);
-            line.branchLineNumTRUE = tokenBuff.size()+1; //the line points to where in the tokenized array to jump to
+            line->branchLineNumTRUE = tokenBuff.size()+1; //the line points to where in the tokenized array to jump to
 
             //tokenize the lines inside of the braces and store in a temp buffer
-            std::vector<TokenizedLine> tempBuff;
+            std::vector< std::shared_ptr<TokenizedLine> > tempBuff;
             tokenizeSection(lines, tempBuff, ifStart, ifEnd);
 
             //check to see if the branch ends or if there's an else/if-else
             if(checkForElse(lines, ifEnd))
-                line.branchLineNumELSE = tokenBuff.size() + tempBuff.size() + 1;
+                line->branchLineNumELSE = tokenBuff.size() + tempBuff.size() + 1;
             else
-                line.branchLineNumEND = tokenBuff.size() + tempBuff.size() + 1;
+                line->branchLineNumEND = tokenBuff.size() + tempBuff.size() + 1;
             
             tokenBuff.push_back(line); //push back the if statement
 
             //extend code that was in the tempbuffer
-            for(TokenizedLine line : tempBuff) {
-                tokenBuff.push_back(line);
+            for(std::shared_ptr<TokenizedLine> tmpLine : tempBuff) {
+                tokenBuff.push_back(tmpLine);
             }
 
             i = ifEnd-1;
@@ -312,24 +298,24 @@ void tokenizeSection(std::vector<std::string>& lines, std::vector<TokenizedLine>
                 i++; //move up to the else / ifelse statement
 
                 bool elseFound = false; //when an 'else' statement is found by itself, that's the end of the branch statement
-                line.branchLineNumTRUE = -1;
-                line.branchLineNumEND = -1;
-                line.branchLineNumELSE = -1;
+                line->branchLineNumTRUE = -1;
+                line->branchLineNumEND = -1;
+                line->branchLineNumELSE = -1;
 
                 if(lines[elseLocation].find("if(") == 5) { //if statement found on the same line as the else, immediately after the keyword "else" (6 characters)
                     //linetype should already be BRANCH still
                     //this code is basically a copy-paste from the above 'if' parsing code (yeah yeah, i know. bad practice. whatever) TODO: Refactor this code with functions to make it easier to read and understand
                     findOpenCloseParenthesis(lines[elseLocation], ifExpressStart, ifExpressEnd);
-                    line.booleanExpression = lines[i].substr(8, ifExpressEnd-8); //extract the boolean expression from the if statement (8 characters for 'else if(')
+                    line->booleanExpression = lines[i].substr(8, ifExpressEnd-8); //extract the boolean expression from the if statement (8 characters for 'else if(')
                 }
                 else {
-                    line.type = LineType::BRANCH_ELSE;
+                    line->type = LineType::BRANCH_ELSE;
                     elseFound = true; //end of the line
                 }
 
                 ifStart = elseLocation;
                 findOpenCloseBraces(lines, ifStart, ifEnd);
-                line.branchLineNumTRUE = tokenBuff.size()+1;
+                line->branchLineNumTRUE = tokenBuff.size()+1;
 
                 //tokenize code inside braces
                 tempBuff.clear();
@@ -337,15 +323,15 @@ void tokenizeSection(std::vector<std::string>& lines, std::vector<TokenizedLine>
 
                 //check to see if the branch ends or if there's an else/if-else
                 if(checkForElse(lines, ifEnd))
-                    line.branchLineNumELSE = tokenBuff.size() + tempBuff.size() + 1;
+                    line->branchLineNumELSE = tokenBuff.size() + tempBuff.size() + 1;
                 else
-                    line.branchLineNumEND = tokenBuff.size() + tempBuff.size() + 1;
+                    line->branchLineNumEND = tokenBuff.size() + tempBuff.size() + 1;
                 
                 tokenBuff.push_back(line);
 
                 //extend code that was in the tempbuffer
-                for(TokenizedLine line : tempBuff) {
-                    tokenBuff.push_back(line);
+                for(std::shared_ptr<TokenizedLine> tmpLine : tempBuff) {
+                    tokenBuff.push_back(tmpLine);
                 }
 
                 i = ifEnd-1;
@@ -355,9 +341,9 @@ void tokenizeSection(std::vector<std::string>& lines, std::vector<TokenizedLine>
             }
         }
         else if((found = lines[i].find(LOOP_HEADER)) != std::string::npos) {
-            LoopLine line;
+            std::shared_ptr<LoopLine> line = std::make_shared<LoopLine>(LoopLine());
 
-            line.type = LineType::LOOP;
+            line->type = LineType::LOOP;
 
             /*
                 Loop linetype:
@@ -370,7 +356,7 @@ void tokenizeSection(std::vector<std::string>& lines, std::vector<TokenizedLine>
             size_t loopEnd;
             findOpenCloseBraces(lines, loopStart, loopEnd);
 
-            line.loopStart = tokenBuff.size() + 1;
+            line->loopStart = tokenBuff.size() + 1;
 
             //parse the number of loops
             if((found = lines[i].find("(")) != std::string::npos) {
@@ -380,23 +366,23 @@ void tokenizeSection(std::vector<std::string>& lines, std::vector<TokenizedLine>
                 findOpenCloseParenthesis(lines[i], loopArgStart, loopArgEnd);
 
                 //read the loop times statement from the line
-                line.loopTimes = lines[i].substr(found+1, (loopArgEnd - loopArgStart)-1);
+                line->loopTimes = lines[i].substr(found+1, (loopArgEnd - loopArgStart)-1);
 
                 //empty parenthesis: no argument passed to the loop function
-                if(line.loopTimes.length() == 0)
+                if(line->loopTimes.length() == 0)
                     tokenizerError("No argument passed to repeat statement!");
 
                 //tokenize the insize of the loop
-                std::vector<TokenizedLine> tempBuff;
+                std::vector< std::shared_ptr<TokenizedLine> > tempBuff;
                 tokenizeSection(lines, tempBuff, loopStart, loopEnd);
 
                 //determine which instruction the loop should jump to when finished
-                line.loopEnd = tempBuff.size() + tokenBuff.size() + 1;
+                line->loopEnd = tempBuff.size() + tokenBuff.size() + 1;
 
                 //push back the finished tokenized line and add the instructions stored in the temporary buffer
                 tokenBuff.push_back(line);
-                for(TokenizedLine line : tempBuff)
-                    tokenBuff.push_back(line);
+                for(std::shared_ptr<TokenizedLine> tmpLine : tempBuff)
+                    tokenBuff.push_back(tmpLine);
                     
                 i = loopEnd-1;
             }
@@ -405,17 +391,17 @@ void tokenizeSection(std::vector<std::string>& lines, std::vector<TokenizedLine>
             }
         }
         else if((functionName = searchForUserFunctions(lines[i])).length() != 0) {
-            CallLine line;
+            std::shared_ptr<CallLine> line = std::make_shared<CallLine>(CallLine());
 
-            line.type = LineType::CALL;
+            line->type = LineType::CALL;
 
-            line.callFuncName = functionName;
+            line->callFuncName = functionName;
 
             size_t paramsStart = 0;
             size_t paramsEnd = 0;
 
             findOpenCloseParenthesis(lines[i], paramsStart, paramsEnd); //parse parameters passed to function
-            line.params = lines[i].substr(paramsStart+1, paramsEnd-paramsStart-1);
+            line->params = lines[i].substr(paramsStart+1, paramsEnd-paramsStart-1);
 
             tokenBuff.push_back(line);
         }
@@ -545,7 +531,6 @@ int countNumCharacters(std::string line, char character) {
     since it allows us to control how a device handles an error. For PCs, the code will simply exit)
 */
 inline void tokenizerError(std::string message) {
-    clearTokenized();
     throw std::runtime_error("Tokenizer Failed! : " + message);
 }
 
@@ -553,7 +538,7 @@ inline void tokenizerError(std::string message) {
     This line is useful for debugging the tokenizer.
     Allows you to print out the tokenized version of a script and also demonstrated what values are used for what in the TokenizedLine struct
 */
-void printTokenBuff(std::vector<TokenizedLine>& buffer) {
+void printTokenBuff(std::vector< std::shared_ptr<TokenizedLine> >& buffer) {
     //for casting the TokenizedLine into its childrens' forms
     CallLine* callLine;
     BranchLine* branchLine;
@@ -565,44 +550,44 @@ void printTokenBuff(std::vector<TokenizedLine>& buffer) {
     for(size_t i=0; i<buffer.size(); i++) {
         std::cout << i << ": ";
 
-        switch(buffer[i].type) {
+        switch(buffer[i]->type) {
             case LineType::CALL:
-                callLine = (CallLine*)&buffer[i]; //some implicit casting (dangerous but we know what we're doing here)
+                callLine = (CallLine*)buffer[i].get();
                 std::cout << "CALL " << callLine->callFuncName << "(" << callLine->params << ")" << std::endl;
                 break;
             
             case LineType::BRANCH:
-                branchLine = (BranchLine*)&buffer[i];
+                branchLine = (BranchLine*)buffer[i].get();
                 std::cout << "BRANCH " << branchLine->booleanExpression << "   TRUE: " << branchLine->branchLineNumTRUE << "   END: " << branchLine->branchLineNumEND << "   ELSE: " << branchLine->branchLineNumELSE << std::endl;
                 break;
 
             case LineType::BRANCH_ELSE:
-                branchLine = (BranchLine*)&buffer[i];
+                branchLine = (BranchLine*)buffer[i].get();
                 std::cout << "ELSE END: " << branchLine->branchLineNumEND << std::endl;
                 break;
 
             case LineType::LOOP:
-                loopLine = (LoopLine*)&buffer[i];
+                loopLine = (LoopLine*)buffer[i].get();
                 std::cout << "LOOP " << loopLine->loopTimes << " TIMES START=" << loopLine->loopStart << ", END=" << loopLine->loopEnd << std::endl;
                 break;
 
             case LineType::ASSIGN:
-                assignLine = (AssignLine*)&buffer[i];
+                assignLine = (AssignLine*)buffer[i].get();
                 std::cout << "ASSIGN \'" << assignLine->assignDst << "\' to \'" << assignLine->assignSrc << "\' using '" << assignLine->assignOperator << "'" << std::endl;
                 break;
 
             case LineType::DECLARE:
-                declareLine = (DeclareLine*)&buffer[i];
+                declareLine = (DeclareLine*)buffer[i].get();
                 std::cout << "DECLARE \'" << declareLine->varType << " " << declareLine->varName << std::endl;;
                 break;
 
             case LineType::DECLARE_ASSIGN:
-                assignLine = (AssignLine*)&buffer[i];
+                assignLine = (AssignLine*)buffer[i].get();
                 std::cout << "DECLARE-ASSIGN \'" << assignLine->assignType << " " << assignLine->assignDst << "\' \'" << assignLine->assignSrc << "\'" << std::endl;
                 break;
 
             case LineType::FUNC_NAME:
-                funcNameLine = (FuncNameLine*)&buffer[i];
+                funcNameLine = (FuncNameLine*)buffer[i].get();
                 std::cout << "FUNC " << funcNameLine->funcName << std::endl;
                 break;
 

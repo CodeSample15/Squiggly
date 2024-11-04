@@ -2,7 +2,9 @@
 
 #include <string>
 #include <vector>
-#include <iostream>
+#include <memory>
+
+#define TOK_DEBUGGING true
 
 namespace Tokenizer {
     enum LineType {
@@ -69,7 +71,7 @@ namespace Tokenizer {
 }
 
 //pointers for different methods in the program (keeps code separate and easier to manage in memory imo)
-extern std::vector<Tokenizer::TokenizedLine> varsBlock_tok;
-extern std::vector<Tokenizer::TokenizedLine> startBlock_tok;
-extern std::vector<Tokenizer::TokenizedLine> mainLoop_tok;
-extern std::vector<std::vector<Tokenizer::TokenizedLine>> functions_tok;
+extern std::vector< std::shared_ptr<Tokenizer::TokenizedLine> > varsBlock_tok;
+extern std::vector< std::shared_ptr<Tokenizer::TokenizedLine> > startBlock_tok;
+extern std::vector< std::shared_ptr<Tokenizer::TokenizedLine> > mainLoop_tok;
+extern std::vector<std::vector< std::shared_ptr<Tokenizer::TokenizedLine> >> functions_tok;
