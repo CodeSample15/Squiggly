@@ -1,0 +1,25 @@
+{
+  "name": "sqgly",
+  "displayName": "Squiggly",
+  "description": "Squiggly programming langugae",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.95.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [{
+      "id": "sqgly",
+      "aliases": ["Squiggly", "sqgly"],
+      "extensions": [".sqgly"],
+      "configuration": "./language-configuration.json"
+    }],
+    "grammars": [{
+      "language": "sqgly",
+      "scopeName": "source.sqgly",
+      "path": "./syntaxes/sqgly.tmLanguage.json"
+    }]
+  }
+}
