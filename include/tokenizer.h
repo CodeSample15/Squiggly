@@ -9,9 +9,10 @@
 namespace Tokenizer {
     enum LineType {
         CALL,           //calling a function
+        BI_CALL,        //call to 'built-in' function/variable
         BRANCH,         //if/else statements
         BRANCH_ELSE,    //else statements (uses if/else values)
-        LOOP,
+        LOOP,           //loops
         ASSIGN,         //assign a variable to a value
         DECLARE,        //declare a variable
         DECLARE_ASSIGN, //declare a variable and assign a value in one line

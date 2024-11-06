@@ -9,7 +9,7 @@ using namespace Tokenizer;
 std::vector< std::shared_ptr<TokenizedLine> > varsBlock_tok = std::vector< std::shared_ptr<TokenizedLine> >();
 std::vector< std::shared_ptr<TokenizedLine> > startBlock_tok = std::vector< std::shared_ptr<TokenizedLine> >();
 std::vector< std::shared_ptr<TokenizedLine> > mainLoop_tok = std::vector< std::shared_ptr<TokenizedLine> >();
-std::vector<std::vector< std::shared_ptr<TokenizedLine> >> functions_tok = std::vector<std::vector< std::shared_ptr<TokenizedLine> >>();
+std::vector< std::vector< std::shared_ptr<TokenizedLine> > > functions_tok = std::vector<std::vector< std::shared_ptr<TokenizedLine> >>();
 
 
 //helper functions prototypes--------------------------------------------------------------------------------------------
@@ -20,6 +20,8 @@ void findCode(std::string header, std::vector<std::string>& lines, size_t& start
 void findOpenCloseBraces(std::vector<std::string>& lines, size_t& start, size_t& end);
 //same thing but only searches one line instead of several
 void findOpenCloseParenthesis(std::string line, size_t& start, size_t& end);
+//same thing but for strings (ignore syntax in strings, treat them as strings)
+void findOpenCloseStrings(std::string line, size_t start, size_t& end);
 //tokenize a section starting from a start location and an end location, storing the result in tokenBuff
 void tokenizeSection(std::vector<std::string>& lines, std::vector< std::shared_ptr<TokenizedLine> >& tokenBuff, size_t start, size_t end);
 //tokenize an if statement
@@ -34,6 +36,8 @@ bool checkForElse(std::vector<std::string>& lines, size_t endOfIf);
 int countNumCharacters(std::string line, char character);
 //find user functions in a line of code (for searching for function calls). Returns the name of the function found
 std::string searchForUserFunctions(std::string line);
+//delete old programs (allows this code to be ran many times without exiting)
+void clearTokens();
 //for errors (exit program)
 inline void tokenizerError(std::string msg);
 //for debug purposes
@@ -47,6 +51,9 @@ void printTokenBuff(std::vector< std::shared_ptr<TokenizedLine> >& buffer);
 void Tokenizer::tokenize(std::vector<std::string>& lines)
 {
     std::cout << "Tokenizing code...\t";
+
+    //delete old tokens if there are any (for when code is ported to embedded devices that shouldn't exit)
+    clearTokens();
 
     //find all user-defined functions
     discoverUserFuncs(lines);
@@ -73,7 +80,7 @@ void Tokenizer::tokenize(std::vector<std::string>& lines)
     std::cout << "Done" << std::endl;
 
     #if TOK_DEBUGGING
-    printTokenBuff(startBlock_tok);
+        printTokenBuff(startBlock_tok);
     #endif
 }
 
@@ -109,9 +116,27 @@ void findOpenCloseBraces(std::vector<std::string>& lines, size_t& start, size_t&
 
     //find first opening brace
     for(size_t i=start; i<lines.size(); i++) {
+        bool inString = false;
+        char stringType = '\0';
 
         //loop through each line to find an opening brace
         for(char letter : lines[i]) {
+            //ignore items inside a string
+            if(letter=='\'' || letter=='\"') {
+                if(stringType==letter) {
+                    //already in string, this is the closing string
+                    inString = false;
+                    stringType = '\0';
+                }
+                else {
+                    inString = true;
+                    stringType = letter;
+                }
+            }
+
+            if(inString)
+                continue; //ignore anything inside of the string
+
             if(letter == '{') {
                 if(!foundFirst) {
                     start = i; //mark the new start location
@@ -143,14 +168,14 @@ void findOpenCloseBraces(std::vector<std::string>& lines, size_t& start, size_t&
     for the time being.
 */
 void findOpenCloseParenthesis(std::string line, size_t& start, size_t& end) {
-    //each opening brace will be pushed to the stack. each closing parenthesis will remove from the stack
-    //once the stack is empty, the program will stop, having found the last brace to the function specified
     std::vector<char> stack;
 
     bool foundFirst = false; //don't start considering a stack empty until the first open parenthesis is found
 
     //loop through each character in the line to find an opening parenthesis
     for(size_t i=start; i<line.length(); i++) {
+        findOpenCloseStrings(line, i, i); //jump to the end of a string
+
         if(line[i] == '(') {
             if(!foundFirst) {
                 start = i; //mark the new start location
@@ -163,6 +188,24 @@ void findOpenCloseParenthesis(std::string line, size_t& start, size_t& end) {
         }
 
         if(stack.size() == 0 && foundFirst) {
+            end = i;
+            return;
+        }
+    }
+}
+
+/*
+    Use this to prevent erros when parsing strings. Allows us to ignore characters marked as strings by the programmer 
+    ("this is a test :)") <-- The ')' in this string would error out the program without this method
+*/
+void findOpenCloseStrings(std::string line, size_t start, size_t& end) {
+    char stringMarker = line[start]; // if the programmer is using "" to represent strings, set to '"', otherwise set to '''. Used to tell whether the programmer is using "" or '' for the strings
+
+    if(stringMarker != '\'' && stringMarker != '\"')
+        return;
+    
+    for(size_t i=start+1; i<line.length(); i++) {
+        if(line[i]==stringMarker) {
             end = i;
             return;
         }
@@ -405,6 +448,13 @@ void tokenizeSection(std::vector<std::string>& lines, std::vector< std::shared_p
 
             tokenBuff.push_back(line);
         }
+        else if(lines[i][0] == '^') {
+            //built in function call
+            std::shared_ptr<CallLine> line = std::make_shared<CallLine>(CallLine());
+
+            line->type = LineType::BI_CALL;
+            
+        }
         else if(lines[i].length() == 1 && (lines[i][0] == '{' || lines[i][0] == '}')) {
             continue; //ignore lines with just { or }
         }
@@ -513,6 +563,16 @@ std::string searchForUserFunctions(std::string line) {
 }
 
 /*
+    Clearing out old tokens
+*/
+void clearTokens() {
+    varsBlock_tok.clear();
+    startBlock_tok.clear();
+    mainLoop_tok.clear();
+    functions_tok.clear();
+}
+
+/*
     Offers some basic utility to the program
 */
 int countNumCharacters(std::string line, char character) {
@@ -554,6 +614,11 @@ void printTokenBuff(std::vector< std::shared_ptr<TokenizedLine> >& buffer) {
             case LineType::CALL:
                 callLine = (CallLine*)buffer[i].get();
                 std::cout << "CALL " << callLine->callFuncName << "(" << callLine->params << ")" << std::endl;
+                break;
+
+            case LineType::BI_CALL:
+                callLine = (CallLine*)buffer[i].get();
+                std::cout << "BUILT-IN CALL "<< callLine->callFuncName << "(" << callLine->params << ")" << std::endl;
                 break;
             
             case LineType::BRANCH:
