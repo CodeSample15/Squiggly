@@ -66,5 +66,8 @@ repeat(AMOUNT) {
 **@** : Built in image reference. Squiggly will look for built-images/shapes with the name that follows the symbol (all caps)
     - Example: `@TRIANGLE`
 
-**$** : Built in variable/function reference. Squiggly will provide functions and values to the program and will automatically update them, handling all input/output (names are also all caps)
+**$** : Built in variable reference. Squiggly will provide values to the program and will automatically update them, handling all input to the program (names are also all caps)
     - Example: `$JOYSTICK_X` --> value of the game joystick 'x' value (between -1.0 and 1.0)
+
+**^**: Built in function reference. Squiggly will provide built in functions for the user to be able to create output from their program (function names are all caps)
+    - Example: ^PRINT("Hello World!")

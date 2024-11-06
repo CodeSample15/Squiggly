@@ -38,6 +38,9 @@
         score = 65
     }
 
+    scoreText = "this is a test :)"
+    printTest("Hi :) <-- This should be ignored")
+
     spawnEnemy()
 }
 
@@ -48,4 +51,8 @@
 
 spawnEnemy() {
 	enemies.add(CREATE_NEW(enemy))
+}
+
+printTest(res) {
+    ^PRINT(res)
 }
