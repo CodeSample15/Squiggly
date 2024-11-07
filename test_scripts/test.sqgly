@@ -1,12 +1,14 @@
 :VARS: {
-    score
-    deaths
+    int score
+    int deaths
 
     float damage = 0.5
 
     OBJECT player
     OBJECT enemy
-    OBJECT[] enemies
+
+    #collection of objects
+    OBJECT_COL enemies
 
     #comment example
     TEXT scoreText

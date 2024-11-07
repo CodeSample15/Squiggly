@@ -34,6 +34,8 @@ bool checkForElse(std::vector<std::string>& lines, size_t endOfIf, size_t& elseL
 bool checkForElse(std::vector<std::string>& lines, size_t endOfIf);
 //returns the number of times a specific character appears in a line
 int countNumCharacters(std::string line, char character);
+//returns the number of segments in the line (segments are sections of a string not broken up by any non-alpha character)
+int numSegmentsInString(std::string line);
 //find user functions in a line of code (for searching for function calls). Returns the name of the function found
 std::string searchForUserFunctions(std::string line);
 //delete old programs (allows this code to be ran many times without exiting)
@@ -62,8 +64,8 @@ void Tokenizer::tokenize(std::vector<std::string>& lines)
     size_t end = 0;
 
     //find and tokenize all of the non optional functions in the code
-    //findCode(VAR_FUNC_HEAD, lines, start, end, true);
-    //tokenizeSection(lines, varsBlock_tok, start, end);
+    findCode(VAR_FUNC_HEAD, lines, start, end, true);
+    tokenizeSection(lines, varsBlock_tok, start, end);
 
     findCode(START_FUNC_HEAD, lines, start, end, true);
     tokenizeSection(lines, startBlock_tok, start, end);
@@ -80,7 +82,7 @@ void Tokenizer::tokenize(std::vector<std::string>& lines)
     std::cout << "Done" << std::endl;
 
     #if TOK_DEBUGGING
-        printTokenBuff(startBlock_tok);
+        printTokenBuff(varsBlock_tok);
     #endif
 }
 
@@ -463,6 +465,19 @@ void tokenizeSection(std::vector<std::string>& lines, std::vector< std::shared_p
 
             tokenBuff.push_back(line);
         }
+        else if(numSegmentsInString(lines[i])==2 && lines[i].find(" ") != std::string::npos) {
+            //define (only two segment of unbroken string: aka variable type and variable name)
+            //Example: 'int lives' --> Define a variables called 'lives' with type 'int' (two strings separated by the non-alpha character " ")
+            std::shared_ptr<DeclareLine> line = std::make_shared<DeclareLine>(DeclareLine());
+
+            line->type = LineType::DECLARE;
+
+            size_t typeStringLength = lines[i].find(" ");
+            line->varType = lines[i].substr(0, typeStringLength);
+            line->varName = lines[i].substr(typeStringLength+1, lines[i].length()-typeStringLength-1);
+
+            tokenBuff.push_back(line);
+        }
         else if(lines[i].length() == 1 && (lines[i][0] == '{' || lines[i][0] == '}')) {
             continue; //ignore lines with just { or }
         }
@@ -594,6 +609,24 @@ int countNumCharacters(std::string line, char character) {
     return count;
 }
 
+int numSegmentsInString(std::string line) {
+    int count = 0;
+    bool alphaFound = false;
+    for(size_t i=0; i<line.length(); i++) {
+        if(std::isalpha(line[i]) && !alphaFound) {
+            //found a segment of characters unbroken by non-alpha characters
+            alphaFound = true;
+            count++;
+        }
+        else if(!std::isalpha(line[i]) && line[i]!='_') { //_ is used to join strings, treat as a string not a delimiter 
+            //found a delimiter (non-alpha character)
+            alphaFound = false;
+        }
+    }
+
+    return count;
+}
+
 /*
     Simple utility for returning a non-crashing error message to the main code (will be useful when ported to different devices
     since it allows us to control how a device handles an error. For PCs, the code will simply exit)
@@ -653,7 +686,7 @@ void printTokenBuff(std::vector< std::shared_ptr<TokenizedLine> >& buffer) {
 
             case LineType::DECLARE:
                 declareLine = (DeclareLine*)buffer[i].get();
-                std::cout << "DECLARE \'" << declareLine->varType << " " << declareLine->varName << std::endl;;
+                std::cout << "DECLARE {" << declareLine->varName << "} type: " << declareLine->varType << std::endl;;
                 break;
 
             case LineType::DECLARE_ASSIGN:

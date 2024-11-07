@@ -57,6 +57,7 @@ namespace Tokenizer {
     };
 
     class DeclareLine : public TokenizedLine {
+        //TODO: allow programmers to use auto-type assignment
         public:
             std::string varName;
             std::string varType;
