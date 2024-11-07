@@ -454,6 +454,14 @@ void tokenizeSection(std::vector<std::string>& lines, std::vector< std::shared_p
 
             line->type = LineType::BI_CALL;
             
+            size_t paramsStart = 0;
+            size_t paramsEnd = 0;
+
+            findOpenCloseParenthesis(lines[i], paramsStart, paramsEnd);
+            line->params = lines[i].substr(paramsStart+1, paramsEnd-paramsStart-1);
+            line->callFuncName = lines[i].substr(1, paramsStart-1);
+
+            tokenBuff.push_back(line);
         }
         else if(lines[i].length() == 1 && (lines[i][0] == '{' || lines[i][0] == '}')) {
             continue; //ignore lines with just { or }
@@ -597,6 +605,8 @@ inline void tokenizerError(std::string message) {
 /*
     This line is useful for debugging the tokenizer.
     Allows you to print out the tokenized version of a script and also demonstrated what values are used for what in the TokenizedLine struct
+
+    USE THIS AS A REFERENCE FOR HOW THE TOKENS SHOULD BE PARSED
 */
 void printTokenBuff(std::vector< std::shared_ptr<TokenizedLine> >& buffer) {
     //for casting the TokenizedLine into its childrens' forms
