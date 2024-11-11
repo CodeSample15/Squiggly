@@ -64,14 +64,14 @@ void Tokenizer::tokenize(std::vector<std::string>& lines)
     size_t end = 0;
 
     //find and tokenize all of the non optional functions in the code
-    // findCode(VAR_FUNC_HEAD, lines, start, end, true);
-    // tokenizeSection(lines, varsBlock_tok, start, end);
+    findCode(VAR_FUNC_HEAD, lines, start, end, true);
+    tokenizeSection(lines, varsBlock_tok, start, end);
 
-    // findCode(START_FUNC_HEAD, lines, start, end, true);
-    // tokenizeSection(lines, startBlock_tok, start, end);
+    findCode(START_FUNC_HEAD, lines, start, end, true);
+    tokenizeSection(lines, startBlock_tok, start, end);
 
-    // findCode(UPDATE_FUNC_HEAD, lines, start, end, true);
-    // tokenizeSection(lines, mainLoop_tok, start, end);
+    findCode(UPDATE_FUNC_HEAD, lines, start, end, true);
+    tokenizeSection(lines, mainLoop_tok, start, end);
 
     //tokenize all of the user defined functions found by 'discoverUserFuncs'
     for(size_t i=0; i<userFuncNames.size(); i++) {
