@@ -11,7 +11,6 @@ std::vector< std::shared_ptr<TokenizedLine> > startBlock_tok = std::vector< std:
 std::vector< std::shared_ptr<TokenizedLine> > mainLoop_tok = std::vector< std::shared_ptr<TokenizedLine> >();
 std::vector< std::vector< std::shared_ptr<TokenizedLine> > > functions_tok = std::vector<std::vector< std::shared_ptr<TokenizedLine> >>();
 
-
 //helper functions prototypes--------------------------------------------------------------------------------------------
 
 //find the line of code which contains a specific header (used for finding functions)
@@ -29,6 +28,7 @@ void tokenizeSection(std::vector<std::string>& lines, std::vector< std::shared_p
 //search for functions defined by the programmer
 void discoverUserFuncs(std::vector<std::string>& lines);
 std::vector<std::string> userFuncNames; //this is what discoverUserFuncs is going to edit
+std::vector<std::vector<size_t>> userFuncRanges; //discoverUserFuncs will also edit this
 //check for the beginning of an else/if else statement
 bool checkForElse(std::vector<std::string>& lines, size_t endOfIf, size_t& elseLine);
 bool checkForElse(std::vector<std::string>& lines, size_t endOfIf);
@@ -57,24 +57,39 @@ void Tokenizer::tokenize(std::vector<std::string>& lines)
     //delete old tokens if there are any (for when code is ported to embedded devices that shouldn't exit)
     clearTokens();
 
-    //find all user-defined functions
+    //find all user-defined functions and place their names into userFuncNames
     discoverUserFuncs(lines);
 
     size_t start = 0;
     size_t end = 0;
 
     //find and tokenize all of the non optional functions in the code
-    findCode(VAR_FUNC_HEAD, lines, start, end, true);
-    tokenizeSection(lines, varsBlock_tok, start, end);
+    // findCode(VAR_FUNC_HEAD, lines, start, end, true);
+    // tokenizeSection(lines, varsBlock_tok, start, end);
 
-    findCode(START_FUNC_HEAD, lines, start, end, true);
-    tokenizeSection(lines, startBlock_tok, start, end);
+    // findCode(START_FUNC_HEAD, lines, start, end, true);
+    // tokenizeSection(lines, startBlock_tok, start, end);
 
-    findCode(UPDATE_FUNC_HEAD, lines, start, end, true);
-    tokenizeSection(lines, mainLoop_tok, start, end);
+    // findCode(UPDATE_FUNC_HEAD, lines, start, end, true);
+    // tokenizeSection(lines, mainLoop_tok, start, end);
 
-    //tokenize all of the user defined functions
-    
+    //tokenize all of the user defined functions found by 'discoverUserFuncs'
+    for(size_t i=0; i<userFuncNames.size(); i++) {
+        std::vector< std::shared_ptr<TokenizedLine> > tokenBuffer;
+
+        //create the header line for this function
+        std::shared_ptr<FuncNameLine> titleLine = std::make_shared<FuncNameLine>(FuncNameLine());
+        titleLine->type = LineType::FUNC_NAME;
+        titleLine->funcName = userFuncNames.at(i);
+        tokenBuffer.push_back(titleLine); //this will make it easier to find the function in the functions_tok array when the program needs to call it
+
+        start = userFuncRanges[i][0];
+        end = userFuncRanges[i][1];
+
+        tokenizeSection(lines, tokenBuffer, start, end);
+
+        functions_tok.push_back(tokenBuffer);
+    }
 
     //clear memory after tokenizing
     lines.clear();
@@ -82,14 +97,14 @@ void Tokenizer::tokenize(std::vector<std::string>& lines)
     std::cout << "Done" << std::endl;
 
     #if TOK_DEBUGGING
-        printTokenBuff(varsBlock_tok);
+        printTokenBuff(functions_tok[0]);
     #endif
 }
 
 //finds the start and end locations for code segments with specific headers (system functions called automatically)
 void findCode(std::string header, std::vector<std::string>& lines, size_t& start, size_t& end, bool err) 
 {
-    //scan for vars function (declares all variables)
+    //scan for function header
     size_t found;
     for(size_t i=0; i<lines.size(); i++) {
         found = lines[i].find(header);
@@ -156,6 +171,7 @@ void findOpenCloseBraces(std::vector<std::string>& lines, size_t& start, size_t&
             }
         }
     }
+    end = start;
 }
 
 /*
@@ -497,6 +513,7 @@ void tokenizeSection(std::vector<std::string>& lines, std::vector< std::shared_p
 void discoverUserFuncs(std::vector<std::string>& lines) 
 {
     userFuncNames.clear();
+    userFuncRanges.clear();
 
     for(size_t i=0; i<lines.size(); i++) {
         if(lines[i].find(VAR_FUNC_HEAD) != std::string::npos
@@ -517,6 +534,11 @@ void discoverUserFuncs(std::vector<std::string>& lines)
                 //jump to end of function
                 size_t end = -1;
                 findOpenCloseBraces(lines, i, end);
+
+                std::vector<size_t> range;
+                range.push_back(i);
+                range.push_back(end);
+                userFuncRanges.push_back(range);
 
                 i = end-1; //jump to new position
             } catch (...) {
@@ -589,6 +611,7 @@ std::string searchForUserFunctions(std::string line) {
     Clearing out old tokens
 */
 void clearTokens() {
+    //tokens
     varsBlock_tok.clear();
     startBlock_tok.clear();
     mainLoop_tok.clear();
@@ -649,7 +672,7 @@ void printTokenBuff(std::vector< std::shared_ptr<TokenizedLine> >& buffer) {
     AssignLine* assignLine;
     DeclareLine* declareLine;
     FuncNameLine* funcNameLine;
-
+    
     for(size_t i=0; i<buffer.size(); i++) {
         std::cout << i << ": ";
 
@@ -696,7 +719,7 @@ void printTokenBuff(std::vector< std::shared_ptr<TokenizedLine> >& buffer) {
 
             case LineType::FUNC_NAME:
                 funcNameLine = (FuncNameLine*)buffer[i].get();
-                std::cout << "FUNC " << funcNameLine->funcName << std::endl;
+                std::cout << "FUNCTION " << funcNameLine->funcName << ":" << std::endl;
                 break;
 
             default:

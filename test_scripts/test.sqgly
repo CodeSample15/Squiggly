@@ -52,7 +52,8 @@
 }
 
 spawnEnemy() {
-	enemies.add(CREATE_NEW(enemy))
+	#enemies.add(CREATE_NEW(enemy))
+    ^PRINT("Testing!")
 }
 
 printTest(res) {
