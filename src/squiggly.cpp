@@ -5,8 +5,9 @@
 #include <string>
 #include <exception>
 
-#include "tokenizer.hpp"
 #include "linter.hpp"
+#include "tokenizer.hpp"
+#include "runner.hpp"
 
 int main(int argc, char** argv) {
     //quick check to make sure file was passed as input to the program
@@ -47,6 +48,11 @@ int main(int argc, char** argv) {
     }
 
     //TODO: Run script
+    try {
+        Runner::execute();
+    } catch(const std::exception& e) {
+        std::cerr << "\n" << e.what() << std::endl;
+    }
 
     return 0;
 }
