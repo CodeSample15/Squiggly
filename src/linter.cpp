@@ -1,4 +1,4 @@
-#include "linter.h"
+#include "linter.hpp"
 
 /*
     Removes all whitespace from the program. Makes parsing the code easier and more reliable later on

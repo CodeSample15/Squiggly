@@ -1,7 +1,7 @@
 #include <iostream>
 
-#include "tokenizer.h"
-#include "linter.h"
+#include "tokenizer.hpp"
+#include "linter.hpp"
 
 using namespace Tokenizer;
 

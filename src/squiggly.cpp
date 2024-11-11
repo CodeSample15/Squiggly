@@ -5,8 +5,8 @@
 #include <string>
 #include <exception>
 
-#include "tokenizer.h"
-#include "linter.h"
+#include "tokenizer.hpp"
+#include "linter.hpp"
 
 int main(int argc, char** argv) {
     //quick check to make sure file was passed as input to the program
