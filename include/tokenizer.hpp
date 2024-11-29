@@ -4,7 +4,7 @@
 #include <vector>
 #include <memory>
 
-#define TOK_DEBUGGING false
+#define TOK_DEBUGGING true
 
 namespace Tokenizer {
     enum LineType {
@@ -30,7 +30,7 @@ namespace Tokenizer {
     class CallLine : public TokenizedLine {
         public:
             std::string callFuncName;
-            std::string params;
+            std::vector<std::string> args;
     };
 
     class BranchLine : public TokenizedLine {

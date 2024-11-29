@@ -23,8 +23,12 @@ void findOpenCloseParenthesis(std::string line, size_t& start, size_t& end);
 void findOpenCloseStrings(std::string line, size_t start, size_t& end);
 //tokenize a section starting from a start location and an end location, storing the result in tokenBuff
 void tokenizeSection(std::vector<std::string>& lines, std::vector< std::shared_ptr<TokenizedLine> >& tokenBuff, size_t start, size_t end);
+
 //tokenize an if statement
 //void tokenizeIf(std::vector<std::string>& lines, std::vector<TokenizedLine>& tokenBuff, );
+
+//use the ',' delimiter to get the individual arguments passed to a function and stored them in argBuff
+void parseArgsFromString(std::string s, std::vector<std::string>& argBuff);
 //search for functions defined by the programmer
 void discoverUserFuncs(std::vector<std::string>& lines);
 std::vector<std::string> userFuncNames; //this is what discoverUserFuncs is going to edit
@@ -97,7 +101,7 @@ void Tokenizer::tokenize(std::vector<std::string>& lines)
     std::cout << "Done" << std::endl;
 
     #if TOK_DEBUGGING
-        printTokenBuff(functions_tok[0]);
+        printTokenBuff(startBlock_tok);
     #endif
 }
 
@@ -456,13 +460,19 @@ void tokenizeSection(std::vector<std::string>& lines, std::vector< std::shared_p
 
             line->type = LineType::CALL;
 
+            /*
+                Function call linetype:
+                    std::string callFuncName;
+                    std::string params;
+            */
+
             line->callFuncName = functionName;
 
             size_t paramsStart = 0;
             size_t paramsEnd = 0;
 
             findOpenCloseParenthesis(lines[i], paramsStart, paramsEnd); //parse parameters passed to function
-            line->params = lines[i].substr(paramsStart+1, paramsEnd-paramsStart-1);
+            parseArgsFromString(lines[i].substr(paramsStart+1, paramsEnd-paramsStart-1), line->args);
 
             tokenBuff.push_back(line);
         }
@@ -471,12 +481,18 @@ void tokenizeSection(std::vector<std::string>& lines, std::vector< std::shared_p
             std::shared_ptr<CallLine> line = std::make_shared<CallLine>(CallLine());
 
             line->type = LineType::BI_CALL;
+
+            /*
+                Built in function call linetype:
+                    std::string callFuncName;
+                    std::string params;
+            */
             
             size_t paramsStart = 0;
             size_t paramsEnd = 0;
 
             findOpenCloseParenthesis(lines[i], paramsStart, paramsEnd);
-            line->params = lines[i].substr(paramsStart+1, paramsEnd-paramsStart-1);
+            parseArgsFromString(lines[i].substr(paramsStart+1, paramsEnd-paramsStart-1), line->args);
             line->callFuncName = lines[i].substr(1, paramsStart-1);
 
             tokenBuff.push_back(line);
@@ -487,6 +503,12 @@ void tokenizeSection(std::vector<std::string>& lines, std::vector< std::shared_p
             std::shared_ptr<DeclareLine> line = std::make_shared<DeclareLine>(DeclareLine());
 
             line->type = LineType::DECLARE;
+
+            /*
+                Declare linetype:
+                    std::string varName;
+                    std::string varType;
+            */
 
             size_t typeStringLength = lines[i].find(" ");
             line->varType = lines[i].substr(0, typeStringLength);
@@ -502,6 +524,28 @@ void tokenizeSection(std::vector<std::string>& lines, std::vector< std::shared_p
             std::cerr << "\nError! Unrecognized syntax at line \'" << lines[i] << "\'. Skipping..." << std::endl;
         }
     }
+}
+
+/*
+    Get the string parsed from the tokenizer and convert into 
+*/
+void parseArgsFromString(std::string s, std::vector<std::string>& argBuff) 
+{
+    if(s.length()==0)
+        return;
+
+    std::string tmp = "";
+    int tmpStart = 0;
+    for(size_t i=0; i<s.length(); i++) {
+        findOpenCloseStrings(s, i, i);
+        if(s[i] == ',') {
+            //delimiter found, section off the string and add to the buffer
+            argBuff.push_back(s.substr(tmpStart, i-tmpStart));
+            tmpStart = i+1;
+        }
+    }
+
+    argBuff.push_back(s.substr(tmpStart, s.length()-tmpStart));
 }
 
 /*
@@ -679,12 +723,18 @@ void printTokenBuff(std::vector< std::shared_ptr<TokenizedLine> >& buffer) {
         switch(buffer[i]->type) {
             case LineType::CALL:
                 callLine = (CallLine*)buffer[i].get();
-                std::cout << "CALL " << callLine->callFuncName << "(" << callLine->params << ")" << std::endl;
+                std::cout << "CALL " << callLine->callFuncName << "(";
+                for(size_t i=0; i<callLine->args.size(); i++)
+                    std::cout << callLine->args[i] << ", ";
+                std::cout << ")" << std::endl;
                 break;
 
             case LineType::BI_CALL:
                 callLine = (CallLine*)buffer[i].get();
-                std::cout << "BUILT-IN CALL "<< callLine->callFuncName << "(" << callLine->params << ")" << std::endl;
+                std::cout << "BUILT-IN CALL "<< callLine->callFuncName << "(";
+                for(size_t i=0; i<callLine->args.size(); i++)
+                    std::cout << callLine->args[i] << ", ";
+                std::cout << ")" << std::endl;
                 break;
             
             case LineType::BRANCH:
