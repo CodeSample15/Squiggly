@@ -2,10 +2,12 @@
 
 #include "runner.hpp"
 #include "tokenizer.hpp"
+#include "utils.hpp"
 
 using namespace Runner;
 
 //virtual memory buffers
+
 
 //general function for running blocks of code
 void runProgram(std::vector< Tokenizer::TokenizedLine >& tokens, size_t startIdx=0, size_t endIdx=0);

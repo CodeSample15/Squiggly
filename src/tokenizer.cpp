@@ -1,7 +1,8 @@
-#include <iostream>
+#include <sstream>
 
 #include "tokenizer.hpp"
 #include "linter.hpp"
+#include "built-in-funcs.hpp"
 
 using namespace Tokenizer;
 
@@ -56,7 +57,7 @@ void printTokenBuff(std::vector< std::shared_ptr<TokenizedLine> >& buffer);
 */
 void Tokenizer::tokenize(std::vector<std::string>& lines)
 {
-    std::cout << "Tokenizing code...\t";
+    BuiltIn::Print("Tokenizing code...\t", false);
 
     //delete old tokens if there are any (for when code is ported to embedded devices that shouldn't exit)
     clearTokens();
@@ -98,7 +99,7 @@ void Tokenizer::tokenize(std::vector<std::string>& lines)
     //clear memory after tokenizing
     lines.clear();
 
-    std::cout << "Done" << std::endl;
+    BuiltIn::Print("Done\n");
 
     #if TOK_DEBUGGING
         printTokenBuff(startBlock_tok);
@@ -718,62 +719,73 @@ void printTokenBuff(std::vector< std::shared_ptr<TokenizedLine> >& buffer) {
     FuncNameLine* funcNameLine;
     
     for(size_t i=0; i<buffer.size(); i++) {
-        std::cout << i << ": ";
+        std::stringstream ss;
+        ss << i << ": ";
 
         switch(buffer[i]->type) {
             case LineType::CALL:
                 callLine = (CallLine*)buffer[i].get();
-                std::cout << "CALL " << callLine->callFuncName << "(";
+                ss << "CALL " << callLine->callFuncName << "(";
                 for(size_t i=0; i<callLine->args.size(); i++)
-                    std::cout << callLine->args[i] << ", ";
-                std::cout << ")" << std::endl;
+                    ss << callLine->args[i] << ", ";
+                ss << ")";
+                BuiltIn::Print(ss.str());
                 break;
-
+            
             case LineType::BI_CALL:
                 callLine = (CallLine*)buffer[i].get();
-                std::cout << "BUILT-IN CALL "<< callLine->callFuncName << "(";
+                ss << "BUILT-IN CALL " << callLine->callFuncName << "(";
                 for(size_t i=0; i<callLine->args.size(); i++)
-                    std::cout << callLine->args[i] << ", ";
-                std::cout << ")" << std::endl;
+                    ss << callLine->args[i] << ", ";
+                ss << ")";
+                BuiltIn::Print(ss.str());
                 break;
             
             case LineType::BRANCH:
                 branchLine = (BranchLine*)buffer[i].get();
-                std::cout << "BRANCH " << branchLine->booleanExpression << "   TRUE: " << branchLine->branchLineNumTRUE << "   END: " << branchLine->branchLineNumEND << "   ELSE: " << branchLine->branchLineNumELSE << std::endl;
+                ss << "BRANCH " << branchLine->booleanExpression << "   TRUE: " << branchLine->branchLineNumTRUE << "   END: " << branchLine->branchLineNumEND << "   ELSE: " << branchLine->branchLineNumELSE;
+                BuiltIn::Print(ss.str());
                 break;
 
             case LineType::BRANCH_ELSE:
                 branchLine = (BranchLine*)buffer[i].get();
-                std::cout << "ELSE END: " << branchLine->branchLineNumEND << std::endl;
+                ss << "ELSE END: " << branchLine->branchLineNumEND;
+                BuiltIn::Print(ss.str());
                 break;
 
             case LineType::LOOP:
                 loopLine = (LoopLine*)buffer[i].get();
-                std::cout << "LOOP " << loopLine->loopTimes << " TIMES START=" << loopLine->loopStart << ", END=" << loopLine->loopEnd << std::endl;
+                ss << "LOOP " << loopLine->loopTimes << " TIMES START=" << loopLine->loopStart << ", END=" << loopLine->loopEnd;
+                BuiltIn::Print(ss.str());
                 break;
 
             case LineType::ASSIGN:
                 assignLine = (AssignLine*)buffer[i].get();
-                std::cout << "ASSIGN \'" << assignLine->assignDst << "\' to \'" << assignLine->assignSrc << "\' using '" << assignLine->assignOperator << "'" << std::endl;
+                ss << "ASSIGN \'" << assignLine->assignDst << "\' to \'" << assignLine->assignSrc << "\' using '" << assignLine->assignOperator << "'";
+                BuiltIn::Print(ss.str());
                 break;
 
             case LineType::DECLARE:
                 declareLine = (DeclareLine*)buffer[i].get();
-                std::cout << "DECLARE {" << declareLine->varName << "} type: " << declareLine->varType << std::endl;;
+                ss << "DECLARE {" << declareLine->varName << "} type: " << declareLine->varType;
+                BuiltIn::Print(ss.str());
                 break;
 
             case LineType::DECLARE_ASSIGN:
                 assignLine = (AssignLine*)buffer[i].get();
-                std::cout << "DECLARE-ASSIGN \'" << assignLine->assignType << " " << assignLine->assignDst << "\' \'" << assignLine->assignSrc << "\'" << std::endl;
+                ss << "DECLARE-ASSIGN \'" << assignLine->assignType << " " << assignLine->assignDst << "\' \'" << assignLine->assignSrc << "\'";
+                BuiltIn::Print(ss.str());
                 break;
 
             case LineType::FUNC_NAME:
                 funcNameLine = (FuncNameLine*)buffer[i].get();
-                std::cout << "FUNCTION " << funcNameLine->funcName << ":" << std::endl;
+                ss << "FUNCTION " << funcNameLine->funcName << ":";
+                BuiltIn::Print(ss.str());
                 break;
 
             default:
-                std::cout << "UNDEFINED LINE" << std::endl;
+                ss << "UNDEFINED LINE";
+                BuiltIn::Print(ss.str());
                 break;
         }
     }

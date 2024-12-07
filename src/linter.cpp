@@ -1,11 +1,12 @@
 #include "linter.hpp"
+#include "built-in-funcs.hpp"
 
 /*
     Removes all whitespace from the program. Makes parsing the code easier and more reliable later on
 */
 void Linter::preprocess(std::vector<std::string>& lines) 
 {
-    std::cout << "Preprocessing script...\t";
+    BuiltIn::Print("Preprocessing script...\t", false);
 
     //remove unecessary whitespace
     for(size_t i=0; i < lines.size(); i++) {
@@ -35,5 +36,5 @@ void Linter::preprocess(std::vector<std::string>& lines)
         }
     }
 
-    std::cout << "Done" << std::endl;
+    BuiltIn::Print("Done");
 }
