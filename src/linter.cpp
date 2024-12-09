@@ -10,7 +10,18 @@ void Linter::preprocess(std::vector<std::string>& lines)
 
     //remove unecessary whitespace
     for(size_t i=0; i < lines.size(); i++) {
+        char quoteChar = '\0';
         for(size_t j=0; j<lines[i].length(); j++) {
+            //ignore strings
+            if(quoteChar!='\0') {
+                if(lines[i][j] == quoteChar)
+                    quoteChar = '\0';
+                continue;
+            } else if(lines[i][j] == '"' || lines[i][j] == '\'') {
+                quoteChar = lines[i][j];
+                continue;
+            }
+
             if(lines[i][j] == ' ' || lines[i][j] == '\t') {
                 //check to see if there is whitespace, that it's not being used to separate two distinct strings
                bool rightGood = j+1 >= lines[i].length() || !std::isalpha(lines[i][j+1]);
