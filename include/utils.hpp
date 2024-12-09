@@ -13,19 +13,12 @@ namespace Utils
         BOOL
     };
 
-    union value {
-        size_t l;
-        int i;
-        float f;
-        double d;
-        char c[8];
-    };
-
     typedef struct {
+        std::string name;
         VarType type;
-        
+        std::shared_ptr<void> ptr;
     } SVariable;
 
-    //convert string to string literal, regardless of value / concatenation
+    //convert string literal to string, regardless of value / concatenation
     std::string ParseString(std::string s);
 }

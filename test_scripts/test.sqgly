@@ -41,7 +41,7 @@
     }
 
     scoreText = "this is a test :)"
-    ^PRINT("Hi :) <-- This should be ignored")
+    ^PRINT("Hi :) <-- This should be ignored" + "hi there")
 
     spawnEnemy()
 }

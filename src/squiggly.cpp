@@ -47,7 +47,7 @@ int main(int argc, char** argv) {
         return 0;
     }
 
-    //TODO: Run script
+    //Execute script
     try {
         Runner::execute();
     } catch(const std::exception& e) {
