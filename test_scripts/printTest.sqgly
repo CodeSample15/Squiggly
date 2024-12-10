@@ -4,14 +4,13 @@
 
 :START: {
 	# initialization code goes here
-	^PRINT("Hello World!")
-	helloWorld()
+	helloWorld("Hello World!")
 }
 
 :UPDATE: {
 	# game loop logic goes here
 }
 
-helloWorld() {
-	^PRINT("Hello " + "World!")
+helloWorld(string test) {
+	^PRINT(test)
 }

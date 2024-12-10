@@ -15,6 +15,7 @@ void BuiltIn::runFunction(std::string name, std::vector<std::string>& args)
         if(args.size() != 1)
             throwError("PRINT: expected 1 argument, got " + args.size());
 
+        
         Print(Utils::ParseString(args[0]));
     }
     else {

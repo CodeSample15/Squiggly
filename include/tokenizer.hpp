@@ -66,6 +66,7 @@ namespace Tokenizer {
     class FuncNameLine : public TokenizedLine {
         public:
             std::string funcName;
+            std::vector<std::string> expectedArgs;
     };
 
     //method that other scripts will be using

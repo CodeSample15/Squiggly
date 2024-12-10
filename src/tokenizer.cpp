@@ -88,11 +88,19 @@ void Tokenizer::tokenize(std::vector<std::string>& lines)
         titleLine->funcName = userFuncNames.at(i);
         tokenBuffer.push_back(titleLine); //this will make it easier to find the function in the functions_tok array when the program needs to call it
 
+        //add expected arguments to list
+        std::string headerLine = lines[userFuncRanges[i][0]];
+
+        size_t paramsStart = 0;
+        size_t paramsEnd = 0;
+        findOpenCloseParenthesis(headerLine, paramsStart, paramsEnd);
+        parseArgsFromString(headerLine.substr(paramsStart+1, paramsEnd-paramsStart-1), titleLine->expectedArgs); //add expected arguments to function declaration header
+
+        //tokenize the function and add to the tokenized vector
         start = userFuncRanges[i][0];
         end = userFuncRanges[i][1];
 
         tokenizeSection(lines, tokenBuffer, start, end);
-
         functions_tok.push_back(tokenBuffer);
     }
 
@@ -528,7 +536,7 @@ void tokenizeSection(std::vector<std::string>& lines, std::vector< std::shared_p
 }
 
 /*
-    Get the string parsed from the tokenizer and convert into 
+    Get the string parsed from the tokenizer and convert into a vector of strings
 */
 void parseArgsFromString(std::string s, std::vector<std::string>& argBuff) 
 {
@@ -538,7 +546,7 @@ void parseArgsFromString(std::string s, std::vector<std::string>& argBuff)
     std::string tmp = "";
     int tmpStart = 0;
     for(size_t i=0; i<s.length(); i++) {
-        findOpenCloseStrings(s, i, i);
+        findOpenCloseStrings(s, i, i); //skip over strings
         if(s[i] == ',') {
             //delimiter found, section off the string and add to the buffer
             argBuff.push_back(s.substr(tmpStart, i-tmpStart));
@@ -656,7 +664,6 @@ std::string searchForUserFunctions(std::string line) {
     Clearing out old tokens
 */
 void clearTokens() {
-    //tokens
     varsBlock_tok.clear();
     startBlock_tok.clear();
     mainLoop_tok.clear();
@@ -779,7 +786,10 @@ void printTokenBuff(std::vector< std::shared_ptr<TokenizedLine> >& buffer) {
 
             case LineType::FUNC_NAME:
                 funcNameLine = (FuncNameLine*)buffer[i].get();
-                ss << "FUNCTION " << funcNameLine->funcName << ":";
+                ss << "FUNCTION " << funcNameLine->funcName << "(";
+                for(std::string arg : funcNameLine->expectedArgs)
+                    ss << arg << ",";
+                ss << "):";
                 BuiltIn::Print(ss.str());
                 break;
 

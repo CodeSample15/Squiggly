@@ -19,6 +19,6 @@ namespace Utils
         std::shared_ptr<void> ptr;
     } SVariable;
 
-    //convert string literal to string, regardless of value / concatenation
-    std::string ParseString(std::string s);
+    std::string ParseString(std::string s); //convert string literal to string, regardless of value / concatenation
+    SVariable convertToVariable(std::string input); //convert strint to a SVariable (whether it's referencing another variable or just a plain string)
 }
