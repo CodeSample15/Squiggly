@@ -63,9 +63,11 @@ void runProgram(std::vector<TOKENIZED_PTR>& tokens, size_t stackFrameIdx, size_t
     Tokenizer::CallLine* callLine;
     //Tokenizer::BranchLine* branchLine;
     //Tokenizer::LoopLine* loopLine;
-    //Tokenizer::AssignLine* assignLine;
+    Tokenizer::AssignLine* assignLine;
     //Tokenizer::DeclareLine* declareLine;
     //Tokenizer::FuncNameLine* funcNameLine;
+
+    Utils::SVariable* varBuff;
     
     //iterate through the program
     for(size_t prgCounter = startIdx; prgCounter < endIdx; prgCounter++) {
@@ -80,6 +82,16 @@ void runProgram(std::vector<TOKENIZED_PTR>& tokens, size_t stackFrameIdx, size_t
             case Tokenizer::LineType::BI_CALL:
                 callLine = (Tokenizer::CallLine*)line.get();
                 BuiltIn::runFunction(callLine->callFuncName, callLine->args);
+                break;
+
+            case Tokenizer::LineType::ASSIGN:
+                assignLine = (Tokenizer::AssignLine*)line.get();
+                varBuff = fetchVariable(assignLine->assignDst);
+                if(varBuff) {
+                    Utils::convertToVariable(assignLine->assignSrc, varBuff->type);
+                }
+                else
+                    throwError("Unable to find variable " + assignLine->assignDst);
                 break;
 
             default:
@@ -110,7 +122,7 @@ void runUserFunction(std::string name, std::vector<std::string>& args) {
             if(tmp->funcName == name) {
                 found = true;
                 
-                //assume arguments passed are correct (linter's job), but do a quick check just as an extra safety measure against segfaults
+                //check to make sure arguments passed are correct
                 if(args.size() != tmp->expectedArgs.size())
                     throwError("Unexpected number of arguments passed to function " + name);
 
@@ -119,15 +131,18 @@ void runUserFunction(std::string name, std::vector<std::string>& args) {
 
                 //add arguments to stack
                 for(size_t i=0; i<args.size(); i++) {
-                    Utils::SVariable nextVar = Utils::convertToVariable(args[i]);
-
                     //get variable's new name from the function parameter vector
                     std::string expected = tmp->expectedArgs[i];
                     size_t spaceLocation = expected.find(" ");
                     if(spaceLocation == std::string::npos)
                         throwError("Improper parameter declaration of function " + name); //quick error check because I don't trust the Linter
 
-                    nextVar.name = expected.substr(spaceLocation+1, expected.length()-spaceLocation-1); //split expected arg into type and name, get the name
+                    //extract the expected name and type
+                    std::string etype = expected.substr(0, spaceLocation);
+                    std::string ename = expected.substr(spaceLocation+1, expected.length()-spaceLocation-1);
+
+                    Utils::SVariable nextVar = Utils::convertToVariable(args[i], Utils::stringToVarType(etype));
+                    nextVar.name = ename; //split expected arg into type and name, get the name
                     sVars.push_back(nextVar); //push to stack
                 }
 
@@ -135,7 +150,7 @@ void runUserFunction(std::string name, std::vector<std::string>& args) {
                 break;
             }
         } else {
-            throwError("Tokenizer screwed up function tokenizing!"); //idealy, the programmer should NEVER get this error, I'm just putting this here for Squiggly development screw ups
+            throwError("Tokenizer screwed up function tokenizing!"); //idealy, the programmer should NEVER get this error, I'm just putting this here to call out Squiggly development screw ups
         }
     }
 

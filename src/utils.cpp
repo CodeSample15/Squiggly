@@ -11,6 +11,43 @@ using namespace Utils;
 inline void throwError(std::string message);
 
 /*
+    Allow functions to get the string version of a VarType
+*/
+std::string Utils::varTypeToString(VarType& type) {
+    switch(type) {
+        case VarType::NONE:
+            return "NONE";
+        case VarType::STRING:
+            return "string";
+        case VarType::INTEGER:
+            return "int";
+        case VarType::DOUBLE:
+            return "double";
+        case VarType::FLOAT:
+            return "float";
+        case VarType::BOOL:
+            return "bool";
+    }
+
+    return "invalid";
+}
+
+VarType Utils::stringToVarType(std::string& str) {
+    if(str=="string")
+        return VarType::STRING;
+    else if(str=="int")
+        return VarType::INTEGER;
+    else if(str=="double")
+        return VarType::DOUBLE;
+    else if(str=="float")
+        return VarType::FLOAT;
+    else if(str=="bool")
+        return VarType::BOOL;
+
+    return VarType::NONE;
+}
+
+/*
     Convert string literal into raw string that Squiggly can work with (string appending with '+' and converting Squiggly variables
     into strings)
 */
@@ -58,6 +95,9 @@ std::string Utils::ParseString(std::string s)
                         case VarType::BOOL:
                             ss << (*((bool*)var->ptr.get()) ? "true" : "false");
                             break;
+                        default:
+                            ss << "NONE";
+                            break;
                     }
                 }
                 else {
@@ -78,9 +118,10 @@ std::string Utils::ParseString(std::string s)
 }
 
 
-SVariable Utils::convertToVariable(std::string input) {
+SVariable Utils::convertToVariable(std::string input, VarType expectedType) {
     SVariable tmp;
     tmp.name = "tmp"; //main code has to set this manually
+    tmp.type = VarType::NONE;
 
     if(input.find("\"") != std::string::npos || input.find("'") != std::string::npos) {
         //variable is a string literal probably
@@ -103,6 +144,9 @@ SVariable Utils::convertToVariable(std::string input) {
             throwError("Unable to convert variable " + input + " to value");
         }
     }
+
+    if(expectedType!=VarType::NONE && tmp.type!=expectedType)
+        throwError("Unable to convert <" + input + "> to '" + varTypeToString(expectedType) + "'");
 
     return tmp;
 }

@@ -6,6 +6,7 @@
 namespace Utils 
 {
     enum VarType {
+        NONE,
         STRING,
         INTEGER,
         DOUBLE,
@@ -19,6 +20,9 @@ namespace Utils
         std::shared_ptr<void> ptr;
     } SVariable;
 
+    std::string varTypeToString(VarType& type);
+    VarType stringToVarType(std::string& str);
+
     std::string ParseString(std::string s); //convert string literal to string, regardless of value / concatenation
-    SVariable convertToVariable(std::string input); //convert strint to a SVariable (whether it's referencing another variable or just a plain string)
+    SVariable convertToVariable(std::string input, VarType expectedType); //convert string to a SVariable (whether it's referencing another variable or just a plain string)
 }
