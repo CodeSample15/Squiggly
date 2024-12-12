@@ -2,7 +2,7 @@
 
 An [esoteric language](https://en.wikipedia.org/wiki/Esoteric_programming_language) designed to be a quick way to develop games using scripts
 
-> WARNING: This project is still in development and does not function.
+> WARNING: This project is still in development and does not function as intended.
 
 > ANOTHER WARNING: Until this message is deleted from the README, the squiggly language will be considered unstable, meaning it's syntax may change and adapt over time as it gets updated. Keep this in mind when writing scripts as you might need to change your syntax if you plan on updating.
 
@@ -46,11 +46,11 @@ Test code can be found in the `/test_scripts` folder, but the general syntax loo
 }
 
 :START: {
-	score = 0
-	deaths = 0
+    score = 0
+    deaths = 0
 
-	player.icon = @CIRCLE
-	enemy.icon = @TRIANGLE
+    player.icon = @CIRCLE
+    enemy.icon = @TRIANGLE
 
     if (damage == 0.5) {
         deaths += 1

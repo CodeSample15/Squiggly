@@ -4,7 +4,7 @@
 
 :START: {
 	# initialization code goes here
-	helloWorld("Hello World!")
+	^PRINT("Hello!" + + " Goodbye!")
 }
 
 :UPDATE: {

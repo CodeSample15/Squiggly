@@ -1,13 +1,15 @@
 #include <sstream>
 
+#include "../lib/exprtk/exprtk.hpp"
+
 #include "utils.hpp"
 #include "runner.hpp"
 #include "linter.hpp"
 #include "built-in-funcs.hpp"
 
-
 using namespace Utils;
-
+ 
+void convertAndAppendVariable(std::stringstream& ss, std::string& varName);
 inline void throwError(std::string message);
 
 /*
@@ -62,10 +64,10 @@ std::string Utils::ParseString(std::string s)
             varScanMode = false; //expect strings from here on out or an append character (+)
 
             while(s[++i] != '"') {
-                if(i>=s.length())
-                    throwError("String left unclosed! Cannot parse string");
-
                 ss << s[i]; //append characters to the string stream
+
+                if(i+1>=s.length())
+                    throwError("String left unclosed! Cannot parse string");
             }
         } else {
             if(varScanMode) {
@@ -77,32 +79,7 @@ std::string Utils::ParseString(std::string s)
                         break; //no need to error, can simply be that the program reached the end of the argument string
                 } while(isalpha(s[++i]) || s[i]=='$');
 
-                SVariable* var = Runner::fetchVariable(temp);
-                if(var) {
-                    switch(var->type) {
-                        case VarType::STRING:
-                            ss << *((std::string*)var->ptr.get()); //dear lord this is an ugly line of code. Casting the void pointer to a string pointer and then dereferencing 
-                            break;
-                        case VarType::INTEGER:
-                            ss << *((int*)var->ptr.get());
-                            break;
-                        case VarType::DOUBLE:
-                            ss << *((double*)var->ptr.get());
-                            break;
-                        case VarType::FLOAT:
-                            ss << *((float*)var->ptr.get());
-                            break;
-                        case VarType::BOOL:
-                            ss << (*((bool*)var->ptr.get()) ? "true" : "false");
-                            break;
-                        default:
-                            ss << "NONE";
-                            break;
-                    }
-                }
-                else {
-                    throwError("Variable " + temp + " is not in scope!");
-                }
+                convertAndAppendVariable(ss, temp);
             }
             else if(s[i] != '+') {
                 //program is not in scan variable mode and there is no string to be found, program is structured incorrectly
@@ -129,11 +106,8 @@ SVariable Utils::convertToVariable(std::string input, VarType expectedType) {
 
         tmp.type = VarType::STRING;
         tmp.ptr = std::make_shared<std::string>(s);
-    } else if(input[0]==BUILT_IN_VAR_PREFIX) {
-        //reference to Squiggly built in variable
-        //TODO: fetch built in variable value
-
     } else {
+        /*
         //regular reference to squiggly variable
         SVariable* fetched = Runner::fetchVariable(input);
 
@@ -143,12 +117,60 @@ SVariable Utils::convertToVariable(std::string input, VarType expectedType) {
         } else {
             throwError("Unable to convert variable " + input + " to value");
         }
+        */
+
+        //replace variables in string with their values
+        std::stringstream ss;
+        for(size_t i=0; i<input.length(); i++) {
+            if(isalpha(input[i])) {
+                std::string temp = "";
+                do {
+                    temp += input[i];
+                    if(i+1 >= input.length())
+                        break; //no need to error, can simply be that the program reached the end of the argument string
+                } while(isalpha(input[++i]) || input[i]=='$');
+                
+                convertAndAppendVariable(ss, temp);
+            } else {
+                ss << input[i];
+            }
+        }
     }
 
     if(expectedType!=VarType::NONE && tmp.type!=expectedType)
         throwError("Unable to convert <" + input + "> to '" + varTypeToString(expectedType) + "'");
 
     return tmp;
+}
+
+void convertAndAppendVariable(std::stringstream& ss, std::string& varName) {
+    SVariable* var = Runner::fetchVariable(varName);
+    
+    if(var) {
+        switch(var->type) {
+            case VarType::STRING:
+                ss << *((std::string*)var->ptr.get()); //dear lord this is an ugly line of code. Casting the void pointer to a string pointer and then dereferencing 
+                break;
+            case VarType::INTEGER:
+                ss << *((int*)var->ptr.get());
+                break;
+            case VarType::DOUBLE:
+                ss << *((double*)var->ptr.get());
+                break;
+            case VarType::FLOAT:
+                ss << *((float*)var->ptr.get());
+                break;
+            case VarType::BOOL:
+                ss << (*((bool*)var->ptr.get()) ? "true" : "false");
+                break;
+            default:
+                ss << "NONE";
+                break;
+        }
+    }
+    else {
+        throwError("Variable " + varName + " is not in scope!");
+    }
 }
 
 inline void throwError(std::string message) {
