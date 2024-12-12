@@ -1,10 +1,11 @@
 #pragma once
 
-#include "utils.hpp"
-
-#define TOKENIZED_PTR std::shared_ptr<Tokenizer::TokenizedLine> 
+#include "utils.hpp" 
 
 namespace Runner {
+    //delete all old values stored in memory
+    void flushMem();
+    
     //run each segment of the code once
     void executeVars();
     void executeStart();

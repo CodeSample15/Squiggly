@@ -16,6 +16,8 @@
 #define COMMENT_PREFIX '#'
 #define BUILT_IN_VAR_PREFIX '$'
 
+#define STRING_CONCAT_CHAR '+'
+
 namespace Linter {
     void preprocess(std::vector<std::string>& lines);
 

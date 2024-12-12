@@ -13,7 +13,7 @@ void BuiltIn::runFunction(std::string name, std::vector<std::string>& args)
     //ho boy, ignore the inefficiencies displayed in this code
     if(name.compare("PRINT")==0) {
         if(args.size() != 1)
-            throwError("PRINT: expected 1 argument, got " + args.size());
+            throwError("PRINT: expected 1 argument, got " + std::to_string(args.size()));
 
         
         Print(Utils::ParseString(args[0]));

@@ -9,23 +9,32 @@
 
 using namespace Runner;
 
+typedef std::shared_ptr<Tokenizer::TokenizedLine> TOKENIZED_PTR;
+
 //virtual memory buffers
 std::vector<Utils::SVariable> gVars;    //global variables
 std::vector<Utils::SVariable> sVars;    //stack variables
 
 //useful functions
-void runProgram(std::vector<TOKENIZED_PTR>& tokens, size_t stackFrameIdx, size_t startIdx=0, size_t endIdx=0); //general function for running blocks of code
+void runProgram(std::vector<TOKENIZED_PTR>& tokens, std::vector<Utils::SVariable>& memory, size_t stackFrameIdx, bool clearStackWhenDone=true, size_t startIdx=0, size_t endIdx=0); //general function for running blocks of code
 void runUserFunction(std::string name, std::vector<std::string>& args); //find a user defined function and run
 inline void throwError(std::string message); //throw a runner error
 
 //useful for debugging to have these separated
-void Runner::executeVars() { runProgram(varsBlock_tok, 0); }
-void Runner::executeStart() { runProgram(startBlock_tok, 0); }
-void Runner::executeUpdate() { runProgram(mainLoop_tok, 0); }
+void Runner::executeVars() { runProgram(varsBlock_tok, gVars, 0, false); }
+void Runner::executeStart() { runProgram(startBlock_tok, sVars, 0); }
+void Runner::executeUpdate() { runProgram(mainLoop_tok, sVars, 0); }
+
+void Runner::flushMem() {
+    gVars.clear();
+    sVars.clear();
+}
 
 //main execute function with loop
 void Runner::execute() 
 {
+    flushMem();
+
     executeVars();
     executeStart();
 
@@ -36,11 +45,9 @@ void Runner::execute()
 Utils::SVariable* Runner::fetchVariable(std::string name) 
 {
     //search local stack frame first (start at most recently pushed variable and work backwards, hopefully should add some efficiency)
-    if(sVars.size() > 0) {
-        for(size_t i=sVars.size()-1; i>=0; i--) {
-            if(sVars[i].name == name)
-                return &sVars[i];
-        }
+    for(ssize_t i=sVars.size()-1; i>=0; i--) {
+        if(sVars[i].name == name)
+            return &sVars[i];
     }
 
     //search global variables
@@ -58,7 +65,7 @@ Utils::SVariable* Runner::fetchVariable(std::string name)
     Starts from a particular location inside the given block of tokens, and ends at either the end of the token block if endIdx is 0, or at 
     position endIdx if the value is not 0
 */
-void runProgram(std::vector<TOKENIZED_PTR>& tokens, size_t stackFrameIdx, size_t startIdx, size_t endIdx) 
+void runProgram(std::vector<TOKENIZED_PTR>& tokens, std::vector<Utils::SVariable>& memory, size_t stackFrameIdx, bool clearStackWhenDone, size_t startIdx, size_t endIdx) 
 {
     endIdx = endIdx==0 ? tokens.size() : endIdx;
 
@@ -66,15 +73,17 @@ void runProgram(std::vector<TOKENIZED_PTR>& tokens, size_t stackFrameIdx, size_t
     //Tokenizer::BranchLine* branchLine;
     //Tokenizer::LoopLine* loopLine;
     Tokenizer::AssignLine* assignLine;
-    //Tokenizer::DeclareLine* declareLine;
+    Tokenizer::DeclareLine* declareLine;
     //Tokenizer::FuncNameLine* funcNameLine;
 
     Utils::SVariable* varBuff;
+    Utils::SVariable newVariableHolder;
     
     //iterate through the program
     for(size_t prgCounter = startIdx; prgCounter < endIdx; prgCounter++) {
         TOKENIZED_PTR line = tokens[prgCounter];
 
+        //execute instruction depending on what type of line is next in the buffer
         switch(line->type) {
             case Tokenizer::LineType::CALL:
                 callLine = (Tokenizer::CallLine*)line.get();
@@ -96,6 +105,17 @@ void runProgram(std::vector<TOKENIZED_PTR>& tokens, size_t stackFrameIdx, size_t
                     throwError("Unable to find variable " + assignLine->assignDst);
                 break;
 
+            case Tokenizer::LineType::DECLARE:
+                declareLine = (Tokenizer::DeclareLine*)line.get();
+                newVariableHolder.name = declareLine->varName;
+                newVariableHolder.type = Utils::stringToVarType(declareLine->varType);
+                newVariableHolder.ptr = Utils::createEmptyShared(newVariableHolder.type);
+                memory.push_back(newVariableHolder); //push new variable to stack
+                break;
+
+            case Tokenizer::LineType::DECLARE_ASSIGN:
+                break;
+
             default:
                 BuiltIn::Print("Unknown line!");
                 break;
@@ -103,9 +123,11 @@ void runProgram(std::vector<TOKENIZED_PTR>& tokens, size_t stackFrameIdx, size_t
     }
 
     //clear out stack frame
-    size_t numVars = sVars.size() - stackFrameIdx; //number of variables created in this stack frame
-    for(size_t i=0; i<numVars; i++)
-        sVars.erase(sVars.begin() + stackFrameIdx);
+    if(clearStackWhenDone) {
+        size_t numVars = memory.size() - stackFrameIdx; //number of variables created in this stack frame
+        for(size_t i=0; i<numVars; i++)
+            memory.erase(memory.begin() + stackFrameIdx);
+    }
 }
 
 /*
@@ -148,7 +170,7 @@ void runUserFunction(std::string name, std::vector<std::string>& args) {
                     sVars.push_back(nextVar); //push to stack
                 }
 
-                runProgram(function, functionStackFrame, 1);
+                runProgram(function, sVars, functionStackFrame, true, 1);
                 break;
             }
         } else {
