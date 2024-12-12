@@ -5,7 +5,7 @@
 :START: {
 	# initialization code goes here
 	int test
-	#test = test + 1
+	test = test + 1
 
 	^PRINT("TEST: " + test)
 }

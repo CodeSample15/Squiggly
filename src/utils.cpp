@@ -1,11 +1,10 @@
 #include <sstream>
 
-#include "../lib/exprtk/exprtk.hpp"
-
 #include "utils.hpp"
 #include "runner.hpp"
 #include "linter.hpp"
 #include "built-in-funcs.hpp"
+#include "external-libs.hpp"
 
 using namespace Utils;
  
@@ -136,7 +135,7 @@ SVariable Utils::convertToVariable(std::string input, VarType expectedType) {
         }
 
         //run expression through expression parser library
-        
+        BuiltIn::Print(std::to_string(expressionToDouble(ss.str())));
     }
 
     if(expectedType!=VarType::NONE && tmp.type!=expectedType)
