@@ -119,14 +119,18 @@ SVariable Utils::convertToVariable(std::string input, VarType expectedType) {
         //replace variables in string with their values
         std::stringstream ss;
         for(size_t i=0; i<input.length(); i++) {
-            if(isalpha(input[i])) {
+            if(isalpha(input[i]) || input[i]==BUILT_IN_VAR_PREFIX) {
+                bool atEnd = false; //did the scanner reach the end of the string?
                 std::string temp = "";
                 do {
                     temp += input[i];
-                    if(i+1 >= input.length())
+                    if(i+1 >= input.length()) {
+                        atEnd = true;
                         break; //no need to error, can simply be that the program reached the end of the argument string
+                    }
                 } while(isalpha(input[++i]) || input[i]==BUILT_IN_VAR_PREFIX);
-                i--;
+                
+                if(!atEnd) i--; //only do this if the scanner did not reach the end of the string (otherwise the scanner might go back and read the last character again and consider it a separate variable, causing an error)
 
                 convertAndAppendVariable(ss, temp);
             } else {
@@ -135,7 +139,9 @@ SVariable Utils::convertToVariable(std::string input, VarType expectedType) {
         }
 
         //run expression through expression parser library
-        BuiltIn::Print(std::to_string(expressionToDouble(ss.str())));
+        double res = expressionToDouble(ss.str());
+        tmp.type = expectedType;
+        tmp.ptr = createSharedPtr(expectedType, res);
     }
 
     if(expectedType!=VarType::NONE && tmp.type!=expectedType)
@@ -152,6 +158,17 @@ std::shared_ptr<void> Utils::createEmptyShared(VarType type) {
         case VarType::DOUBLE: return createSharedPtr((double)0);
         case VarType::FLOAT: return createSharedPtr((float)0);
         case VarType::BOOL: return createSharedPtr(false);
+        default: return createSharedPtr((int)0);
+    }
+}
+
+std::shared_ptr<void> Utils::createSharedPtr(VarType type, double value) {
+    switch(type) {
+        case VarType::STRING: return createSharedPtr(std::to_string(value));
+        case VarType::INTEGER: return createSharedPtr((int)value);
+        case VarType::DOUBLE: return createSharedPtr((double)value);
+        case VarType::FLOAT: return createSharedPtr((float)value);
+        case VarType::BOOL: return createSharedPtr(value!=0 ? true : false);
         default: return createSharedPtr((int)0);
     }
 }

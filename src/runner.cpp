@@ -18,6 +18,7 @@ std::vector<Utils::SVariable> sVars;    //stack variables
 //useful functions
 void runProgram(std::vector<TOKENIZED_PTR>& tokens, std::vector<Utils::SVariable>& memory, size_t stackFrameIdx, bool clearStackWhenDone=true, size_t startIdx=0, size_t endIdx=0); //general function for running blocks of code
 void runUserFunction(std::string name, std::vector<std::string>& args); //find a user defined function and run
+void setVariable(const std::shared_ptr<void>& dst, const std::shared_ptr<void>& src, Utils::VarType type, std::string assignType="="); //assign one value to another value
 inline void throwError(std::string message); //throw a runner error
 
 //useful for debugging to have these separated
@@ -98,9 +99,8 @@ void runProgram(std::vector<TOKENIZED_PTR>& tokens, std::vector<Utils::SVariable
             case Tokenizer::LineType::ASSIGN:
                 assignLine = (Tokenizer::AssignLine*)line.get();
                 varBuff = fetchVariable(assignLine->assignDst);
-                if(varBuff) {
-                    Utils::convertToVariable(assignLine->assignSrc, varBuff->type);
-                }
+                if(varBuff)
+                    setVariable(varBuff->ptr, Utils::convertToVariable(assignLine->assignSrc, varBuff->type).ptr, varBuff->type, assignLine->assignOperator);
                 else
                     throwError("Unable to find variable " + assignLine->assignDst);
                 break;
@@ -114,6 +114,17 @@ void runProgram(std::vector<TOKENIZED_PTR>& tokens, std::vector<Utils::SVariable
                 break;
 
             case Tokenizer::LineType::DECLARE_ASSIGN:
+                assignLine = (Tokenizer::AssignLine*)line.get();
+                newVariableHolder.name = assignLine->assignDst;
+                newVariableHolder.type = Utils::stringToVarType(assignLine->assignType);
+                newVariableHolder.ptr = Utils::createEmptyShared(newVariableHolder.type);
+
+                setVariable( newVariableHolder.ptr, 
+                        Utils::convertToVariable(assignLine->assignSrc, newVariableHolder.type).ptr, 
+                        newVariableHolder.type, 
+                        assignLine->assignOperator );
+                
+                memory.push_back(newVariableHolder); //push new variable to stack
                 break;
 
             default:
@@ -180,6 +191,79 @@ void runUserFunction(std::string name, std::vector<std::string>& args) {
 
     if(!found)
         throwError("Cannot find function named " + name);
+}
+
+/*
+    Assigns a value to a variable using a specific assignType if necessary
+    Casts the void pointers passed into the expected datatype pointers and dereferences
+*/
+void setVariable(const std::shared_ptr<void>& dst, const std::shared_ptr<void>& src, Utils::VarType type, std::string assignType) {
+    switch(type) {
+        case Utils::VarType::STRING:
+            if(assignType=="=")
+                *((std::string*)dst.get()) = *((std::string*)src.get());
+            else if(assignType=="+=")
+                *((std::string*)dst.get()) += *((std::string*)src.get());
+            else
+                throwError("Invalid assign operator '" + assignType + "' for string type");
+            break;
+
+        case Utils::VarType::INTEGER:
+            if(assignType=="=")
+                *((int*)dst.get()) = *((int*)src.get());
+            else if(assignType=="+=")
+                *((int*)dst.get()) += *((int*)src.get());
+            else if(assignType=="-=")
+                *((int*)dst.get()) -= *((int*)src.get());
+            else if(assignType=="*=")
+                *((int*)dst.get()) *= *((int*)src.get());
+            else if(assignType=="/=")
+                *((int*)dst.get()) /= *((int*)src.get());
+            else
+                throwError("Invalid assign operator '" + assignType + "' for string type");
+            break;
+
+        case Utils::VarType::DOUBLE:
+            if(assignType=="=")
+                *((double*)dst.get()) = *((double*)src.get());
+            else if(assignType=="+")
+                *((double*)dst.get()) += *((double*)src.get());
+            else if(assignType=="-=")
+                *((double*)dst.get()) -= *((double*)src.get());
+            else if(assignType=="*=")
+                *((double*)dst.get()) *= *((double*)src.get());
+            else if(assignType=="/=")
+                *((double*)dst.get()) /= *((double*)src.get());
+            else
+                throwError("Invalid assign operator '" + assignType + "' for string type");
+            break;
+
+        case Utils::VarType::FLOAT:
+            if(assignType=="=")
+                *((float*)dst.get()) = *((float*)src.get());
+            else if(assignType=="+=")
+                *((float*)dst.get()) += *((float*)src.get());
+            else if(assignType=="-=")
+                *((float*)dst.get()) -= *((float*)src.get());
+            else if(assignType=="*=")
+                *((float*)dst.get()) *= *((float*)src.get());
+            else if(assignType=="/=")
+                *((float*)dst.get()) /= *((float*)src.get());
+            else
+                throwError("Invalid assign operator '" + assignType + "' for string type");
+            break;
+
+        case Utils::VarType::BOOL:
+            if(assignType=="=")
+                *((float*)dst.get()) = *((float*)src.get());
+            else
+                throwError("Invalid assign operator '" + assignType + "' for string type");
+            break;
+
+        default:
+            throwError("Error setting variable (This is a problem with Squiggly, not with your Squiggly code. Please report this issue on the project's GitHub)");
+            break;
+    }
 }
 
 inline void throwError(std::string message) {

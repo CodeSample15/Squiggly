@@ -27,6 +27,7 @@ namespace Utils
     SVariable convertToVariable(std::string input, VarType expectedType); //convert string to a SVariable (whether it's referencing another variable or just a plain string)
 
     std::shared_ptr<void> createEmptyShared(VarType type); //for initializing new variables with "empty" values
+    std::shared_ptr<void> createSharedPtr(VarType type, double value); //create a new shared ptr with a specific type and cast value to that type
     std::shared_ptr<void> createSharedPtr(std::string s);
     std::shared_ptr<void> createSharedPtr(int i);
     std::shared_ptr<void> createSharedPtr(double d);
