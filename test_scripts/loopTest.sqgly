@@ -1,0 +1,23 @@
+:VARS: {
+    # global variables go here
+}
+
+:START: {
+	int count = 0
+
+	repeat (5) {
+        count += 1
+        ^PRINT("Counter: " + count)
+
+        repeat(10) {
+            count += 2
+            ^PRINT("Inner: " + count)
+        }
+    }
+
+    ^PRINT("Done")
+}
+
+:UPDATE: {
+	# game loop logic goes here
+}

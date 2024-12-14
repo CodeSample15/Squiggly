@@ -23,7 +23,7 @@ void findOpenCloseParenthesis(std::string line, size_t& start, size_t& end);
 //same thing but for strings (ignore syntax in strings, treat them as strings)
 void findOpenCloseStrings(std::string line, size_t start, size_t& end);
 //tokenize a section starting from a start location and an end location, storing the result in tokenBuff
-void tokenizeSection(std::vector<std::string>& lines, std::vector< std::shared_ptr<TokenizedLine> >& tokenBuff, size_t start, size_t end);
+void tokenizeSection(std::vector<std::string>& lines, std::vector< std::shared_ptr<TokenizedLine> >& tokenBuff, size_t baseBuffSize, size_t start, size_t end);
 
 //tokenize an if statement
 //void tokenizeIf(std::vector<std::string>& lines, std::vector<TokenizedLine>& tokenBuff, );
@@ -70,13 +70,13 @@ void Tokenizer::tokenize(std::vector<std::string>& lines)
 
     //find and tokenize all of the non optional functions in the code
     findCode(VAR_FUNC_HEAD, lines, start, end, true);
-    tokenizeSection(lines, varsBlock_tok, start, end);
+    tokenizeSection(lines, varsBlock_tok, 0, start, end);
 
     findCode(START_FUNC_HEAD, lines, start, end, true);
-    tokenizeSection(lines, startBlock_tok, start, end);
+    tokenizeSection(lines, startBlock_tok, 0, start, end);
 
     findCode(UPDATE_FUNC_HEAD, lines, start, end, true);
-    tokenizeSection(lines, mainLoop_tok, start, end);
+    tokenizeSection(lines, mainLoop_tok, 0, start, end);
 
     //tokenize all of the user defined functions found by 'discoverUserFuncs'
     for(size_t i=0; i<userFuncNames.size(); i++) {
@@ -100,7 +100,7 @@ void Tokenizer::tokenize(std::vector<std::string>& lines)
         start = userFuncRanges[i][0];
         end = userFuncRanges[i][1];
 
-        tokenizeSection(lines, tokenBuffer, start, end);
+        tokenizeSection(lines, tokenBuffer, 0, start, end);
         functions_tok.push_back(tokenBuffer);
     }
 
@@ -247,7 +247,7 @@ void findOpenCloseStrings(std::string line, size_t start, size_t& end) {
     Go to the section of the code specified with the start and end lines variables and go
     line by line to tokenize the program into a tokenBuff
 */
-void tokenizeSection(std::vector<std::string>& lines, std::vector< std::shared_ptr<TokenizedLine> >& tokenBuff, size_t start, size_t end) 
+void tokenizeSection(std::vector<std::string>& lines, std::vector< std::shared_ptr<TokenizedLine> >& tokenBuff, size_t baseBuffSize, size_t start, size_t end) 
 {
     std::string functionName; //for detecting user function calls in a line
 
@@ -345,17 +345,17 @@ void tokenizeSection(std::vector<std::string>& lines, std::vector< std::shared_p
             size_t ifStart = i;
             size_t ifEnd = 0;
             findOpenCloseBraces(lines, ifStart, ifEnd);
-            line->branchLineNumTRUE = tokenBuff.size()+1; //the line points to where in the tokenized array to jump to
+            line->branchLineNumTRUE = tokenBuff.size()+1+baseBuffSize; //the line points to where in the tokenized array to jump to
 
             //tokenize the lines inside of the braces and store in a temp buffer
             std::vector< std::shared_ptr<TokenizedLine> > tempBuff;
-            tokenizeSection(lines, tempBuff, ifStart, ifEnd);
+            tokenizeSection(lines, tempBuff, tokenBuff.size()+1, ifStart, ifEnd);
 
             //check to see if the branch ends or if there's an else/if-else
             if(checkForElse(lines, ifEnd))
-                line->branchLineNumELSE = tokenBuff.size() + tempBuff.size() + 1;
+                line->branchLineNumELSE = tokenBuff.size() + tempBuff.size() + 1 + baseBuffSize;
             else
-                line->branchLineNumEND = tokenBuff.size() + tempBuff.size() + 1;
+                line->branchLineNumEND = tokenBuff.size() + tempBuff.size() + 1 + baseBuffSize;
             
             tokenBuff.push_back(line); //push back the if statement
 
@@ -389,17 +389,17 @@ void tokenizeSection(std::vector<std::string>& lines, std::vector< std::shared_p
 
                 ifStart = elseLocation;
                 findOpenCloseBraces(lines, ifStart, ifEnd);
-                line->branchLineNumTRUE = tokenBuff.size()+1;
+                line->branchLineNumTRUE = tokenBuff.size()+1+baseBuffSize;
 
                 //tokenize code inside braces
                 tempBuff.clear();
-                tokenizeSection(lines, tempBuff, ifStart, ifEnd);
+                tokenizeSection(lines, tempBuff, tokenBuff.size()+1, ifStart, ifEnd);
 
                 //check to see if the branch ends or if there's an else/if-else
                 if(checkForElse(lines, ifEnd))
-                    line->branchLineNumELSE = tokenBuff.size() + tempBuff.size() + 1;
+                    line->branchLineNumELSE = tokenBuff.size() + tempBuff.size() + 1 + baseBuffSize;
                 else
-                    line->branchLineNumEND = tokenBuff.size() + tempBuff.size() + 1;
+                    line->branchLineNumEND = tokenBuff.size() + tempBuff.size() + 1 + baseBuffSize;
                 
                 tokenBuff.push_back(line);
 
@@ -430,7 +430,7 @@ void tokenizeSection(std::vector<std::string>& lines, std::vector< std::shared_p
             size_t loopEnd;
             findOpenCloseBraces(lines, loopStart, loopEnd);
 
-            line->loopStart = tokenBuff.size() + 1;
+            line->loopStart = tokenBuff.size() + 1 + baseBuffSize;
 
             //parse the number of loops
             if((found = lines[i].find("(")) != std::string::npos) {
@@ -444,14 +444,14 @@ void tokenizeSection(std::vector<std::string>& lines, std::vector< std::shared_p
 
                 //empty parenthesis: no argument passed to the loop function
                 if(line->loopTimes.length() == 0)
-                    tokenizerError("No argument passed to repeat statement!");
+                    tokenizerError("No argument passed to loop statement!");
 
                 //tokenize the insize of the loop
                 std::vector< std::shared_ptr<TokenizedLine> > tempBuff;
-                tokenizeSection(lines, tempBuff, loopStart, loopEnd);
+                tokenizeSection(lines, tempBuff, tokenBuff.size()+1, loopStart, loopEnd);
 
                 //determine which instruction the loop should jump to when finished
-                line->loopEnd = tempBuff.size() + tokenBuff.size() + 1;
+                line->loopEnd = tempBuff.size() + tokenBuff.size() + 1 + baseBuffSize;
 
                 //push back the finished tokenized line and add the instructions stored in the temporary buffer
                 tokenBuff.push_back(line);

@@ -71,14 +71,15 @@ void runProgram(std::vector<TOKENIZED_PTR>& tokens, std::vector<Utils::SVariable
     endIdx = endIdx==0 ? tokens.size() : endIdx;
 
     Tokenizer::CallLine* callLine;
-    //Tokenizer::BranchLine* branchLine;
-    //Tokenizer::LoopLine* loopLine;
+    Tokenizer::BranchLine* branchLine;
+    Tokenizer::LoopLine* loopLine;
     Tokenizer::AssignLine* assignLine;
     Tokenizer::DeclareLine* declareLine;
-    //Tokenizer::FuncNameLine* funcNameLine;
 
     Utils::SVariable* varBuff;
     Utils::SVariable newVariableHolder;
+
+    int intBuff = 0; // a place for the switch statement to throw integer values into temporarily
     
     //iterate through the program
     for(size_t prgCounter = startIdx; prgCounter < endIdx; prgCounter++) {
@@ -96,6 +97,25 @@ void runProgram(std::vector<TOKENIZED_PTR>& tokens, std::vector<Utils::SVariable
                 BuiltIn::runFunction(callLine->callFuncName, callLine->args);
                 break;
 
+            case Tokenizer::LineType::BRANCH:
+                branchLine = (Tokenizer::BranchLine*)line.get();
+                BuiltIn::Print(branchLine->booleanExpression);
+                break;
+            
+            case Tokenizer::LineType::BRANCH_ELSE:
+                break;
+
+            case Tokenizer::LineType::LOOP:
+                loopLine = (Tokenizer::LoopLine*)line.get();
+                intBuff = *((int*)Utils::convertToVariable(loopLine->loopTimes, Utils::VarType::INTEGER).ptr.get());
+
+                for(int i=0; i<intBuff; i++)
+                    runProgram(tokens, memory, memory.size(), true, loopLine->loopStart, loopLine->loopEnd);
+
+                //jump to end of loop
+                prgCounter = loopLine->loopEnd-1;
+                break;
+
             case Tokenizer::LineType::ASSIGN:
                 assignLine = (Tokenizer::AssignLine*)line.get();
                 varBuff = fetchVariable(assignLine->assignDst);
@@ -110,6 +130,7 @@ void runProgram(std::vector<TOKENIZED_PTR>& tokens, std::vector<Utils::SVariable
                 newVariableHolder.name = declareLine->varName;
                 newVariableHolder.type = Utils::stringToVarType(declareLine->varType);
                 newVariableHolder.ptr = Utils::createEmptyShared(newVariableHolder.type);
+
                 memory.push_back(newVariableHolder); //push new variable to stack
                 break;
 
