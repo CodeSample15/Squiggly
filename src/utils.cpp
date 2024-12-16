@@ -9,7 +9,7 @@
 using namespace Utils;
  
 void convertAndAppendVariable(std::stringstream& ss, std::string& varName);
-inline void throwError(std::string message);
+inline void throwUtilError(std::string message);
 
 /*
     Allow functions to get the string version of a VarType
@@ -59,7 +59,7 @@ std::string Utils::ParseString(std::string s)
     bool varScanMode = true; //when in varScan mode, Squiggly is looking for a variable name, when it's not in this mode, program will throw an error upon encountering
     char stringNotation = '\0'; //what type of string is the user using (' or ")
     for(size_t i=0; i<s.length(); i++) {
-        //loop through strings,
+        //loop through strings
         if(s[i] == '"' || s[i] == '\'') {
             varScanMode = false; //expect strings from here on out or an append character (+)
             stringNotation = s[i];
@@ -68,7 +68,7 @@ std::string Utils::ParseString(std::string s)
                 ss << s[i]; //append characters to the string stream
 
                 if(i+1>=s.length())
-                    throwError("String left unclosed! Cannot parse string");
+                    throwUtilError("String left unclosed! Cannot parse string");
             }
         } else {
             if(varScanMode) {
@@ -92,7 +92,7 @@ std::string Utils::ParseString(std::string s)
             }
             else if(s[i] != STRING_CONCAT_CHAR) {
                 //program is not in scan variable mode and there is no string to be found, program is structured incorrectly
-                throwError("Invalid structuring of string.");
+                throwUtilError("Invalid structuring of string.");
             }
             else {
                 varScanMode = true; // + found, append new string or go back to varScanMode
@@ -116,6 +116,9 @@ SVariable Utils::convertToVariable(std::string input, VarType expectedType) {
         tmp.type = VarType::STRING;
         tmp.ptr = std::make_shared<std::string>(s);
     } else {
+        if(expectedType == VarType::STRING)
+            throwUtilError("Value '" + input + "' is not a string!");
+
         //replace variables in string with their values
         std::stringstream ss;
         for(size_t i=0; i<input.length(); i++) {
@@ -145,7 +148,7 @@ SVariable Utils::convertToVariable(std::string input, VarType expectedType) {
     }
 
     if(expectedType!=VarType::NONE && tmp.type!=expectedType)
-        throwError("Unable to convert <" + input + "> to '" + varTypeToString(expectedType) + "'");
+        throwUtilError("Unable to convert <" + input + "> to '" + varTypeToString(expectedType) + "'");
 
     return tmp;
 }
@@ -197,7 +200,7 @@ void convertAndAppendVariable(std::stringstream& ss, std::string& varName) {
                 ss << *((float*)var->ptr.get());
                 break;
             case VarType::BOOL:
-                ss << (*((bool*)var->ptr.get()) ? "true" : "false");
+                ss << (*((bool*)var->ptr.get()) ? "1" : "0");
                 break;
             default:
                 ss << "NONE";
@@ -205,10 +208,10 @@ void convertAndAppendVariable(std::stringstream& ss, std::string& varName) {
         }
     }
     else {
-        throwError("Variable " + varName + " is not in scope!");
+        throwUtilError("Variable '" + varName + "' is not in scope!");
     }
 }
 
-inline void throwError(std::string message) {
+inline void throwUtilError(std::string message) {
     throw std::runtime_error("Squiggly util error: " + message);
 }

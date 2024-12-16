@@ -49,7 +49,7 @@ int main(int argc, char** argv) {
 
     //Execute script
     try {
-        Runner::execute();
+        //Runner::execute();
     } catch(const std::exception& e) {
         std::cerr << "\n" << e.what() << std::endl;
     }

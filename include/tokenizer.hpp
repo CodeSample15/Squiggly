@@ -4,7 +4,7 @@
 #include <vector>
 #include <memory>
 
-#define TOK_DEBUGGING false
+#define TOK_DEBUGGING true
 
 namespace Tokenizer {
     enum LineType {

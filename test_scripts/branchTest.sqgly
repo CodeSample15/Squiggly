@@ -1,0 +1,20 @@
+# Blank sqgly file with required functions included as a template
+
+:VARS: {
+    # global variables go here
+}
+
+:START: {
+	# initialization code goes here
+    if(true) {
+        ^PRINT("Hello World!")
+    } else if(false) {
+        ^PRINT("Goodbye")
+    } else {
+        ^PRINT("Not possible")
+    }
+}
+
+:UPDATE: {
+	# game loop logic goes here
+}

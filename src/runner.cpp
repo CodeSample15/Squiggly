@@ -19,10 +19,28 @@ std::vector<Utils::SVariable> sVars;    //stack variables
 void runProgram(std::vector<TOKENIZED_PTR>& tokens, std::vector<Utils::SVariable>& memory, size_t stackFrameIdx, bool clearStackWhenDone=true, size_t startIdx=0, size_t endIdx=0); //general function for running blocks of code
 void runUserFunction(std::string name, std::vector<std::string>& args); //find a user defined function and run
 void setVariable(const std::shared_ptr<void>& dst, const std::shared_ptr<void>& src, Utils::VarType type, std::string assignType="="); //assign one value to another value
+void createVariable(std::vector<Utils::SVariable>& memory, std::string name, Utils::VarType type, std::shared_ptr<void> ptr); // add the three values
 inline void throwError(std::string message); //throw a runner error
 
 //useful for debugging to have these separated
-void Runner::executeVars() { runProgram(varsBlock_tok, gVars, 0, false); }
+void Runner::executeVars() { 
+    //constant variables that the whole program will have access to
+    createVariable(gVars, "true", Utils::VarType::BOOL, Utils::createSharedPtr(true));
+    createVariable(gVars, "false", Utils::VarType::BOOL, Utils::createSharedPtr(false));
+
+    //useful variables to replace with their own words when parsing equations. Allows exprtk to be able to run certain functions and parse boolean operations, giving Squiggly a major boost in functionality
+    createVariable(gVars, "and", Utils::VarType::STRING, Utils::createSharedPtr((std::string)"and"));
+    createVariable(gVars, "or", Utils::VarType::STRING, Utils::createSharedPtr((std::string)"or"));
+    createVariable(gVars, "xor", Utils::VarType::STRING, Utils::createSharedPtr((std::string)"xor"));
+    createVariable(gVars, "sqrt", Utils::VarType::STRING, Utils::createSharedPtr((std::string)"sqrt"));
+    createVariable(gVars, "ceil", Utils::VarType::STRING, Utils::createSharedPtr((std::string)"ceil"));
+    createVariable(gVars, "cos", Utils::VarType::STRING, Utils::createSharedPtr((std::string)"cos"));
+    createVariable(gVars, "sin", Utils::VarType::STRING, Utils::createSharedPtr((std::string)"sin"));
+    createVariable(gVars, "tan", Utils::VarType::STRING, Utils::createSharedPtr((std::string)"tan"));
+
+    runProgram(varsBlock_tok, gVars, gVars.size(), false);
+}
+
 void Runner::executeStart() { runProgram(startBlock_tok, sVars, 0); }
 void Runner::executeUpdate() { runProgram(mainLoop_tok, sVars, 0); }
 
@@ -99,7 +117,14 @@ void runProgram(std::vector<TOKENIZED_PTR>& tokens, std::vector<Utils::SVariable
 
             case Tokenizer::LineType::BRANCH:
                 branchLine = (Tokenizer::BranchLine*)line.get();
-                BuiltIn::Print(branchLine->booleanExpression);
+                intBuff = *((int*)Utils::convertToVariable(branchLine->booleanExpression, Utils::VarType::INTEGER).ptr.get());
+
+                if(intBuff) {
+                    //run if statement and jump to end of branch
+                    //runProgram(tokens, memory, memory.size(), true, branchLine->branchLineNumTRUE, branchLine->)
+                } else if(branchLine->branchLineNumELSE != -1) {
+                    //run else statement at end of branch
+                }
                 break;
             
             case Tokenizer::LineType::BRANCH_ELSE:
@@ -122,11 +147,14 @@ void runProgram(std::vector<TOKENIZED_PTR>& tokens, std::vector<Utils::SVariable
                 if(varBuff)
                     setVariable(varBuff->ptr, Utils::convertToVariable(assignLine->assignSrc, varBuff->type).ptr, varBuff->type, assignLine->assignOperator);
                 else
-                    throwError("Unable to find variable " + assignLine->assignDst);
+                    throwError("Unable to find variable '" + assignLine->assignDst + "'");
                 break;
 
             case Tokenizer::LineType::DECLARE:
                 declareLine = (Tokenizer::DeclareLine*)line.get();
+                if(fetchVariable(declareLine->varName))
+                    throwError("Variable '" + declareLine->varName + "' is already defined!");
+
                 newVariableHolder.name = declareLine->varName;
                 newVariableHolder.type = Utils::stringToVarType(declareLine->varType);
                 newVariableHolder.ptr = Utils::createEmptyShared(newVariableHolder.type);
@@ -136,6 +164,9 @@ void runProgram(std::vector<TOKENIZED_PTR>& tokens, std::vector<Utils::SVariable
 
             case Tokenizer::LineType::DECLARE_ASSIGN:
                 assignLine = (Tokenizer::AssignLine*)line.get();
+                if(fetchVariable(assignLine->assignDst))
+                    throwError("Variable '" + assignLine->assignDst + "' is already defined!");
+
                 newVariableHolder.name = assignLine->assignDst;
                 newVariableHolder.type = Utils::stringToVarType(assignLine->assignType);
                 newVariableHolder.ptr = Utils::createEmptyShared(newVariableHolder.type);
@@ -285,6 +316,20 @@ void setVariable(const std::shared_ptr<void>& dst, const std::shared_ptr<void>& 
             throwError("Error setting variable (This is a problem with Squiggly, not with your Squiggly code. Please report this issue on the project's GitHub)");
             break;
     }
+}
+
+
+/*
+    This basically just acts as a wrapper constructor for creating new variables easily (from the programmer's perspective)
+*/
+void createVariable(std::vector<Utils::SVariable>& memory, std::string name, Utils::VarType type, std::shared_ptr<void> ptr) 
+{
+    Utils::SVariable temp;
+    temp.name = name;
+    temp.type = type;
+    temp.ptr = ptr;
+
+    memory.push_back(temp);
 }
 
 inline void throwError(std::string message) {

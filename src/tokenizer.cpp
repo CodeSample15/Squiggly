@@ -24,10 +24,8 @@ void findOpenCloseParenthesis(std::string line, size_t& start, size_t& end);
 void findOpenCloseStrings(std::string line, size_t start, size_t& end);
 //tokenize a section starting from a start location and an end location, storing the result in tokenBuff
 void tokenizeSection(std::vector<std::string>& lines, std::vector< std::shared_ptr<TokenizedLine> >& tokenBuff, size_t baseBuffSize, size_t start, size_t end);
-
 //tokenize an if statement
-//void tokenizeIf(std::vector<std::string>& lines, std::vector<TokenizedLine>& tokenBuff, );
-
+void tokenizeIf(std::vector<std::string>& lines, std::vector<TokenizedLine>& tokenBuff);
 //use the ',' delimiter to get the individual arguments passed to a function and stored them in argBuff
 void parseArgsFromString(std::string s, std::vector<std::string>& argBuff);
 //search for functions defined by the programmer
@@ -205,7 +203,7 @@ void findOpenCloseParenthesis(std::string line, size_t& start, size_t& end) {
 
     //loop through each character in the line to find an opening parenthesis
     for(size_t i=start; i<line.length(); i++) {
-        findOpenCloseStrings(line, i, i); //jump to the end of a string
+        findOpenCloseStrings(line, i, i); //jump to the end of a string 
 
         if(line[i] == '(') {
             if(!foundFirst) {
@@ -358,7 +356,8 @@ void tokenizeSection(std::vector<std::string>& lines, std::vector< std::shared_p
                 line->branchLineNumEND = tokenBuff.size() + tempBuff.size() + 1 + baseBuffSize;
             
             tokenBuff.push_back(line); //push back the if statement
-
+            line = std::make_shared<BranchLine>(BranchLine()); //create a new shared ptr
+            
             //extend code that was in the tempbuffer
             for(std::shared_ptr<TokenizedLine> tmpLine : tempBuff) {
                 tokenBuff.push_back(tmpLine);
@@ -372,6 +371,7 @@ void tokenizeSection(std::vector<std::string>& lines, std::vector< std::shared_p
                 i++; //move up to the else / ifelse statement
 
                 bool elseFound = false; //when an 'else' statement is found by itself, that's the end of the branch statement
+
                 line->branchLineNumTRUE = -1;
                 line->branchLineNumEND = -1;
                 line->branchLineNumELSE = -1;
@@ -401,7 +401,8 @@ void tokenizeSection(std::vector<std::string>& lines, std::vector< std::shared_p
                 else
                     line->branchLineNumEND = tokenBuff.size() + tempBuff.size() + 1 + baseBuffSize;
                 
-                tokenBuff.push_back(line);
+                tokenBuff.push_back(line); 
+                line = std::make_shared<BranchLine>(BranchLine()); //create a new shared ptr
 
                 //extend code that was in the tempbuffer
                 for(std::shared_ptr<TokenizedLine> tmpLine : tempBuff) {
