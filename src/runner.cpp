@@ -126,9 +126,6 @@ void runProgram(std::vector<TOKENIZED_PTR>& tokens, std::vector<Utils::SVariable
                     //run else statement at end of branch
                 }
                 break;
-            
-            case Tokenizer::LineType::BRANCH_ELSE:
-                break;
 
             case Tokenizer::LineType::LOOP:
                 loopLine = (Tokenizer::LoopLine*)line.get();

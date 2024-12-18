@@ -5,13 +5,17 @@
 }
 
 :START: {
-	# initialization code goes here
-    if(true) {
-        ^PRINT("Hello World!")
-    } else if(false) {
-        ^PRINT("Goodbye")
+    int score
+    int anotherTest
+
+	if (damage == 0.5) {
+        score = 5
+        anotherTest = 23
+    } else if(damage == 0.1) {
+        score = 6
+        score = 4
     } else {
-        ^PRINT("Not possible")
+        score = 65
     }
 }
 

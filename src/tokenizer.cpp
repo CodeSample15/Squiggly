@@ -24,8 +24,8 @@ void findOpenCloseParenthesis(std::string line, size_t& start, size_t& end);
 void findOpenCloseStrings(std::string line, size_t start, size_t& end);
 //tokenize a section starting from a start location and an end location, storing the result in tokenBuff
 void tokenizeSection(std::vector<std::string>& lines, std::vector< std::shared_ptr<TokenizedLine> >& tokenBuff, size_t baseBuffSize, size_t start, size_t end);
-//tokenize an if statement
-void tokenizeIf(std::vector<std::string>& lines, std::vector<TokenizedLine>& tokenBuff);
+//tokenize an if statement, return the end line of the if statement in the source code
+size_t tokenizeIf(std::vector<std::string>& lines, std::vector< std::shared_ptr<TokenizedLine> >& tokenBuff, size_t& i, size_t baseBuffSize, bool isiFStatement);
 //use the ',' delimiter to get the individual arguments passed to a function and stored them in argBuff
 void parseArgsFromString(std::string s, std::vector<std::string>& argBuff);
 //search for functions defined by the programmer
@@ -34,7 +34,6 @@ std::vector<std::string> userFuncNames; //this is what discoverUserFuncs is goin
 std::vector<std::vector<size_t>> userFuncRanges; //discoverUserFuncs will also edit this
 //check for the beginning of an else/if else statement
 bool checkForElse(std::vector<std::string>& lines, size_t endOfIf, size_t& elseLine);
-bool checkForElse(std::vector<std::string>& lines, size_t endOfIf);
 //returns the number of times a specific character appears in a line
 int countNumCharacters(std::string line, char character);
 //returns the number of segments in the line (segments are sections of a string not broken up by any non-alpha character)
@@ -315,105 +314,20 @@ void tokenizeSection(std::vector<std::string>& lines, std::vector< std::shared_p
             tokenBuff.push_back(line);
         }
         else if((found = lines[i].find("if(")) == 0) { //should be found at 0 (first thing in the string)
-            std::shared_ptr<BranchLine> line = std::make_shared<BranchLine>(BranchLine());
+            size_t ifEnd = tokenizeIf(lines, tokenBuff, i, baseBuffSize, true);
 
-            //this string parsing method is a mess but just go with it...
-            line->type = LineType::BRANCH;
-
-            /*
-                Branch linetype:
-                    std::string booleanExpression;
-                    size_t branchLineNumTRUE;
-                    size_t branchLineNumFALSE;
-                    size_t branchLineNumELSE;
-            */
-
-            //TODO: FOR THE LOVE OF GOD PLEASE REFACTOR THIS CODE
-
-            line->branchLineNumTRUE = -1;
-            line->branchLineNumEND = -1;
-            line->branchLineNumELSE = -1;
-
-            size_t ifExpressStart = 0;
-            size_t ifExpressEnd = 0;
-            findOpenCloseParenthesis(lines[i], ifExpressStart, ifExpressEnd);
-            line->booleanExpression = lines[i].substr(3, ifExpressEnd-3); //extract the boolean expression from the if statement
-
-            //find scope of the if statement
-            size_t ifStart = i;
-            size_t ifEnd = 0;
-            findOpenCloseBraces(lines, ifStart, ifEnd);
-            line->branchLineNumTRUE = tokenBuff.size()+1+baseBuffSize; //the line points to where in the tokenized array to jump to
-
-            //tokenize the lines inside of the braces and store in a temp buffer
-            std::vector< std::shared_ptr<TokenizedLine> > tempBuff;
-            tokenizeSection(lines, tempBuff, tokenBuff.size()+1, ifStart, ifEnd);
-
-            //check to see if the branch ends or if there's an else/if-else
-            if(checkForElse(lines, ifEnd))
-                line->branchLineNumELSE = tokenBuff.size() + tempBuff.size() + 1 + baseBuffSize;
-            else
-                line->branchLineNumEND = tokenBuff.size() + tempBuff.size() + 1 + baseBuffSize;
-            
-            tokenBuff.push_back(line); //push back the if statement
-            line = std::make_shared<BranchLine>(BranchLine()); //create a new shared ptr
-            
-            //extend code that was in the tempbuffer
-            for(std::shared_ptr<TokenizedLine> tmpLine : tempBuff) {
-                tokenBuff.push_back(tmpLine);
-            }
-
-            i = ifEnd-1;
-
-            //tokenize additional if-else statements
-            size_t elseLocation = 0; //value set within checkForElse
+            size_t elseLocation = 0;
             while(checkForElse(lines, ifEnd, elseLocation)) {
-                i++; //move up to the else / ifelse statement
-
-                bool elseFound = false; //when an 'else' statement is found by itself, that's the end of the branch statement
-
-                line->branchLineNumTRUE = -1;
-                line->branchLineNumEND = -1;
-                line->branchLineNumELSE = -1;
-
-                if(lines[elseLocation].find("if(") == 5) { //if statement found on the same line as the else, immediately after the keyword "else" (6 characters)
-                    //linetype should already be BRANCH still
-                    //this code is basically a copy-paste from the above 'if' parsing code (yeah yeah, i know. bad practice. whatever) TODO: Refactor this code with functions to make it easier to read and understand
-                    findOpenCloseParenthesis(lines[elseLocation], ifExpressStart, ifExpressEnd);
-                    line->booleanExpression = lines[i].substr(8, ifExpressEnd-8); //extract the boolean expression from the if statement (8 characters for 'else if(')
-                }
-                else {
-                    line->type = LineType::BRANCH_ELSE;
-                    elseFound = true; //end of the line
-                }
-
-                ifStart = elseLocation;
-                findOpenCloseBraces(lines, ifStart, ifEnd);
-                line->branchLineNumTRUE = tokenBuff.size()+1+baseBuffSize;
-
-                //tokenize code inside braces
-                tempBuff.clear();
-                tokenizeSection(lines, tempBuff, tokenBuff.size()+1, ifStart, ifEnd);
-
-                //check to see if the branch ends or if there's an else/if-else
-                if(checkForElse(lines, ifEnd))
-                    line->branchLineNumELSE = tokenBuff.size() + tempBuff.size() + 1 + baseBuffSize;
-                else
-                    line->branchLineNumEND = tokenBuff.size() + tempBuff.size() + 1 + baseBuffSize;
+                i = elseLocation;
+                bool elseFound = lines[i].find("if(") != 5 && lines[i].find("if(") != 6;
                 
-                tokenBuff.push_back(line); 
-                line = std::make_shared<BranchLine>(BranchLine()); //create a new shared ptr
-
-                //extend code that was in the tempbuffer
-                for(std::shared_ptr<TokenizedLine> tmpLine : tempBuff) {
-                    tokenBuff.push_back(tmpLine);
-                }
-
-                i = ifEnd-1;
+                ifEnd = tokenizeIf(lines, tokenBuff, i, baseBuffSize, !elseFound);
 
                 if(elseFound)
-                    break; //all done, don't risk errors
+                    break;
             }
+
+            i = ifEnd;
         }
         else if((found = lines[i].find(LOOP_HEADER)) != std::string::npos) {
             std::shared_ptr<LoopLine> line = std::make_shared<LoopLine>(LoopLine());
@@ -531,9 +445,64 @@ void tokenizeSection(std::vector<std::string>& lines, std::vector< std::shared_p
         }
         else {
             //will change this to a proper tokenizerError message when testing is finished
-            std::cerr << "\nError! Unrecognized syntax at line \'" << lines[i] << "\'. Skipping..." << std::endl;
+            //std::cerr << "\nError! Unrecognized syntax at line \'" << lines[i] << "\'. Skipping..." << std::endl;
+            tokenizerError("Error parsing line: '" + lines[i] + "'");
         }
     }
+}
+
+/*
+
+*/
+size_t tokenizeIf(std::vector<std::string>& lines, std::vector< std::shared_ptr<TokenizedLine> >& tokenBuff, size_t& i, size_t baseBuffSize, bool isiFStatement)
+{
+    std::shared_ptr<BranchLine> line = std::make_shared<BranchLine>(BranchLine());
+
+    //this string parsing method is a mess but just go with it...
+    line->type = LineType::BRANCH;
+
+    /*
+        Branch linetype:
+            std::string booleanExpression;
+            size_t branchLineNumTRUE;
+            size_t branchLineNumFALSE;
+            size_t branchLineNumELSE;
+    */
+
+    line->branchLineNumTRUE = -1;
+    line->branchLineNumELSE = -1;
+
+    //don't do this if this is an else statement only
+    if(isiFStatement) {
+        size_t ifExpressStart = 0;
+        size_t ifExpressEnd = 0;
+        findOpenCloseParenthesis(lines[i], ifExpressStart, ifExpressEnd);
+        line->booleanExpression = lines[i].substr(ifExpressStart+1, ifExpressEnd-ifExpressStart-1); //extract the boolean expression from the if statement
+    } else {
+        line->booleanExpression = "";
+        line->type = LineType::BRANCH_ELSE;
+    }
+
+    //find scope of the if statement
+    size_t ifStart = i;
+    size_t ifEnd = 0;
+    findOpenCloseBraces(lines, ifStart, ifEnd);
+    line->branchLineNumTRUE = tokenBuff.size()+1+baseBuffSize; //the line points to where in the tokenized array to jump to if the boolean is true
+
+    //tokenize the lines inside of the braces and store in a temp buffer
+    std::vector< std::shared_ptr<TokenizedLine> > tempBuff;
+    tokenizeSection(lines, tempBuff, tokenBuff.size()+1, ifStart, ifEnd);
+
+    line->branchLineNumELSE = tokenBuff.size() + tempBuff.size() + 1 + baseBuffSize;
+    
+    tokenBuff.push_back(line); //push back the if statement
+    
+    //extend code that was in the tempbuffer
+    for(std::shared_ptr<TokenizedLine> tmpLine : tempBuff) {
+        tokenBuff.push_back(tmpLine);
+    }
+
+    return ifEnd;
 }
 
 /*
@@ -608,31 +577,15 @@ void discoverUserFuncs(std::vector<std::string>& lines)
     The line number given should be the end line number of a if statement closing brace
 */
 bool checkForElse(std::vector<std::string>& lines, size_t endOfIf, size_t& elseLine) {
-    //big long ugly boolean that checks for an else at the end of an if statement
-    if(lines[endOfIf-1].find("else") != std::string::npos
-    || lines[endOfIf-1].find("else if(") != std::string::npos) {
+
+    //checks for an else at the end of an if statement
+    if(lines[endOfIf-1].find("else") == 0 || lines[endOfIf-1].find("else") == 1) {
         elseLine = endOfIf-1; //same line as the closing brace of the if statement
         return true;
     }
 
-    if((endOfIf < lines.size() && (lines[endOfIf].find("else") != std::string::npos
-    || lines[endOfIf].find("else if(") != std::string::npos))) {
+    if(endOfIf < lines.size() && (lines[endOfIf].find("else") == 0 || lines[endOfIf].find("else") == 1)) {
         elseLine = endOfIf; //line after the closing brace of the if statement
-        return true;
-    }
-
-    return false;
-}
-
-bool checkForElse(std::vector<std::string>& lines, size_t endOfIf) {
-    //big long ugly boolean that checks for an else at the end of an if statement
-    if(lines[endOfIf-1].find("else") != std::string::npos
-    || lines[endOfIf-1].find("else if(") != std::string::npos) {
-        return true;
-    }
-
-    if((endOfIf < lines.size() && (lines[endOfIf].find("else{") != std::string::npos
-    || lines[endOfIf].find("else if(") != std::string::npos))) {
         return true;
     }
 
@@ -751,13 +704,13 @@ void printTokenBuff(std::vector< std::shared_ptr<TokenizedLine> >& buffer) {
             
             case LineType::BRANCH:
                 branchLine = (BranchLine*)buffer[i].get();
-                ss << "BRANCH " << branchLine->booleanExpression << "   TRUE: " << branchLine->branchLineNumTRUE << "   END: " << branchLine->branchLineNumEND << "   ELSE: " << branchLine->branchLineNumELSE;
+                ss << "BRANCH " << branchLine->booleanExpression << "   TRUE: " << branchLine->branchLineNumTRUE << "   ELSE: " << branchLine->branchLineNumELSE;
                 BuiltIn::Print(ss.str());
                 break;
 
             case LineType::BRANCH_ELSE:
                 branchLine = (BranchLine*)buffer[i].get();
-                ss << "ELSE END: " << branchLine->branchLineNumEND;
+                ss << "ELSE END: " << branchLine->branchLineNumELSE;
                 BuiltIn::Print(ss.str());
                 break;
 

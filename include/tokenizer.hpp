@@ -37,7 +37,6 @@ namespace Tokenizer {
         public:
             std::string booleanExpression;
             ssize_t branchLineNumTRUE;
-            ssize_t branchLineNumEND;
             ssize_t branchLineNumELSE;
     };
 
