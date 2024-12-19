@@ -12,7 +12,7 @@ ${OBJ}%.o : ${SRC}%.cpp
 		mkdir ${OBJ}; \
 	fi
 
-	$(CC) -Wall -Werror -I$(INCL) -c $< -o $@
+	$(CC) -Wall -Werror -I$(INCL) -c $< -Wa,-mbig-obj  -o $@
 
 clean :
 	rm -f squiggly
