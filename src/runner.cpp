@@ -19,7 +19,8 @@ std::vector<Utils::SVariable> sVars;    //stack variables
 void runProgram(std::vector<TOKENIZED_PTR>& tokens, std::vector<Utils::SVariable>& memory, size_t stackFrameIdx, bool clearStackWhenDone=true, size_t startIdx=0, size_t endIdx=0); //general function for running blocks of code
 void runUserFunction(std::string name, std::vector<std::string>& args); //find a user defined function and run
 void setVariable(const std::shared_ptr<void>& dst, const std::shared_ptr<void>& src, Utils::VarType type, std::string assignType="="); //assign one value to another value
-void createVariable(std::vector<Utils::SVariable>& memory, std::string name, Utils::VarType type, std::shared_ptr<void> ptr); // add the three values
+void createVariable(std::vector<Utils::SVariable>& memory, std::string name, Utils::VarType type, std::shared_ptr<void> ptr); //quick shortcut for adding a new variable to memory
+void executeBranch(std::vector<TOKENIZED_PTR>& tokens, std::vector<Utils::SVariable>& memory, size_t stackFrameIdx, size_t& prgCounter);
 inline void throwError(std::string message); //throw a runner error
 
 //useful for debugging to have these separated
@@ -89,7 +90,6 @@ void runProgram(std::vector<TOKENIZED_PTR>& tokens, std::vector<Utils::SVariable
     endIdx = endIdx==0 ? tokens.size() : endIdx;
 
     Tokenizer::CallLine* callLine;
-    Tokenizer::BranchLine* branchLine;
     Tokenizer::LoopLine* loopLine;
     Tokenizer::AssignLine* assignLine;
     Tokenizer::DeclareLine* declareLine;
@@ -116,15 +116,7 @@ void runProgram(std::vector<TOKENIZED_PTR>& tokens, std::vector<Utils::SVariable
                 break;
 
             case Tokenizer::LineType::BRANCH:
-                branchLine = (Tokenizer::BranchLine*)line.get();
-                intBuff = *((int*)Utils::convertToVariable(branchLine->booleanExpression, Utils::VarType::INTEGER).ptr.get());
-
-                if(intBuff) {
-                    //run if statement and jump to end of branch
-                    //runProgram(tokens, memory, memory.size(), true, branchLine->branchLineNumTRUE, branchLine->)
-                } else if(branchLine->branchLineNumELSE != -1) {
-                    //run else statement at end of branch
-                }
+                executeBranch(tokens, memory, memory.size(), prgCounter);
                 break;
 
             case Tokenizer::LineType::LOOP:
@@ -177,7 +169,7 @@ void runProgram(std::vector<TOKENIZED_PTR>& tokens, std::vector<Utils::SVariable
                 break;
 
             default:
-                BuiltIn::Print("Unknown line!");
+                throwError("Unknown line encountered!");
                 break;
         }
     }
@@ -327,6 +319,69 @@ void createVariable(std::vector<Utils::SVariable>& memory, std::string name, Uti
     temp.ptr = ptr;
 
     memory.push_back(temp);
+}
+
+/*
+    Tranverse a branching statement in the Squiggly code.
+
+    Once an if statement is evaluated to true, skip to the end of the branch statement.
+    If no if statement is evaluated to true, check to see if the statement has an 'else' section and execute that.
+    Otherwise, skip to the end of the branching statement and return control to the calling function (runProgram)
+*/
+void executeBranch(std::vector<TOKENIZED_PTR>& tokens, std::vector<Utils::SVariable>& memory, size_t stackFrameIdx, size_t& prgCounter) 
+{
+    Tokenizer::BranchLine* branchLine;
+    int intBuff = 0;
+    bool executedSection = false;
+    bool outOfBranch = false;
+    bool expectIfElse = false;
+
+    for(; prgCounter<tokens.size(); prgCounter++) {
+        TOKENIZED_PTR line = tokens[prgCounter];
+
+        switch(line->type) {
+            case Tokenizer::LineType::BRANCH:
+                branchLine = (Tokenizer::BranchLine*)line.get();
+
+                if(expectIfElse && !branchLine->ifElse) { // if expecting an if else/else and the program reads just an if, the program has reached the beginning of a new branching statement, exit this loop
+                    outOfBranch = true;
+                    break;
+                }
+
+                expectIfElse = true; //from here on out, expect if else statements, an else statement, or an end to the branch
+
+                if(!executedSection) { //only bother evaluating if 
+                    intBuff = *((int*)Utils::convertToVariable(branchLine->booleanExpression, Utils::VarType::INTEGER).ptr.get());
+                    if(intBuff) {
+                        //run section inside of code
+                        executedSection = true;
+                        
+                        runProgram(tokens, memory, stackFrameIdx, true, branchLine->branchLineNumTRUE, branchLine->branchLineNumELSE);
+                    }
+                }
+
+                prgCounter = branchLine->branchLineNumELSE-1;
+                break;
+
+            case Tokenizer::LineType::BRANCH_ELSE:
+                branchLine = (Tokenizer::BranchLine*)line.get();
+
+                if(!executedSection)
+                    runProgram(tokens, memory, stackFrameIdx, true, branchLine->branchLineNumTRUE, branchLine->branchLineNumELSE);
+
+                prgCounter = branchLine->branchLineNumELSE-1;
+                outOfBranch = true; //make sure the next if statement that gets picked up by the program is treated as a separate branch statement
+                break;
+
+            default:
+                outOfBranch = true; //no longer looking at code from the branch section
+                prgCounter--;
+                break;
+        }
+
+        if(outOfBranch)
+            break;
+    }
 }
 
 inline void throwError(std::string message) {

@@ -4,8 +4,6 @@
 #include <vector>
 #include <memory>
 
-#define TOK_DEBUGGING true
-
 namespace Tokenizer {
     enum LineType {
         CALL,           //calling a function
@@ -38,6 +36,7 @@ namespace Tokenizer {
             std::string booleanExpression;
             ssize_t branchLineNumTRUE;
             ssize_t branchLineNumELSE;
+            bool ifElse;
     };
 
     class LoopLine : public TokenizedLine {

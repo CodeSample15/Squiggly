@@ -4,6 +4,8 @@
 #include "linter.hpp"
 #include "built-in-funcs.hpp"
 
+#define TOK_DEBUGGING false
+
 using namespace Tokenizer;
 
 //init extern variables
@@ -25,7 +27,7 @@ void findOpenCloseStrings(std::string line, size_t start, size_t& end);
 //tokenize a section starting from a start location and an end location, storing the result in tokenBuff
 void tokenizeSection(std::vector<std::string>& lines, std::vector< std::shared_ptr<TokenizedLine> >& tokenBuff, size_t baseBuffSize, size_t start, size_t end);
 //tokenize an if statement, return the end line of the if statement in the source code
-size_t tokenizeIf(std::vector<std::string>& lines, std::vector< std::shared_ptr<TokenizedLine> >& tokenBuff, size_t& i, size_t baseBuffSize, bool isiFStatement);
+size_t tokenizeIf(std::vector<std::string>& lines, std::vector< std::shared_ptr<TokenizedLine> >& tokenBuff, size_t& i, size_t baseBuffSize, bool isiFStatement, bool isElseIf);
 //use the ',' delimiter to get the individual arguments passed to a function and stored them in argBuff
 void parseArgsFromString(std::string s, std::vector<std::string>& argBuff);
 //search for functions defined by the programmer
@@ -314,20 +316,20 @@ void tokenizeSection(std::vector<std::string>& lines, std::vector< std::shared_p
             tokenBuff.push_back(line);
         }
         else if((found = lines[i].find("if(")) == 0) { //should be found at 0 (first thing in the string)
-            size_t ifEnd = tokenizeIf(lines, tokenBuff, i, baseBuffSize, true);
-
+            size_t ifEnd = tokenizeIf(lines, tokenBuff, i, baseBuffSize, true, false);
+            
             size_t elseLocation = 0;
             while(checkForElse(lines, ifEnd, elseLocation)) {
                 i = elseLocation;
                 bool elseFound = lines[i].find("if(") != 5 && lines[i].find("if(") != 6;
                 
-                ifEnd = tokenizeIf(lines, tokenBuff, i, baseBuffSize, !elseFound);
+                ifEnd = tokenizeIf(lines, tokenBuff, i, baseBuffSize, !elseFound, elseFound);
 
                 if(elseFound)
                     break;
             }
 
-            i = ifEnd;
+            i = ifEnd-1;
         }
         else if((found = lines[i].find(LOOP_HEADER)) != std::string::npos) {
             std::shared_ptr<LoopLine> line = std::make_shared<LoopLine>(LoopLine());
@@ -454,7 +456,7 @@ void tokenizeSection(std::vector<std::string>& lines, std::vector< std::shared_p
 /*
 
 */
-size_t tokenizeIf(std::vector<std::string>& lines, std::vector< std::shared_ptr<TokenizedLine> >& tokenBuff, size_t& i, size_t baseBuffSize, bool isiFStatement)
+size_t tokenizeIf(std::vector<std::string>& lines, std::vector< std::shared_ptr<TokenizedLine> >& tokenBuff, size_t& i, size_t baseBuffSize, bool isiFStatement, bool isElseIf)
 {
     std::shared_ptr<BranchLine> line = std::make_shared<BranchLine>(BranchLine());
 
@@ -471,6 +473,7 @@ size_t tokenizeIf(std::vector<std::string>& lines, std::vector< std::shared_ptr<
 
     line->branchLineNumTRUE = -1;
     line->branchLineNumELSE = -1;
+    line->ifElse = isElseIf;
 
     //don't do this if this is an else statement only
     if(isiFStatement) {
@@ -704,7 +707,7 @@ void printTokenBuff(std::vector< std::shared_ptr<TokenizedLine> >& buffer) {
             
             case LineType::BRANCH:
                 branchLine = (BranchLine*)buffer[i].get();
-                ss << "BRANCH " << branchLine->booleanExpression << "   TRUE: " << branchLine->branchLineNumTRUE << "   ELSE: " << branchLine->branchLineNumELSE;
+                ss << "BRANCH " << branchLine->booleanExpression << "   TRUE: " << branchLine->branchLineNumTRUE << "   " << (branchLine->ifElse ? "IF ELSE: " : "ELSE ") << branchLine->branchLineNumELSE;
                 BuiltIn::Print(ss.str());
                 break;
 

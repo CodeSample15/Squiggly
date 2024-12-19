@@ -1,22 +1,25 @@
-# Blank sqgly file with required functions included as a template
+# Testing to make sure branch statements are working with Squiggly
 
 :VARS: {
     # global variables go here
 }
 
 :START: {
-    int score
-    int anotherTest
+    float damage = 0.5
 
-	if (damage == 0.5) {
-        score = 5
-        anotherTest = 23
-    } else if(damage == 0.1) {
-        score = 6
-        score = 4
+	if (damage > 0) {
+        ^PRINT("True statement")
+        if(damage == 0.5) {
+            ^PRINT("Nested True")
+        }
+        else {
+            ^PRINT("Nested False")
+        }
     } else {
-        score = 65
+        ^PRINT("False statement")
     }
+
+    ^PRINT("End of branching")
 }
 
 :UPDATE: {
