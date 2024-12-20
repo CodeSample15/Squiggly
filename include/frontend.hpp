@@ -5,6 +5,39 @@
     the language to arduino, the function names used by other parts of the code can remain the
     same while the actual implementation can be treated differently.
 
+    Basically, everything that interfaces with Squiggly that is external to the language itself will go through
+    this header file.
+
     For the PC version of Squiggly, games will be rendered to an opencv window and game input will
-    be taken from the keyboard
+    be taken from the keyboard.
+    For the arduino version of Squiggly, games will be rendered to a physical screen wired to the arduino
+    and game input will be taken from physical buttons also wired to the arduino.
 */
+
+#pragma once
+
+//this will allow both the arduino port and the pc port to be in the same codebase
+#define BUILD_FOR_ARDUINO false
+
+namespace Frontend {
+    //input control: -------------------------------
+
+    //directional control
+    bool getRightBtn();
+    bool getLeftBtn();
+    bool getUpBtn();
+    bool getDownBtn();
+
+    //A/B buttons for additional actions
+    bool getABtn();
+    bool getBBtn();
+
+    //for exiting programs
+    bool getExitBtn();
+
+
+    //output display: ------------------------------
+
+    void clearDisplay();
+    void drawScreen();
+}

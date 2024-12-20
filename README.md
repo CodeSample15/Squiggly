@@ -8,8 +8,10 @@ An [esoteric language](https://en.wikipedia.org/wiki/Esoteric_programming_langua
 
 ## Build/Run instructions:
 
-* From the root directory of the project, run `make`
-* To run: `./squiggly <FILENAME>`
+* From the root directory of the project, create build folder: `mkdir build && cd build`
+* Run cmake: `cmake -G "Unix Makefiles" ../`
+* Build the project: `make`
+* Run Squiggly with: `./squiggly <path to .sqgl file>`
 
 ## *...why?*
 

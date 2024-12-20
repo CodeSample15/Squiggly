@@ -2,3 +2,4 @@
 squiggly
 .vscode/
 *.exe
+build/
