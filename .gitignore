@@ -3,3 +3,6 @@ squiggly
 .vscode/
 *.exe
 build/
+env_setup.sh
+compile_commands.json
+.cache

@@ -34,8 +34,8 @@ namespace Tokenizer {
     class BranchLine : public TokenizedLine {
         public:
             std::string booleanExpression;
-            ssize_t branchLineNumTRUE;
-            ssize_t branchLineNumELSE;
+            size_t branchLineNumTRUE;
+            size_t branchLineNumELSE;
             bool ifElse;
     };
 

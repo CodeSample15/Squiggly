@@ -471,8 +471,8 @@ size_t tokenizeIf(std::vector<std::string>& lines, std::vector< std::shared_ptr<
             size_t branchLineNumELSE;
     */
 
-    line->branchLineNumTRUE = -1;
-    line->branchLineNumELSE = -1;
+    line->branchLineNumTRUE = 0;
+    line->branchLineNumELSE = 0;
     line->ifElse = isElseIf;
 
     //don't do this if this is an else statement only

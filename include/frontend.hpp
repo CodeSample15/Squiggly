@@ -35,9 +35,8 @@ namespace Frontend {
     //for exiting programs
     bool getExitBtn();
 
-
     //output display: ------------------------------
 
-    void clearDisplay();
     void drawScreen();
+    void init();
 }

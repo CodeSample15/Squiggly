@@ -6,6 +6,7 @@
 #include "tokenizer.hpp"
 #include "built-in-funcs.hpp"
 #include "utils.hpp"
+#include "frontend.hpp"
 
 using namespace Runner;
 
@@ -60,14 +61,17 @@ void Runner::execute()
 
     //TODO: put in escapable while loop
     executeUpdate();
+    Frontend::drawScreen();
 }
 
 Utils::SVariable* Runner::fetchVariable(std::string name) 
 {
     //search local stack frame first (start at most recently pushed variable and work backwards, hopefully should add some efficiency)
-    for(ssize_t i=sVars.size()-1; i>=0; i--) {
-        if(sVars[i].name == name)
-            return &sVars[i];
+    if(sVars.size()>0) {
+        for(size_t i=sVars.size()-1; i>=0; i--) {
+            if(sVars[i].name == name)
+                return &sVars[i];
+        }
     }
 
     //search global variables

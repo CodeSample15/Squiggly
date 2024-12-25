@@ -35,6 +35,21 @@ void BuiltIn::Print(std::string m, bool newline) {
     //Serial.print() //for arduino
 }
 
+void BuiltIn::Print(char c, bool newline) {
+    std::cout << c;
+    if(newline)
+        std::cout << std::endl;
+    //Serial.print() //for arduino
+}
+
+void BuiltIn::PrintErr(std::string m) {
+    std::cerr << m << std::endl;
+}
+
+void BuiltIn::PrintErr(char c) {
+    std::cerr << c << std::endl;
+}
+
 inline void throwError(std::string message) {
     throw std::runtime_error("Built in function failed! : " + message);
 }

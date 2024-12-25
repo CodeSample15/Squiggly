@@ -13,4 +13,8 @@ namespace BuiltIn
     void runFunction(std::string name, std::vector<std::string>& args);
 
     void Print(std::string message, bool newline=true);
+    void Print(char c, bool newline=true);
+
+    void PrintErr(std::string message); //same thing as print, just print to error stream
+    void PrintErr(char c);
 }

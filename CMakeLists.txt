@@ -1,15 +1,19 @@
 cmake_minimum_required(VERSION 3.22)
 
-set(OpenCV_DIR "C:/opencv/build/x64/vc16/lib") #change this to your local OpenCV directory
-
-add_compile_options(-Wall -Werror -Wa,-mbig-obj)
-
 PROJECT (squiggly)
+
+add_compile_options(-std=c++20 -Wall -Werror -Wa,-mbig-obj)
+
 find_package( OpenCV REQUIRED )
 
-include_directories( ${OpenCV_INCLUDE_DIRS} )
-include_directories( include )
+message(STATUS "OpenCV version: ${OpenCV_VERSION}")
+message(STATUS "OpenCV include directories: ${OpenCV_INCLUDE_DIRS}")
+message(STATUS "OpenCV libraries: ${OpenCV_LIBS}")
+
+include_directories( include ${OpenCV_INCLUDE_DIRS} )
 file( GLOB SOURCES "src/*.cpp" )
 
 add_executable( squiggly ${SOURCES} )
 target_link_libraries( squiggly ${OpenCV_LIBS} )
+
+install( TARGETS squiggly )
