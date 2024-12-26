@@ -1,0 +1,13 @@
+# Blank sqgly file with required functions included as a template
+
+:VARS: {
+    # global variables go here
+}
+
+:START: {
+	# initialization code goes here
+}
+
+:UPDATE: {
+    ^PRINT("X: " + $JOYSTICK_X + "    Y: " + $JOYSTICK_Y + "    A pressed: " + $A_BTN + "     B pressed: " + $B_BTN)
+}

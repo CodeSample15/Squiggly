@@ -2,6 +2,12 @@
 
 #include "utils.hpp" 
 
+//built in variable names
+#define JOYSTICK_X_VAR_NAME "JOYSTICK_X"
+#define JOYSTICK_Y_VAR_NAME "JOYSTICK_Y"
+#define BUTTON_A_VAR_NAME "A_BTN"
+#define BUTTON_B_VAR_NAME "B_BTN"
+
 namespace Runner {
     //delete all old values stored in memory
     void flushMem();

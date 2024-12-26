@@ -1,8 +1,10 @@
+#include <string>
 #include <vector>
 #include <memory>
 #include <stdexcept>
 
 #include "runner.hpp"
+#include "linter.hpp"
 #include "tokenizer.hpp"
 #include "built-in-funcs.hpp"
 #include "utils.hpp"
@@ -15,6 +17,10 @@ typedef std::shared_ptr<Tokenizer::TokenizedLine> TOKENIZED_PTR;
 //virtual memory buffers
 std::vector<Utils::SVariable> gVars;    //global variables
 std::vector<Utils::SVariable> sVars;    //stack variables
+std::vector<Utils::SVariable> bVars;    //built-in variables
+
+//called by the program while executing a script to set all the built in variables users can access
+void setBIVars();
 
 //useful functions
 void runProgram(std::vector<TOKENIZED_PTR>& tokens, std::vector<Utils::SVariable>& memory, size_t stackFrameIdx, bool clearStackWhenDone=true, size_t startIdx=0, size_t endIdx=0); //general function for running blocks of code
@@ -24,7 +30,9 @@ void createVariable(std::vector<Utils::SVariable>& memory, std::string name, Uti
 void executeBranch(std::vector<TOKENIZED_PTR>& tokens, std::vector<Utils::SVariable>& memory, size_t stackFrameIdx, size_t& prgCounter);
 inline void throwError(std::string message); //throw a runner error
 
-//useful for debugging to have these separated
+//useful for debugging to have these run functions separated:
+
+//THIS FUNCTION HAS TO RUN BEFORE SQUIGGLY CAN CORRECTLY PARSE PROGRAMS
 void Runner::executeVars() { 
     //constant variables that the whole program will have access to
     createVariable(gVars, "true", Utils::VarType::BOOL, Utils::createSharedPtr(true));
@@ -40,6 +48,13 @@ void Runner::executeVars() {
     createVariable(gVars, "sin", Utils::VarType::STRING, Utils::createSharedPtr((std::string)"sin"));
     createVariable(gVars, "tan", Utils::VarType::STRING, Utils::createSharedPtr((std::string)"tan"));
 
+    //built in values that the user can access (will never be cleared from virtual memory)
+    createVariable(bVars, JOYSTICK_X_VAR_NAME, Utils::VarType::FLOAT, Utils::createSharedPtr((float)0.0));
+    createVariable(bVars, JOYSTICK_Y_VAR_NAME, Utils::VarType::FLOAT, Utils::createSharedPtr((float)0.0));
+    createVariable(bVars, BUTTON_A_VAR_NAME, Utils::VarType::BOOL, Utils::createSharedPtr(false));
+    createVariable(bVars, BUTTON_B_VAR_NAME, Utils::VarType::BOOL, Utils::createSharedPtr(false));
+
+    //run global variable section of the Squiggly code and add created variables to global scope (gVars)
     runProgram(varsBlock_tok, gVars, gVars.size(), false);
 }
 
@@ -51,6 +66,8 @@ void Runner::flushMem() {
     sVars.clear();
 }
 
+bool runningProgram = false;
+
 //main execute function with loop
 void Runner::execute() 
 {
@@ -59,25 +76,45 @@ void Runner::execute()
     executeVars();
     executeStart();
 
-    //TODO: put in escapable while loop
-    executeUpdate();
-    Frontend::drawScreen();
+    runningProgram = true;
+    while(runningProgram) {
+        setBIVars(); //set built in variables
+
+        executeUpdate();
+        Frontend::drawScreen();
+
+        if(Frontend::getExitBtn())
+            runningProgram = false;
+    }
 }
 
 Utils::SVariable* Runner::fetchVariable(std::string name) 
 {
-    //search local stack frame first (start at most recently pushed variable and work backwards, hopefully should add some efficiency)
-    if(sVars.size()>0) {
-        for(size_t i=sVars.size()-1; i>=0; i--) {
-            if(sVars[i].name == name)
-                return &sVars[i];
+    if(name.length()<1)
+        return nullptr;
+
+    if(name[0] == BUILT_IN_VAR_PREFIX) {
+        name = name.substr(1, name.length()-1); //get rid of the prefix before searching
+
+        for(size_t i=0; i<bVars.size(); i++) {
+            if(bVars[i].name == name)
+                return &bVars[i];
         }
     }
+    else {
+        //search local stack frame first (start at most recently pushed variable and work backwards, hopefully should add some efficiency)
+        if(sVars.size()>0) {
+            for(size_t i=sVars.size()-1; i>=0; i--) {
+                if(sVars[i].name == name)
+                    return &sVars[i];
+            }
+        }
 
-    //search global variables
-    for(Utils::SVariable& var : gVars) {
-        if(var.name == name)
-            return &var;
+        //search global variables
+        for(Utils::SVariable& var : gVars) {
+            if(var.name == name)
+                return &var;
+        }
     }
 
     return nullptr; //no variable was found, return a nullptr as a safety guard
@@ -243,6 +280,9 @@ void runUserFunction(std::string name, std::vector<std::string>& args) {
     Casts the void pointers passed into the expected datatype pointers and dereferences
 */
 void setVariable(const std::shared_ptr<void>& dst, const std::shared_ptr<void>& src, Utils::VarType type, std::string assignType) {
+    if(dst == nullptr || src == nullptr)
+        throwError("Error setting variable with nullptr!"); //yet another error I don't think squiggly users should come across, this is for developers of this project only
+
     switch(type) {
         case Utils::VarType::STRING:
             if(assignType=="=")
@@ -386,6 +426,33 @@ void executeBranch(std::vector<TOKENIZED_PTR>& tokens, std::vector<Utils::SVaria
         if(outOfBranch)
             break;
     }
+}
+
+void setBIVars() {
+    //input control
+    std::string temp = JOYSTICK_X_VAR_NAME;
+    temp.insert(0, 1, BUILT_IN_VAR_PREFIX);
+    setVariable(fetchVariable(temp)->ptr, 
+                Utils::createSharedPtr((float)Frontend::getHorAxis()), 
+                Utils::VarType::FLOAT, "=");
+
+    temp = JOYSTICK_Y_VAR_NAME;
+    temp.insert(0, 1, BUILT_IN_VAR_PREFIX);
+    setVariable(fetchVariable(temp)->ptr, 
+                Utils::createSharedPtr((float)Frontend::getVertAxis()), 
+                Utils::VarType::FLOAT, "=");
+
+    temp = BUTTON_A_VAR_NAME;
+    temp.insert(0, 1, BUILT_IN_VAR_PREFIX);
+    setVariable(fetchVariable(temp)->ptr, 
+                Utils::createSharedPtr(Frontend::getABtn()), 
+                Utils::VarType::BOOL, "=");
+
+    temp = BUTTON_B_VAR_NAME;
+    temp.insert(0, 1, BUILT_IN_VAR_PREFIX);
+    setVariable(fetchVariable(temp)->ptr, 
+                Utils::createSharedPtr(Frontend::getBBtn()), 
+                Utils::VarType::BOOL, "=");
 }
 
 inline void throwError(std::string message) {

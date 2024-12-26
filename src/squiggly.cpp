@@ -11,7 +11,7 @@
 int main(int argc, char** argv) {
     //quick check to make sure file was passed as input to the program
     if(argc < 2) {
-        std::cout << ".sqgly file not provided. Exiting..." << std::endl;
+        std::cout << "No file not provided. Exiting..." << std::endl;
         return 0;
     }
 
@@ -52,6 +52,8 @@ int main(int argc, char** argv) {
     } catch(const std::exception& e) {
         std::cerr << "\n" << e.what() << std::endl;
     }
+
+    std::cout << "Program stopped successfully" << std::endl;
 
     return 0;
 }

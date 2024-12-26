@@ -3,7 +3,6 @@
 #include "utils.hpp"
 #include "runner.hpp"
 #include "linter.hpp"
-#include "built-in-funcs.hpp"
 #include "external-libs.hpp"
 
 using namespace Utils;
@@ -84,7 +83,7 @@ std::string Utils::ParseString(std::string s)
                         atEnd = true;
                         break; //no need to error, can simply be that the program reached the end of the argument string
                     }
-                } while(isalpha(s[++i]) || s[i]==BUILT_IN_VAR_PREFIX);
+                } while(isalpha(s[++i]) || s[i]==BUILT_IN_VAR_PREFIX || s[i]=='_');
                 
                 if(!atEnd) i--;
 

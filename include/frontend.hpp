@@ -19,14 +19,16 @@
 //this will allow both the arduino port and the pc port to be in the same codebase
 #define BUILD_FOR_ARDUINO false
 
+//for windows builds
+#define WIN_A_BTN_CODE 0x5A
+#define WIN_B_BTN_CODE 0x58
+
 namespace Frontend {
     //input control: -------------------------------
 
     //directional control
-    bool getRightBtn();
-    bool getLeftBtn();
-    bool getUpBtn();
-    bool getDownBtn();
+    float getHorAxis();
+    float getVertAxis();
 
     //A/B buttons for additional actions
     bool getABtn();
