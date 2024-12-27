@@ -12,6 +12,7 @@ An [esoteric language](https://en.wikipedia.org/wiki/Esoteric_programming_langua
 * Run cmake: `cmake -G "Unix Makefiles" ../`
 * Build the project: `make`
 * Run Squiggly with: `./squiggly <path to .sqgl file>`
+* Install: `make install`
 
 ## *...why?*
 
@@ -34,9 +35,6 @@ Test code can be found in the `/test_scripts` folder, but the general syntax loo
 
 ``` Python
 :VARS: {
-    score
-    deaths
-
     float damage = 0.5
 
     OBJECT player
@@ -48,13 +46,13 @@ Test code can be found in the `/test_scripts` folder, but the general syntax loo
 }
 
 :START: {
-    score = 0
-    deaths = 0
+    int score = 0
+    int deaths = 0
 
     player.icon = @CIRCLE
     enemy.icon = @TRIANGLE
 
-    if (damage == 0.5) {
+    if (damage == 1) {
         deaths += 1
     }
 

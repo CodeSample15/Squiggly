@@ -71,3 +71,18 @@ repeat(AMOUNT) {
 
 **^**: Built in function reference. Squiggly will provide built in functions for the user to be able to create output from their program (function names are all caps)
     - Example: ^PRINT("Hello World!")
+
+## Built-in functions:
+
+Below is the current list of built-in functions supported by Squiggly. This should be kept up to date as the project develops:
+
+- `^PRINT(string message)`: Print a message to a debug terminal
+
+
+## Built-in variables:
+
+Below is the current list of built-in variables accessible in Squiggly programs. This should also be kept up to date as the project develops:
+
+- `$JOYSTICK_X / $JOYSTICK_Y` **(float)**: analog values between -1.0 and 1.0 of the input provided to the controller used to play a Squiggly game (keyboard arrow keys for Windows build)
+- `$A_BTN / $B_BTN` **(bool)**: additional input buttons to Squiggly programs (for Windows build: <u>A = Z keyboard button</u> and <u>B = X keyboard button</u>)
+- `$FPS` **(int)**: current frames per second of the Squiggly window. Useful for debugging and benchmarking purposes

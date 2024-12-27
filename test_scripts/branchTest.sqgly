@@ -7,7 +7,7 @@
 :START: {
     float damage = 0.5
 
-	if (damage > 0) {
+    if (damage > 0) {
         ^PRINT("True statement")
         if(damage == 0.5) {
             ^PRINT("Nested True")
@@ -23,5 +23,5 @@
 }
 
 :UPDATE: {
-	# game loop logic goes here
+    # game loop logic goes here
 }

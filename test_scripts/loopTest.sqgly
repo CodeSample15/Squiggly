@@ -3,9 +3,9 @@
 }
 
 :START: {
-	int count = 0
+    int count = 0
 
-	repeat (5) {
+    repeat (5) {
         count += 1
         ^PRINT("Counter: " + count)
 
@@ -19,5 +19,5 @@
 }
 
 :UPDATE: {
-	# game loop logic goes here
+    # game loop logic goes here
 }

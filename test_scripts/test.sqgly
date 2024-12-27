@@ -15,13 +15,13 @@
 }
 
 :START: {
-	int score = 0
-	deaths = 0
+    int score = 0
+    deaths = 0
 
     deaths += 5
 
-	player.icon = @CIRCLE
-	enemy.icon = @TRIANGLE
+    player.icon = @CIRCLE
+    enemy.icon = @TRIANGLE
 
     #case sensitive
     repeat(10) {
@@ -46,12 +46,12 @@
 }
 
 :UPDATE: {
-	player.x += $JOYSTICK_X
-	player.y += $JOYSTICK_Y
+    player.x += $JOYSTICK_X
+    player.y += $JOYSTICK_Y
 }
 
 spawnEnemy() {
-	#enemies.add(CREATE_NEW(enemy))
+    #enemies.add(CREATE_NEW(enemy))
     ^PRINT("Testing!")
 }
 

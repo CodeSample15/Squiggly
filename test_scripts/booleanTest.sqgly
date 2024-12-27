@@ -1,11 +1,9 @@
-# Blank sqgly file with required functions included as a template
-
 :VARS: {
     # global variables go here
 }
 
 :START: {
-	# initialization code goes here
+    # initialization code goes here
     # bool test = 0
     # bool other = 0
     # bool res = test + other
@@ -17,5 +15,5 @@
 }
 
 :UPDATE: {
-	# game loop logic goes here
+    # game loop logic goes here
 }
