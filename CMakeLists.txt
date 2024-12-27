@@ -1,8 +1,8 @@
-cmake_minimum_required(VERSION 3.22)
+cmake_minimum_required(VERSION 3.18)
 
 PROJECT (squiggly)
 
-add_compile_options(-std=c++20 -Wall -Werror -Wa,-mbig-obj)
+add_compile_options(-std=c++20 -Wall -Werror)
 
 find_package( OpenCV REQUIRED )
 
