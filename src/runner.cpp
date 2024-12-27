@@ -2,6 +2,7 @@
 #include <vector>
 #include <memory>
 #include <stdexcept>
+#include <chrono>
 
 #include "runner.hpp"
 #include "linter.hpp"
@@ -21,6 +22,9 @@ std::vector<Utils::SVariable> bVars;    //built-in variables
 
 //called by the program while executing a script to set all the built in variables users can access
 void setBIVars();
+
+//values used for built in variables
+std::chrono::steady_clock::time_point lastLoopTime = std::chrono::steady_clock::now();
 
 //useful functions
 void runProgram(std::vector<TOKENIZED_PTR>& tokens, std::vector<Utils::SVariable>& memory, size_t stackFrameIdx, bool clearStackWhenDone=true, size_t startIdx=0, size_t endIdx=0); //general function for running blocks of code
@@ -53,6 +57,8 @@ void Runner::executeVars() {
     createVariable(bVars, JOYSTICK_Y_VAR_NAME, Utils::VarType::FLOAT, Utils::createSharedPtr((float)0.0));
     createVariable(bVars, BUTTON_A_VAR_NAME, Utils::VarType::BOOL, Utils::createSharedPtr(false));
     createVariable(bVars, BUTTON_B_VAR_NAME, Utils::VarType::BOOL, Utils::createSharedPtr(false));
+
+    createVariable(bVars, FPS_VAR_NAME, Utils::VarType::INTEGER, Utils::createSharedPtr((int)0));
 
     //run global variable section of the Squiggly code and add created variables to global scope (gVars)
     runProgram(varsBlock_tok, gVars, gVars.size(), false);
@@ -453,6 +459,17 @@ void setBIVars() {
     setVariable(fetchVariable(temp)->ptr, 
                 Utils::createSharedPtr(Frontend::getBBtn()), 
                 Utils::VarType::BOOL, "=");
+
+    //other miscellaneous values
+    int fps = (int)(1000/(float)std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - lastLoopTime).count());
+    lastLoopTime = std::chrono::steady_clock::now();
+
+    temp = FPS_VAR_NAME;
+    temp.insert(0, 1, BUILT_IN_VAR_PREFIX);
+    setVariable(fetchVariable(temp)->ptr, 
+                Utils::createSharedPtr(fps),
+                Utils::VarType::INTEGER, "=");
+
 }
 
 inline void throwError(std::string message) {

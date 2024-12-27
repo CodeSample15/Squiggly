@@ -1,0 +1,13 @@
+# Blank sqgly file with required functions included as a template
+
+:VARS: {
+    # global variables go here
+}
+
+:START: {
+	# initialization code goes here
+}
+
+:UPDATE: {
+    ^PRINT("FPS: " + $FPS)
+}

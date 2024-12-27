@@ -14,7 +14,7 @@ using namespace Frontend;
 
     void Frontend::drawScreen() {
         cv::imshow("Squiggly Project", display);
-        cv::waitKey(SCREEN_FRAME_RATE);
+        cv::waitKey(SCREEN_REFRESH_DELAY);
     }
 
     //getting keboard input

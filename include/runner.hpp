@@ -8,6 +8,8 @@
 #define BUTTON_A_VAR_NAME "A_BTN"
 #define BUTTON_B_VAR_NAME "B_BTN"
 
+#define FPS_VAR_NAME "FPS"
+
 namespace Runner {
     //delete all old values stored in memory
     void flushMem();
