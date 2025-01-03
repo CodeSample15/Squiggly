@@ -1,5 +1,9 @@
 #pragma once
 
+#include <cstdint>
+
+#include "built-in.hpp"
+
 #define SCREEN_WIDTH 100
 #define SCREEN_HEIGHT 100
 
@@ -9,6 +13,10 @@ class Screen {
     public:
         Screen();
 
-    private:
-        
+        void clear();
+        void drawObj(BuiltIn::Object& obj);
+
+        uint8_t screenBuff[SCREEN_WIDTH][SCREEN_HEIGHT][3];
 };
+
+extern Screen screen;

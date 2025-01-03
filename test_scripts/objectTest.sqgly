@@ -1,0 +1,11 @@
+:VARS: {
+    OBJECT test
+}
+
+:START: {
+}
+
+:UPDATE: {
+	test.x += 5
+    ^PRINT("" + test.x)
+}

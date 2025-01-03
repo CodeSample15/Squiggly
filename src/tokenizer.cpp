@@ -2,7 +2,7 @@
 
 #include "tokenizer.hpp"
 #include "linter.hpp"
-#include "built-in-funcs.hpp"
+#include "built-in.hpp"
 
 #define TOK_DEBUGGING false
 

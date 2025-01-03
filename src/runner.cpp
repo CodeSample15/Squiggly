@@ -7,7 +7,7 @@
 #include "runner.hpp"
 #include "linter.hpp"
 #include "tokenizer.hpp"
-#include "built-in-funcs.hpp"
+#include "built-in.hpp"
 #include "utils.hpp"
 #include "frontend.hpp"
 
@@ -32,7 +32,7 @@ void runUserFunction(std::string name, std::vector<std::string>& args); //find a
 void setVariable(const std::shared_ptr<void>& dst, const std::shared_ptr<void>& src, Utils::VarType type, std::string assignType="="); //assign one value to another value
 void createVariable(std::vector<Utils::SVariable>& memory, std::string name, Utils::VarType type, std::shared_ptr<void> ptr); //quick shortcut for adding a new variable to memory
 void executeBranch(std::vector<TOKENIZED_PTR>& tokens, std::vector<Utils::SVariable>& memory, size_t stackFrameIdx, size_t& prgCounter);
-inline void throwError(std::string message); //throw a runner error
+void throwRunnerError(std::string message); //throw a runner error
 
 //useful for debugging to have these run functions separated:
 
@@ -99,6 +99,14 @@ Utils::SVariable* Runner::fetchVariable(std::string name)
     if(name.length()<1)
         return nullptr;
 
+    std::string memberName = "";
+    size_t splitLocation = 0;
+    if((splitLocation = name.find(".")) != std::string::npos) {
+        //split the name of the variable name and member name of the object
+        memberName = name.substr(splitLocation+1, name.length()-(splitLocation+1));
+        name = name.substr(0, splitLocation);
+    }
+
     if(name[0] == BUILT_IN_VAR_PREFIX) {
         name = name.substr(1, name.length()-1); //get rid of the prefix before searching
 
@@ -108,19 +116,31 @@ Utils::SVariable* Runner::fetchVariable(std::string name)
         }
     }
     else {
+        Utils::SVariable* tmp = nullptr;
+
         //search local stack frame first (start at most recently pushed variable and work backwards, hopefully should add some efficiency)
         if(sVars.size()>0) {
             for(size_t i=sVars.size()-1; i>=0; i--) {
-                if(sVars[i].name == name)
-                    return &sVars[i];
+                if(sVars[i].name == name) {
+                    tmp = &sVars[i];
+                    break;
+                }
             }
         }
 
         //search global variables
         for(Utils::SVariable& var : gVars) {
-            if(var.name == name)
-                return &var;
+            if(var.name == name) {
+                tmp = &var;
+                break;
+            }
         }
+
+        if(tmp && tmp->type==Utils::VarType::OBJECT) {
+            tmp = ((BuiltIn::Object*)tmp->ptr.get())->fetchVariable(memberName);
+        }
+        
+        return tmp;
     }
 
     return nullptr; //no variable was found, return a nullptr as a safety guard
@@ -180,16 +200,17 @@ void runProgram(std::vector<TOKENIZED_PTR>& tokens, std::vector<Utils::SVariable
             case Tokenizer::LineType::ASSIGN:
                 assignLine = (Tokenizer::AssignLine*)line.get();
                 varBuff = fetchVariable(assignLine->assignDst);
+
                 if(varBuff)
                     setVariable(varBuff->ptr, Utils::convertToVariable(assignLine->assignSrc, varBuff->type).ptr, varBuff->type, assignLine->assignOperator);
                 else
-                    throwError("Unable to find variable '" + assignLine->assignDst + "'");
+                    throwRunnerError("Unable to find variable '" + assignLine->assignDst + "'");
                 break;
 
             case Tokenizer::LineType::DECLARE:
                 declareLine = (Tokenizer::DeclareLine*)line.get();
                 if(fetchVariable(declareLine->varName))
-                    throwError("Variable '" + declareLine->varName + "' is already defined!");
+                    throwRunnerError("Variable '" + declareLine->varName + "' is already defined!");
 
                 newVariableHolder.name = declareLine->varName;
                 newVariableHolder.type = Utils::stringToVarType(declareLine->varType);
@@ -201,7 +222,7 @@ void runProgram(std::vector<TOKENIZED_PTR>& tokens, std::vector<Utils::SVariable
             case Tokenizer::LineType::DECLARE_ASSIGN:
                 assignLine = (Tokenizer::AssignLine*)line.get();
                 if(fetchVariable(assignLine->assignDst))
-                    throwError("Variable '" + assignLine->assignDst + "' is already defined!");
+                    throwRunnerError("Variable '" + assignLine->assignDst + "' is already defined!");
 
                 newVariableHolder.name = assignLine->assignDst;
                 newVariableHolder.type = Utils::stringToVarType(assignLine->assignType);
@@ -216,7 +237,7 @@ void runProgram(std::vector<TOKENIZED_PTR>& tokens, std::vector<Utils::SVariable
                 break;
 
             default:
-                throwError("Unknown line encountered!");
+                throwRunnerError("Unknown line encountered!");
                 break;
         }
     }
@@ -247,7 +268,7 @@ void runUserFunction(std::string name, std::vector<std::string>& args) {
                 
                 //check to make sure arguments passed are correct
                 if(args.size() != tmp->expectedArgs.size())
-                    throwError("Unexpected number of arguments passed to function " + name);
+                    throwRunnerError("Unexpected number of arguments passed to function " + name);
 
                 //get current stack size so stack frame can be cleared later
                 size_t functionStackFrame = sVars.size();
@@ -258,7 +279,7 @@ void runUserFunction(std::string name, std::vector<std::string>& args) {
                     std::string expected = tmp->expectedArgs[i];
                     size_t spaceLocation = expected.find(" ");
                     if(spaceLocation == std::string::npos)
-                        throwError("Improper parameter declaration of function " + name); //quick error check because I don't trust the Linter
+                        throwRunnerError("Improper parameter declaration of function " + name); //quick error check because I don't trust the Linter
 
                     //extract the expected name and type
                     std::string etype = expected.substr(0, spaceLocation);
@@ -273,12 +294,12 @@ void runUserFunction(std::string name, std::vector<std::string>& args) {
                 break;
             }
         } else {
-            throwError("Tokenizer screwed up function tokenizing!"); //idealy, the programmer should NEVER get this error, I'm just putting this here to call out Squiggly development screw ups
+            throwRunnerError("Tokenizer screwed up function tokenizing!"); //idealy, the programmer should NEVER get this error, I'm just putting this here to call out Squiggly development screw ups
         }
     }
 
     if(!found)
-        throwError("Cannot find function named " + name);
+        throwRunnerError("Cannot find function named " + name);
 }
 
 /*
@@ -287,7 +308,7 @@ void runUserFunction(std::string name, std::vector<std::string>& args) {
 */
 void setVariable(const std::shared_ptr<void>& dst, const std::shared_ptr<void>& src, Utils::VarType type, std::string assignType) {
     if(dst == nullptr || src == nullptr)
-        throwError("Error setting variable with nullptr!"); //yet another error I don't think squiggly users should come across, this is for developers of this project only
+        throwRunnerError("Error setting variable with nullptr!"); //yet another error I don't think squiggly users should come across, this is for developers of this project only
 
     switch(type) {
         case Utils::VarType::STRING:
@@ -296,7 +317,7 @@ void setVariable(const std::shared_ptr<void>& dst, const std::shared_ptr<void>& 
             else if(assignType=="+=")
                 *((std::string*)dst.get()) += *((std::string*)src.get());
             else
-                throwError("Invalid assign operator '" + assignType + "' for string type");
+                throwRunnerError("Invalid assign operator '" + assignType + "' for string type");
             break;
 
         case Utils::VarType::INTEGER:
@@ -311,7 +332,7 @@ void setVariable(const std::shared_ptr<void>& dst, const std::shared_ptr<void>& 
             else if(assignType=="/=")
                 *((int*)dst.get()) /= *((int*)src.get());
             else
-                throwError("Invalid assign operator '" + assignType + "' for string type");
+                throwRunnerError("Invalid assign operator '" + assignType + "' for string type");
             break;
 
         case Utils::VarType::DOUBLE:
@@ -326,7 +347,7 @@ void setVariable(const std::shared_ptr<void>& dst, const std::shared_ptr<void>& 
             else if(assignType=="/=")
                 *((double*)dst.get()) /= *((double*)src.get());
             else
-                throwError("Invalid assign operator '" + assignType + "' for string type");
+                throwRunnerError("Invalid assign operator '" + assignType + "' for string type");
             break;
 
         case Utils::VarType::FLOAT:
@@ -341,18 +362,18 @@ void setVariable(const std::shared_ptr<void>& dst, const std::shared_ptr<void>& 
             else if(assignType=="/=")
                 *((float*)dst.get()) /= *((float*)src.get());
             else
-                throwError("Invalid assign operator '" + assignType + "' for string type");
+                throwRunnerError("Invalid assign operator '" + assignType + "' for string type");
             break;
 
         case Utils::VarType::BOOL:
             if(assignType=="=")
                 *((float*)dst.get()) = *((float*)src.get());
             else
-                throwError("Invalid assign operator '" + assignType + "' for string type");
+                throwRunnerError("Invalid assign operator '" + assignType + "' for string type");
             break;
 
         default:
-            throwError("Error setting variable (This is a problem with Squiggly, not with your Squiggly code. Please report this issue on the project's GitHub)");
+            throwRunnerError("Error setting variable (This is a problem with Squiggly, not with your Squiggly code. Please report this issue on the project's GitHub)");
             break;
     }
 }
@@ -472,6 +493,6 @@ void setBIVars() {
 
 }
 
-inline void throwError(std::string message) {
+void throwRunnerError(std::string message) {
     throw std::runtime_error("Program Runner failed! : " + message);
 }

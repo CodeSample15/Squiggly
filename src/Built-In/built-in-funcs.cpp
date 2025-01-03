@@ -1,7 +1,7 @@
 #include <stdexcept>
 #include <iostream>
 
-#include "built-in-funcs.hpp"
+#include "built-in.hpp"
 #include "utils.hpp"
 
 using namespace BuiltIn;

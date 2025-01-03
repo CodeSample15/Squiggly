@@ -8,6 +8,8 @@ An [esoteric language](https://en.wikipedia.org/wiki/Esoteric_programming_langua
 
 ## Build/Run instructions:
 
+> Important: In order to compile for Windows, you must have the OpenCV library installed on your device. If you don't, you can find the instructions [here](https://youtu.be/m9HBM1m_EMU)
+
 * From the root directory of the project, create build folder: `mkdir build && cd build`
 * Run cmake: `cmake -G "Unix Makefiles" ../`
 * Build the project: `make`
@@ -17,10 +19,10 @@ An [esoteric language](https://en.wikipedia.org/wiki/Esoteric_programming_langua
 ## *...why?*
 
 - **Why did you make this project?** 
-    - Good question! The goal of this project is to eventually have an interpreter capable of being easily ported to any embedded system, allowing for a way for people to easily develop game scripts that can be ran and tested on their computer before being downloaded to a portable player.
-    - This language is designed around game development. It will come with built in functionality to make game design easier.
-- **Why doesn't this do anything?**
-    - Cuz I'm not done yet. Please wait until this message doesn't appear in the README.
+    - Good question! The goal of this project is to eventually have an interpreter capable of being easily ported to any embedded system, allowing anyone to easily develop game scripts that can be tested on their computer before being downloaded to a portable player.
+    - This language is designed around game development, so I believe it will be a unique way to develop simple games. I love using scripting languages to throw something cool together, and I hope that Squiggly will be a fun way to do just that.
+- **Why can't I make games with this yet?**
+    - As of right now, Squiggly is only capable of handling basic input (in Windows using the arrow keys and 'z' and 'x' keys), and providing basic output (using the ^PRINT function). I am currently working on the graphical end of Squiggly, and hope to get something simple working soon.
 - **Why should I use this project?**
     1. This interpreter (when built and ran from the `main` branch) will open it's own graphical window when running a script where you can play and test games!
     2. When this interpreter is ported over to embedded systems, it will allow those same scripts to be played on any portable mini-consoles built using arduino (and raspberry pis in the future)!
@@ -31,7 +33,7 @@ An [esoteric language](https://en.wikipedia.org/wiki/Esoteric_programming_langua
 
 ## Example squiggly syntax:
 
-Test code can be found in the `/test_scripts` folder, but the general syntax looks like the following:
+Test code can be found in the [/test_scripts](/test_scripts/) folder, but the general syntax looks like the following:
 
 ``` Python
 :VARS: {
@@ -56,7 +58,7 @@ Test code can be found in the `/test_scripts` folder, but the general syntax loo
         deaths += 1
     }
 
-    REPEAT(5) {
+    repeat(5) {
         score += 1
     }
 }

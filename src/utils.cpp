@@ -1,6 +1,8 @@
+#include <memory>
 #include <sstream>
 
 #include "utils.hpp"
+#include "built-in.hpp"
 #include "runner.hpp"
 #include "linter.hpp"
 #include "external-libs.hpp"
@@ -27,6 +29,10 @@ std::string Utils::varTypeToString(VarType& type) {
             return "float";
         case VarType::BOOL:
             return "bool";
+        case VarType::OBJECT:
+            return "OBJECT";
+        case VarType::TEXT:
+            return "TEXT";
     }
 
     return "invalid";
@@ -43,6 +49,10 @@ VarType Utils::stringToVarType(std::string& str) {
         return VarType::FLOAT;
     else if(str=="bool")
         return VarType::BOOL;
+    else if(str=="OBJECT")
+        return VarType::OBJECT;
+    else if(str=="TEXT")
+        return VarType::TEXT;
 
     return VarType::NONE;
 }
@@ -83,7 +93,7 @@ std::string Utils::ParseString(std::string s)
                         atEnd = true;
                         break; //no need to error, can simply be that the program reached the end of the argument string
                     }
-                } while(isalpha(s[++i]) || s[i]==BUILT_IN_VAR_PREFIX || s[i]=='_');
+                } while(isalpha(s[++i]) || s[i]==BUILT_IN_VAR_PREFIX || s[i]=='_' || s[i]=='.');
                 
                 if(!atEnd) i--;
 
@@ -108,7 +118,16 @@ SVariable Utils::convertToVariable(std::string input, VarType expectedType) {
     tmp.name = "tmp"; //main code has to set this manually
     tmp.type = VarType::NONE;
 
-    if(input.find("\"") != std::string::npos || input.find("'") != std::string::npos) {
+    if(expectedType == VarType::OBJECT || expectedType == VarType::TEXT) {
+        SVariable* var = Runner::fetchVariable(input);
+        if(var) {
+            tmp.type = var->type;
+            tmp.ptr = var->ptr;
+        }
+        else
+            throwUtilError("Unable to fetch OBJECT variable \'" + input + "\'");
+    }
+    else if(input.find("\"") != std::string::npos || input.find("'") != std::string::npos) {
         //variable is a string literal probably
         std::string s = ParseString(input);
 
@@ -130,7 +149,7 @@ SVariable Utils::convertToVariable(std::string input, VarType expectedType) {
                         atEnd = true;
                         break; //no need to error, can simply be that the program reached the end of the argument string
                     }
-                } while(isalpha(input[++i]) || input[i]==BUILT_IN_VAR_PREFIX);
+                } while(isalpha(input[++i]) || input[i]==BUILT_IN_VAR_PREFIX || input[i]=='_' || input[i]=='.');
                 
                 if(!atEnd) i--; //only do this if the scanner did not reach the end of the string (otherwise the scanner might go back and read the last character again and consider it a separate variable, causing an error)
 
@@ -160,6 +179,7 @@ std::shared_ptr<void> Utils::createEmptyShared(VarType type) {
         case VarType::DOUBLE: return createSharedPtr((double)0);
         case VarType::FLOAT: return createSharedPtr((float)0);
         case VarType::BOOL: return createSharedPtr(false);
+        case VarType::OBJECT: return std::make_shared<BuiltIn::Object>(BuiltIn::Object());
         default: return createSharedPtr((int)0);
     }
 }
@@ -202,7 +222,7 @@ void convertAndAppendVariable(std::stringstream& ss, std::string& varName) {
                 ss << (*((bool*)var->ptr.get()) ? "1" : "0");
                 break;
             default:
-                ss << "NONE";
+                ss << "1"; //safeguard against use of wrong datatypes, just convert to one
                 break;
         }
     }

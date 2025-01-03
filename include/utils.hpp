@@ -11,7 +11,9 @@ namespace Utils
         INTEGER,
         DOUBLE,
         FLOAT,
-        BOOL
+        BOOL,
+        OBJECT,
+        TEXT
     };
 
     typedef struct {
