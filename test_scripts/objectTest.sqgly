@@ -1,11 +1,24 @@
 :VARS: {
     OBJECT test
+
+    float xVel
+    float yVel
 }
 
 :START: {
+    xVel = 0
+    yVel = 0
 }
 
 :UPDATE: {
-	test.x += 5
-    ^PRINT("" + test.x)
+	test.x += 0.1 * xVel * $DTIME
+    test.y += 0.1 * yVel * $DTIME
+
+    xVel += $JOYSTICK_X
+    yVel += $JOYSTICK_Y
+
+    xVel *= 0.8
+    yVel *= 0.8
+
+    ^PRINT("X: " + test.x + "   Y: " + test.y)
 }

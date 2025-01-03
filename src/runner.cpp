@@ -59,6 +59,7 @@ void Runner::executeVars() {
     createVariable(bVars, BUTTON_B_VAR_NAME, Utils::VarType::BOOL, Utils::createSharedPtr(false));
 
     createVariable(bVars, FPS_VAR_NAME, Utils::VarType::INTEGER, Utils::createSharedPtr((int)0));
+    createVariable(bVars, DTIME_VAR_NAME, Utils::VarType::FLOAT, Utils::createSharedPtr((float)0.0));
 
     //run global variable section of the Squiggly code and add created variables to global scope (gVars)
     runProgram(varsBlock_tok, gVars, gVars.size(), false);
@@ -482,7 +483,8 @@ void setBIVars() {
                 Utils::VarType::BOOL, "=");
 
     //other miscellaneous values
-    int fps = (int)(1000/(float)std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - lastLoopTime).count());
+    float dtime = (float)std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - lastLoopTime).count();
+    int fps = (int)(1000/dtime);
     lastLoopTime = std::chrono::steady_clock::now();
 
     temp = FPS_VAR_NAME;
@@ -491,6 +493,11 @@ void setBIVars() {
                 Utils::createSharedPtr(fps),
                 Utils::VarType::INTEGER, "=");
 
+    temp = DTIME_VAR_NAME;
+    temp.insert(0, 1, BUILT_IN_VAR_PREFIX);
+    setVariable(fetchVariable(temp)->ptr, 
+                Utils::createSharedPtr(dtime),
+                Utils::VarType::FLOAT, "=");
 }
 
 void throwRunnerError(std::string message) {

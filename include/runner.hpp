@@ -9,7 +9,7 @@
 #define BUTTON_B_VAR_NAME "B_BTN"
 
 #define FPS_VAR_NAME "FPS"
-#define DTIME_VAR_NAME "D_TIME"
+#define DTIME_VAR_NAME "DTIME"
 
 namespace Runner {
     //delete all old values stored in memory
