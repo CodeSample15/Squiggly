@@ -166,6 +166,7 @@ void runProgram(std::vector<TOKENIZED_PTR>& tokens, std::vector<Utils::SVariable
     Utils::SVariable newVariableHolder;
 
     int intBuff = 0; // a place for the switch statement to throw integer values into temporarily
+    size_t sizeBuff = 0;
     
     //iterate through the program
     for(size_t prgCounter = startIdx; prgCounter < endIdx; prgCounter++) {
@@ -175,7 +176,8 @@ void runProgram(std::vector<TOKENIZED_PTR>& tokens, std::vector<Utils::SVariable
         switch(line->type) {
             case Tokenizer::LineType::CALL:
                 callLine = (Tokenizer::CallLine*)line.get();
-                runUserFunction(callLine->callFuncName, callLine->args);
+                if((sizeBuff=callLine->callFuncName.find(".")) != std::string::npos)
+                    runUserFunction(callLine->callFuncName, callLine->args);
                 break;
 
             case Tokenizer::LineType::BI_CALL:
@@ -271,8 +273,8 @@ void runUserFunction(std::string name, std::vector<std::string>& args) {
                 if(args.size() != tmp->expectedArgs.size())
                     throwRunnerError("Unexpected number of arguments passed to function " + name);
 
-                //get current stack size so stack frame can be cleared later
-                size_t functionStackFrame = sVars.size();
+                //create a virtual stack frame
+                std::vector<Utils::SVariable> tempStack;
 
                 //add arguments to stack
                 for(size_t i=0; i<args.size(); i++) {
@@ -288,10 +290,10 @@ void runUserFunction(std::string name, std::vector<std::string>& args) {
 
                     Utils::SVariable nextVar = Utils::convertToVariable(args[i], Utils::stringToVarType(etype));
                     nextVar.name = ename; //split expected arg into type and name, get the name
-                    sVars.push_back(nextVar); //push to stack
+                    tempStack.push_back(nextVar); //push to stack
                 }
 
-                runProgram(function, sVars, functionStackFrame, true, 1);
+                runProgram(function, tempStack, 0, true, 1);
                 break;
             }
         } else {
