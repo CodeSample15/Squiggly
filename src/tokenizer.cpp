@@ -42,6 +42,8 @@ int countNumCharacters(std::string line, char character);
 int numSegmentsInString(std::string line);
 //find user functions in a line of code (for searching for function calls). Returns the name of the function found
 std::string searchForUserFunctions(std::string line);
+//find object functions. Returns the name of the object its function being called
+std::string searchForObjectFunctions(std::string line);
 //delete old programs (allows this code to be ran many times without exiting)
 void clearTokens();
 //for errors (exit program)
@@ -381,7 +383,7 @@ void tokenizeSection(std::vector<std::string>& lines, std::vector< std::shared_p
                 tokenizerError("Error parsing loop statement. Incorrect format:\n'" + lines[i] + "'");
             }
         }
-        else if((functionName = searchForUserFunctions(lines[i])).length() != 0) {
+        else if((functionName = searchForUserFunctions(lines[i])).length() != 0 || (functionName = searchForObjectFunctions(lines[i])).length() != 0) {
             std::shared_ptr<CallLine> line = std::make_shared<CallLine>(CallLine());
 
             line->type = LineType::CALL;
@@ -615,6 +617,15 @@ std::string searchForUserFunctions(std::string line) {
     }
 
     return ""; //return an empty string otherwise
+}
+
+std::string searchForObjectFunctions(std::string line) {
+    size_t dotLocation = line.find(".");
+    size_t paramsLocation = line.find("(");
+    if(dotLocation != std::string::npos && paramsLocation != std::string::npos && paramsLocation > dotLocation)
+        return line.substr(0, paramsLocation);
+
+    return "";
 }
 
 /*

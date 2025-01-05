@@ -75,6 +75,7 @@ Utils::SVariable* BuiltIn::Object::fetchVariable(std::string name)
 
 void BuiltIn::Object::draw() 
 {
+    BuiltIn::Print("Drawing Object!"); //TODO: remove this line after testing function calls on objects
     screen.drawObj(*this);
 }
 

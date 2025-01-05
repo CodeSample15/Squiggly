@@ -8,6 +8,8 @@
 :START: {
     xVel = 0
     yVel = 0
+
+    test.draw()
 }
 
 :UPDATE: {
