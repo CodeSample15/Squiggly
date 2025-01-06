@@ -9,10 +9,13 @@ using namespace Frontend;
     //PC port using opencv
     #include <opencv2/opencv.hpp>
     #include <opencv2/imgproc/imgproc.hpp>
-
-    cv::Mat display = cv::Mat::zeros(cv::Size(SCREEN_WIDTH, SCREEN_HEIGHT), 0);
+    
 
     void Frontend::drawScreen() {
+        //convert virtual screen to opencv Mat
+        cv::Mat display(SCREEN_HEIGHT, SCREEN_WIDTH, CV_8UC3, screen.screenBuff);
+        
+        //draw Mat in window
         cv::imshow("Squiggly Project", display);
         cv::waitKey(SCREEN_REFRESH_DELAY);
     }

@@ -32,6 +32,12 @@ namespace BuiltIn
         public:
             Object();
 
+            float getX();
+            float getY();
+            float getWidth();
+            float getHeight();
+            uint8_t color[3];
+
             void callFunction(std::string name, std::vector<std::string>& args);
             Utils::SVariable* fetchVariable(std::string name);
 
@@ -44,7 +50,6 @@ namespace BuiltIn
             Utils::SVariable rotation;
 
             ObjectShape shape;
-            uint8_t color[3];
 
             void draw();
             void isTouching(Object& other);

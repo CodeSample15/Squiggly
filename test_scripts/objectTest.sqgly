@@ -9,18 +9,23 @@
     xVel = 0
     yVel = 0
 
-    test.draw()
+    test.x = 0
+    test.y = 0
+    test.width = 10
+    test.height = 10
 }
 
 :UPDATE: {
-	test.x += 0.1 * xVel * $DTIME
-    test.y += 0.1 * yVel * $DTIME
+	test.x += 0.05 * xVel * $DTIME
+    test.y += 0.05 * yVel * $DTIME
 
     xVel += $JOYSTICK_X
-    yVel += $JOYSTICK_Y
+    yVel -= $JOYSTICK_Y
 
     xVel *= 0.8
     yVel *= 0.8
 
     ^PRINT("X: " + test.x + "   Y: " + test.y)
+
+    test.draw()
 }

@@ -40,6 +40,22 @@ BuiltIn::Object::Object()
     color[2] = 255;
 }
 
+float BuiltIn::Object::getX() {
+    return *(float*)x.ptr.get();
+}
+
+float BuiltIn::Object::getY() {
+    return *(float*)y.ptr.get();
+}
+
+float BuiltIn::Object::getWidth() {
+    return *(float*)width.ptr.get();
+}
+
+float BuiltIn::Object::getHeight() {
+    return *(float*)height.ptr.get();
+}
+
 void BuiltIn::Object::callFunction(std::string name, std::vector<std::string>& args) 
 {
     if(name == "draw") {
@@ -75,7 +91,6 @@ Utils::SVariable* BuiltIn::Object::fetchVariable(std::string name)
 
 void BuiltIn::Object::draw() 
 {
-    BuiltIn::Print("Drawing Object!"); //TODO: remove this line after testing function calls on objects
     screen.drawObj(*this);
 }
 

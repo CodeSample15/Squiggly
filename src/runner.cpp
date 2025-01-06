@@ -6,6 +6,7 @@
 
 #include "runner.hpp"
 #include "linter.hpp"
+#include "screen.hpp"
 #include "tokenizer.hpp"
 #include "built-in.hpp"
 #include "utils.hpp"
@@ -86,6 +87,7 @@ void Runner::execute()
 
     runningProgram = true;
     while(runningProgram) {
+        screen.clear(); //clear the current screen
         setBIVars(); //set built in variables
 
         executeUpdate();
