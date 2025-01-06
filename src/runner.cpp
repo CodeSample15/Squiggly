@@ -138,7 +138,7 @@ Utils::SVariable* Runner::fetchVariable(std::string name)
             }
         }
 
-        if(tmp && tmp->type==Utils::VarType::OBJECT) {
+        if(tmp && tmp->type==Utils::VarType::OBJECT && memberName!="") {
             tmp = ((BuiltIn::Object*)tmp->ptr.get())->fetchVariable(memberName);
         }
         
@@ -178,6 +178,8 @@ void runProgram(std::vector<TOKENIZED_PTR>& tokens, std::vector<Utils::SVariable
             case Tokenizer::LineType::CALL:
                 callLine = (Tokenizer::CallLine*)line.get();
                 if((sizeBuff=callLine->callFuncName.find(".")) != std::string::npos)
+                    runObjectFunction(callLine->callFuncName, callLine->args, sizeBuff);
+                else
                     runUserFunction(callLine->callFuncName, callLine->args);
                 break;
 
@@ -313,7 +315,11 @@ void runObjectFunction(std::string name, std::vector<std::string>& args, size_t&
 {
     Utils::SVariable* objectVar = fetchVariable(name.substr(0, dotLocation));
     if(objectVar) {
+        if(objectVar->type != Utils::VarType::OBJECT)
+            throwRunnerError("Cannot run '" + name + "' on a non object type!");
 
+        std::string functionName = name.substr(dotLocation+1, name.length()-(dotLocation+1));
+        ((BuiltIn::Object*)objectVar->ptr.get())->callFunction(functionName, args);
     } else {
         throwRunnerError("Unable to execute function '" + name + "'");
     }

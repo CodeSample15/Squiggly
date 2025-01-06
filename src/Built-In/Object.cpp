@@ -40,7 +40,7 @@ BuiltIn::Object::Object()
     color[2] = 255;
 }
 
-void BuiltIn::Object::callFunction(std::string name, std::vector<Utils::SVariable>& args) 
+void BuiltIn::Object::callFunction(std::string name, std::vector<std::string>& args) 
 {
     if(name == "draw") {
         draw();

@@ -32,7 +32,7 @@ namespace BuiltIn
         public:
             Object();
 
-            void callFunction(std::string name, std::vector<Utils::SVariable>& args);
+            void callFunction(std::string name, std::vector<std::string>& args);
             Utils::SVariable* fetchVariable(std::string name);
 
         private:
