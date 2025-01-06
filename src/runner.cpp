@@ -20,7 +20,7 @@ std::vector<Utils::SVariable> gVars;    //global variables
 std::vector<Utils::SVariable> sVars;    //stack variables
 std::vector<Utils::SVariable> bVars;    //built-in variables
 
-//called by the program while executing a script to set all the built in variables users can access
+//called by the program while executing a script to set all the built in Squiggly variables
 void setBIVars();
 
 //values used for built in variables
@@ -29,6 +29,7 @@ std::chrono::steady_clock::time_point lastLoopTime = std::chrono::steady_clock::
 //useful functions
 void runProgram(std::vector<TOKENIZED_PTR>& tokens, std::vector<Utils::SVariable>& memory, size_t stackFrameIdx, bool clearStackWhenDone=true, size_t startIdx=0, size_t endIdx=0); //general function for running blocks of code
 void runUserFunction(std::string name, std::vector<std::string>& args); //find a user defined function and run
+void runObjectFunction(std::string name, std::vector<std::string>& args, size_t& dotLocation);
 void setVariable(const std::shared_ptr<void>& dst, const std::shared_ptr<void>& src, Utils::VarType type, std::string assignType="="); //assign one value to another value
 void createVariable(std::vector<Utils::SVariable>& memory, std::string name, Utils::VarType type, std::shared_ptr<void> ptr); //quick shortcut for adding a new variable to memory
 void executeBranch(std::vector<TOKENIZED_PTR>& tokens, std::vector<Utils::SVariable>& memory, size_t stackFrameIdx, size_t& prgCounter);
@@ -306,6 +307,19 @@ void runUserFunction(std::string name, std::vector<std::string>& args) {
 }
 
 /*
+    Search for defined objects and call their functions
+*/
+void runObjectFunction(std::string name, std::vector<std::string>& args, size_t& dotLocation) 
+{
+    Utils::SVariable* objectVar = fetchVariable(name.substr(0, dotLocation));
+    if(objectVar) {
+
+    } else {
+        throwRunnerError("Unable to execute function '" + name + "'");
+    }
+}
+
+/*
     Assigns a value to a variable using a specific assignType if necessary
     Casts the void pointers passed into the expected datatype pointers and dereferences
 */
@@ -341,7 +355,7 @@ void setVariable(const std::shared_ptr<void>& dst, const std::shared_ptr<void>& 
         case Utils::VarType::DOUBLE:
             if(assignType=="=")
                 *((double*)dst.get()) = *((double*)src.get());
-            else if(assignType=="+")
+            else if(assignType=="+=")
                 *((double*)dst.get()) += *((double*)src.get());
             else if(assignType=="-=")
                 *((double*)dst.get()) -= *((double*)src.get());

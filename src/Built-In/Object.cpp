@@ -40,7 +40,7 @@ BuiltIn::Object::Object()
     color[2] = 255;
 }
 
-void BuiltIn::Object::callFunction(std::string name, std::vector<std::string>& args) 
+void BuiltIn::Object::callFunction(std::string name, std::vector<Utils::SVariable>& args) 
 {
     if(name == "draw") {
         draw();
@@ -70,7 +70,7 @@ Utils::SVariable* BuiltIn::Object::fetchVariable(std::string name)
         return &rotation;
 
     throwObjectError("Object variable \'" + name + "\' not found!");
-    return nullptr;
+    return nullptr; //not likely to run at all, but putting it here anyway
 }
 
 void BuiltIn::Object::draw() 
