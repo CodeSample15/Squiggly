@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #include <string>
 #include <vector>
 
@@ -36,10 +37,12 @@ namespace BuiltIn
             float getY();
             float getWidth();
             float getHeight();
-            uint8_t color[3];
+            void getColor(uint8_t buffer[3]);
 
             void callFunction(std::string name, std::vector<std::string>& args);
             Utils::SVariable* fetchVariable(std::string name);
+
+            void setColor(uint8_t r, uint8_t g, uint8_t b);
 
         private:
             //all of these variables / functions will be accessible from from Squiggly scripts
@@ -48,6 +51,10 @@ namespace BuiltIn
             Utils::SVariable width;
             Utils::SVariable height;
             Utils::SVariable rotation;
+
+            Utils::SVariable color_r;
+            Utils::SVariable color_g;
+            Utils::SVariable color_b;
 
             ObjectShape shape;
 

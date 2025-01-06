@@ -14,6 +14,7 @@ using namespace Frontend;
     void Frontend::drawScreen() {
         //convert virtual screen to opencv Mat
         cv::Mat display(SCREEN_HEIGHT, SCREEN_WIDTH, CV_8UC3, screen.screenBuff);
+        cv::cvtColor(display, display, cv::COLOR_RGB2BGR);
         
         //draw Mat in window
         cv::imshow("Squiggly Project", display);

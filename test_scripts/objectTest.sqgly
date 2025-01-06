@@ -27,5 +27,17 @@
 
     ^PRINT("X: " + test.x + "   Y: " + test.y)
 
+    if($A_BTN) {
+        test.color_r = 0
+    } else {
+        test.color_r = 255
+    }
+
+    if($B_BTN) {
+        test.color_g = 256
+    } else {
+        test.color_g = 0
+    }
+
     test.draw()
 }

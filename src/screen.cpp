@@ -24,10 +24,11 @@ void Screen::drawObj(BuiltIn::Object& obj)
             if(xDraw < 0 || xDraw >= SCREEN_WIDTH || yDraw < 0 || yDraw >= SCREEN_HEIGHT)
                 continue;
 
-            //load colors in BGR order
-            screenBuff[yDraw][xDraw][0] = obj.color[2];
-            screenBuff[yDraw][xDraw][1] = obj.color[1];
-            screenBuff[yDraw][xDraw][2] = obj.color[0];
+            uint8_t objColor[3];
+            obj.getColor(objColor);
+            screenBuff[yDraw][xDraw][0] = objColor[0];
+            screenBuff[yDraw][xDraw][1] = objColor[1];
+            screenBuff[yDraw][xDraw][2] = objColor[2];
         }
     }
 }
