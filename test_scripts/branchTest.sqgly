@@ -23,5 +23,5 @@
 }
 
 :UPDATE: {
-    # game loop logic goes here
+    #Update code goes here
 }

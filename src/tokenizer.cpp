@@ -257,7 +257,7 @@ void tokenizeSection(std::vector<std::string>& lines, std::vector< std::shared_p
         size_t found;
 
         //search for assignments (equals character)
-        if((found = lines[i].find("=")) != std::string::npos && countNumCharacters(lines[i], '=') == 1) {
+        if((found = lines[i].find("=")) != std::string::npos && countNumCharacters(lines[i], '=') == 1 && lines[i].find("if(")!=0 && lines[i].find("else if(")!=0) {
             //found an assignment line
             std::shared_ptr<AssignLine> line = std::make_shared<AssignLine>(AssignLine());
 
@@ -322,6 +322,9 @@ void tokenizeSection(std::vector<std::string>& lines, std::vector< std::shared_p
             
             size_t elseLocation = 0;
             while(checkForElse(lines, ifEnd, elseLocation)) {
+                if(elseLocation >= end-1)
+                    break; //encountering the start of a different else statement
+
                 i = elseLocation;
                 bool elseFound = lines[i].find("if(") != 5 && lines[i].find("if(") != 6;
                 

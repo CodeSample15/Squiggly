@@ -11,6 +11,9 @@
 #define FPS_VAR_NAME "FPS"
 #define DTIME_VAR_NAME "DTIME"
 
+#define SCREEN_WIDTH_VAR_NAME "SCREEN_WIDTH"
+#define SCREEN_HEIGHT_VAR_NAME "SCREEN_HEIGHT"
+
 namespace Runner {
     //delete all old values stored in memory
     void flushMem();

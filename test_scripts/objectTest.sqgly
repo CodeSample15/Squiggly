@@ -34,7 +34,7 @@
     }
 
     if($B_BTN) {
-        test.color_g = 256
+        test.color_g = 255
     } else {
         test.color_g = 0
     }

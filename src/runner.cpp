@@ -5,6 +5,7 @@
 #include <chrono>
 
 #include "runner.hpp"
+#include "built-in.hpp"
 #include "linter.hpp"
 #include "screen.hpp"
 #include "tokenizer.hpp"
@@ -62,6 +63,9 @@ void Runner::executeVars() {
 
     createVariable(bVars, FPS_VAR_NAME, Utils::VarType::INTEGER, Utils::createSharedPtr((int)0));
     createVariable(bVars, DTIME_VAR_NAME, Utils::VarType::FLOAT, Utils::createSharedPtr((float)0.0));
+
+    createVariable(bVars, SCREEN_WIDTH_VAR_NAME, Utils::VarType::INTEGER, Utils::createSharedPtr((int)SCREEN_HEIGHT));
+    createVariable(bVars, SCREEN_HEIGHT_VAR_NAME, Utils::VarType::INTEGER, Utils::createSharedPtr((int)SCREEN_WIDTH));
 
     //run global variable section of the Squiggly code and add created variables to global scope (gVars)
     runProgram(varsBlock_tok, gVars, gVars.size(), false);
@@ -522,6 +526,18 @@ void setBIVars() {
     setVariable(fetchVariable(temp)->ptr, 
                 Utils::createSharedPtr(dtime),
                 Utils::VarType::FLOAT, "=");
+
+    temp = SCREEN_WIDTH_VAR_NAME;
+    temp.insert(0, 1, BUILT_IN_VAR_PREFIX);
+    setVariable(fetchVariable(temp)->ptr, 
+                Utils::createSharedPtr(SCREEN_HEIGHT), //reversed due to how the rows and columns get swapped somewhere in the graphics code, idk
+                Utils::VarType::INTEGER, "=");
+
+    temp = SCREEN_HEIGHT_VAR_NAME;
+    temp.insert(0, 1, BUILT_IN_VAR_PREFIX);
+    setVariable(fetchVariable(temp)->ptr, 
+                Utils::createSharedPtr(SCREEN_WIDTH),
+                Utils::VarType::INTEGER, "=");
 }
 
 void throwRunnerError(std::string message) {
