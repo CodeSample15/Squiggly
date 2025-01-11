@@ -7,12 +7,13 @@
 	int test = 43
 
 	^PRINT("TEST: " + test)
+	helloWorld("test")
 }
 
 :UPDATE: {
 	# game loop logic goes here
 }
 
-helloWorld(string test) {
-	^PRINT(test)
+helloWorld(string f) {
+	^PRINT(f)
 }

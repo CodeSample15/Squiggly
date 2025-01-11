@@ -9,10 +9,12 @@ using namespace Frontend;
     //PC port using opencv
     #include <opencv2/opencv.hpp>
     #include <opencv2/imgproc/imgproc.hpp>
-    
+    #include <opencv2/core/utils/logger.hpp>
 
     void Frontend::drawScreen() {
         //convert virtual screen to opencv Mat
+        cv::utils::logging::setLogLevel(cv::utils::logging::LogLevel::LOG_LEVEL_SILENT);
+
         cv::Mat display(SCREEN_HEIGHT, SCREEN_WIDTH, CV_8UC3, screen.screenBuff);
         cv::cvtColor(display, display, cv::COLOR_RGB2BGR);
         

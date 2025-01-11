@@ -4,11 +4,14 @@
 #include <string>
 
 #include "built-in.hpp"
+#include "linter.hpp"
+#include "runner.hpp"
 #include "screen.hpp"
 #include "utils.hpp"
 
 using namespace BuiltIn;
 
+bool valueInRange(int val, int one, int two); //helper method for detecting collisions
 void throwObjectError(std::string message);
 
 BuiltIn::Object::Object() 
@@ -51,6 +54,15 @@ BuiltIn::Object::Object()
 
     shape = ObjectShape::RECT; //TODO: allow other shapes to be used for object
 
+    //get variables from memory (flags set by functions)
+    std::string flagName = COLLISION_FLAG_VAR_NAME;
+    flagName.insert(0, 1, BUILT_IN_VAR_PREFIX);
+    Utils::SVariable* tmp =  Runner::fetchVariable(flagName);
+    if(tmp)
+        collisionFlag = (bool*)tmp->ptr.get();
+    else
+        throwObjectError("Unable to fetch collision flag!"); //another error that should never be seen by regular Squiggly users, just devs
+
     //default color (pink)
     setColor(255, 0, 255);
 }
@@ -82,11 +94,17 @@ void BuiltIn::Object::callFunction(std::string name, std::vector<std::string>& a
     if(name == "draw") {
         draw();
     }
-    else if(name == "isTouching") {
+    else if(name == "testCollision") {
         if(args.size() != 1)
             throwObjectError("'isTouching' expected 1 argument, got " + std::to_string(args.size()));
 
-        //Object* other = 
+        Utils::SVariable* tmp = Runner::fetchVariable(args[0]);
+        if(tmp && tmp->type == Utils::VarType::OBJECT) {
+            Object* other = (Object*)tmp->ptr.get();
+            *collisionFlag = isTouching(*other);
+        } else {
+            throwObjectError("'isTouching' -> '" + args[0] + "' is not an Object variable");
+        }
     }
     else {
         throwObjectError("Function name \'" + name + "\' does not exist.");
@@ -121,6 +139,17 @@ void BuiltIn::Object::draw()
     screen.drawObj(*this);
 }
 
+bool BuiltIn::Object::isTouching(Object& other) 
+{
+    bool xOverlap = valueInRange(getX(), other.getX(), other.getX()+other.getWidth())
+                || valueInRange(other.getX(), getX(), getX()+getWidth());
+
+    bool yOverlap = valueInRange(getY(), other.getY(), other.getY()+other.getHeight())
+                || valueInRange(other.getY(), getY(), getY()+getHeight());
+    
+    return xOverlap && yOverlap;
+}
+
 /*
     This is just here mainly to make setting the color of the object through c++ code much easier to do
 */
@@ -128,6 +157,10 @@ void BuiltIn::Object::setColor(uint8_t r, uint8_t g, uint8_t b) {
     *(int*)color_r.ptr.get() = r;
     *(int*)color_g.ptr.get() = g;
     *(int*)color_b.ptr.get() = b;
+}
+
+bool valueInRange(int val, int one, int two) {
+    return (val >= one && val <= two) || (val <= one && val >= two);
 }
 
 void throwObjectError(std::string message) {

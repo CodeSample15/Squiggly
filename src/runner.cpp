@@ -9,7 +9,6 @@
 #include "linter.hpp"
 #include "screen.hpp"
 #include "tokenizer.hpp"
-#include "built-in.hpp"
 #include "utils.hpp"
 #include "frontend.hpp"
 
@@ -22,6 +21,8 @@ std::vector<Utils::SVariable> gVars;    //global variables
 std::vector<Utils::SVariable> sVars;    //stack variables
 std::vector<Utils::SVariable> bVars;    //built-in variables
 
+int currStackFrame = 0; //points to where the program is currently using as a stack frame in sVars
+
 //called by the program while executing a script to set all the built in Squiggly variables
 void setBIVars();
 
@@ -29,7 +30,7 @@ void setBIVars();
 std::chrono::steady_clock::time_point lastLoopTime = std::chrono::steady_clock::now();
 
 //useful functions
-void runProgram(std::vector<TOKENIZED_PTR>& tokens, std::vector<Utils::SVariable>& memory, size_t stackFrameIdx, bool clearStackWhenDone=true, size_t startIdx=0, size_t endIdx=0); //general function for running blocks of code
+void runProgram(std::vector<TOKENIZED_PTR>& tokens, std::vector<Utils::SVariable>& memory, size_t stackFrameIdx, bool clearStackWhenDone=true, size_t startIdx=0, size_t endIdx=0, bool isFunction=false); //general function for running blocks of code
 void runUserFunction(std::string name, std::vector<std::string>& args); //find a user defined function and run
 void runObjectFunction(std::string name, std::vector<std::string>& args, size_t& dotLocation);
 void setVariable(const std::shared_ptr<void>& dst, const std::shared_ptr<void>& src, Utils::VarType type, std::string assignType="="); //assign one value to another value
@@ -48,12 +49,14 @@ void Runner::executeVars() {
     //useful variables to replace with their own words when parsing equations. Allows exprtk to be able to run certain functions and parse boolean operations, giving Squiggly a major boost in functionality
     createVariable(gVars, "and", Utils::VarType::STRING, Utils::createSharedPtr((std::string)"and"));
     createVariable(gVars, "or", Utils::VarType::STRING, Utils::createSharedPtr((std::string)"or"));
+    createVariable(gVars, "not", Utils::VarType::STRING, Utils::createSharedPtr((std::string)"not"));
     createVariable(gVars, "xor", Utils::VarType::STRING, Utils::createSharedPtr((std::string)"xor"));
     createVariable(gVars, "sqrt", Utils::VarType::STRING, Utils::createSharedPtr((std::string)"sqrt"));
     createVariable(gVars, "ceil", Utils::VarType::STRING, Utils::createSharedPtr((std::string)"ceil"));
     createVariable(gVars, "cos", Utils::VarType::STRING, Utils::createSharedPtr((std::string)"cos"));
     createVariable(gVars, "sin", Utils::VarType::STRING, Utils::createSharedPtr((std::string)"sin"));
     createVariable(gVars, "tan", Utils::VarType::STRING, Utils::createSharedPtr((std::string)"tan"));
+    createVariable(gVars, "abs", Utils::VarType::STRING, Utils::createSharedPtr((std::string)"abs"));
 
     //built in values that the user can access (will never be cleared from virtual memory)
     createVariable(bVars, JOYSTICK_X_VAR_NAME, Utils::VarType::FLOAT, Utils::createSharedPtr((float)0.0));
@@ -67,12 +70,15 @@ void Runner::executeVars() {
     createVariable(bVars, SCREEN_WIDTH_VAR_NAME, Utils::VarType::INTEGER, Utils::createSharedPtr((int)SCREEN_HEIGHT));
     createVariable(bVars, SCREEN_HEIGHT_VAR_NAME, Utils::VarType::INTEGER, Utils::createSharedPtr((int)SCREEN_WIDTH));
 
+    //flags for built in functions to set
+    createVariable(bVars, COLLISION_FLAG_VAR_NAME, Utils::VarType::BOOL, Utils::createSharedPtr(false));
+
     //run global variable section of the Squiggly code and add created variables to global scope (gVars)
-    runProgram(varsBlock_tok, gVars, gVars.size(), false);
+    runProgram(varsBlock_tok, gVars, gVars.size(), false, 0, 0, true);
 }
 
-void Runner::executeStart() { runProgram(startBlock_tok, sVars, 0); }
-void Runner::executeUpdate() { runProgram(mainLoop_tok, sVars, 0); }
+void Runner::executeStart() { runProgram(startBlock_tok, sVars, 0, true, 0, 0, true); }
+void Runner::executeUpdate() { runProgram(mainLoop_tok, sVars, 0, true, 0, 0, true); }
 
 void Runner::flushMem() {
     gVars.clear();
@@ -128,11 +134,14 @@ Utils::SVariable* Runner::fetchVariable(std::string name)
 
         //search local stack frame first (start at most recently pushed variable and work backwards, hopefully should add some efficiency)
         if(sVars.size()>0) {
-            for(size_t i=sVars.size()-1; i>=0; i--) {
+            for(size_t i=sVars.size()-1; i>=currStackFrame; i--) { //only look for variables within the current stack frame
                 if(sVars[i].name == name) {
                     tmp = &sVars[i];
                     break;
                 }
+
+                if(i==0) //prevent underflow
+                    break;
             }
         }
 
@@ -160,7 +169,7 @@ Utils::SVariable* Runner::fetchVariable(std::string name)
     Starts from a particular location inside the given block of tokens, and ends at either the end of the token block if endIdx is 0, or at 
     position endIdx if the value is not 0
 */
-void runProgram(std::vector<TOKENIZED_PTR>& tokens, std::vector<Utils::SVariable>& memory, size_t stackFrameIdx, bool clearStackWhenDone, size_t startIdx, size_t endIdx) 
+void runProgram(std::vector<TOKENIZED_PTR>& tokens, std::vector<Utils::SVariable>& memory, size_t stackFrameIdx, bool clearStackWhenDone, size_t startIdx, size_t endIdx, bool isFunction) 
 {
     endIdx = endIdx==0 ? tokens.size() : endIdx;
 
@@ -177,6 +186,9 @@ void runProgram(std::vector<TOKENIZED_PTR>& tokens, std::vector<Utils::SVariable
     
     //iterate through the program
     for(size_t prgCounter = startIdx; prgCounter < endIdx; prgCounter++) {
+        if(isFunction)
+            currStackFrame = stackFrameIdx; //update the stack frame so the program has access to only variables in the scope of the function
+
         TOKENIZED_PTR line = tokens[prgCounter];
 
         //execute instruction depending on what type of line is next in the buffer
@@ -215,7 +227,7 @@ void runProgram(std::vector<TOKENIZED_PTR>& tokens, std::vector<Utils::SVariable
 
                 if(varBuff)
                     setVariable(varBuff->ptr, Utils::convertToVariable(assignLine->assignSrc, varBuff->type).ptr, varBuff->type, assignLine->assignOperator);
-                else
+                else 
                     throwRunnerError("Unable to find variable '" + assignLine->assignDst + "'");
                 break;
 
@@ -280,10 +292,10 @@ void runUserFunction(std::string name, std::vector<std::string>& args) {
                 
                 //check to make sure arguments passed are correct
                 if(args.size() != tmp->expectedArgs.size())
-                    throwRunnerError("Unexpected number of arguments passed to function " + name);
-
+                    throwRunnerError("Unexpected number of arguments passed to function " + name + ". Got " + std::to_string(args.size()) + " expected " + std::to_string(tmp->expectedArgs.size()));
+                
                 //create a virtual stack frame
-                std::vector<Utils::SVariable> tempStack;
+                int prevStackFrame = sVars.size();
 
                 //add arguments to stack
                 for(size_t i=0; i<args.size(); i++) {
@@ -299,10 +311,11 @@ void runUserFunction(std::string name, std::vector<std::string>& args) {
 
                     Utils::SVariable nextVar = Utils::convertToVariable(args[i], Utils::stringToVarType(etype));
                     nextVar.name = ename; //split expected arg into type and name, get the name
-                    tempStack.push_back(nextVar); //push to stack
+
+                    sVars.push_back(nextVar); //push to stack
                 }
 
-                runProgram(function, tempStack, 0, true, 1);
+                runProgram(function, sVars, prevStackFrame, true, 1, 0, true);
                 break;
             }
         } else {
@@ -450,7 +463,7 @@ void executeBranch(std::vector<TOKENIZED_PTR>& tokens, std::vector<Utils::SVaria
 
                 expectIfElse = true; //from here on out, expect if else statements, an else statement, or an end to the branch
 
-                if(!executedSection) { //only bother evaluating if 
+                if(!executedSection) { //only bother evaluating if no other branch of the statement was ran
                     intBuff = *((int*)Utils::convertToVariable(branchLine->booleanExpression, Utils::VarType::INTEGER).ptr.get());
                     if(intBuff) {
                         //run section inside of code
@@ -524,7 +537,7 @@ void setBIVars() {
     temp = DTIME_VAR_NAME;
     temp.insert(0, 1, BUILT_IN_VAR_PREFIX);
     setVariable(fetchVariable(temp)->ptr, 
-                Utils::createSharedPtr(dtime),
+                Utils::createSharedPtr(dtime/1000),
                 Utils::VarType::FLOAT, "=");
 
     temp = SCREEN_WIDTH_VAR_NAME;

@@ -7,5 +7,5 @@
 }
 
 :UPDATE: {
-    ^PRINT("FPS: " + $FPS)
+    ^PRINT("FPS: " + $FPS + "   DTIME: " + $DTIME)
 }

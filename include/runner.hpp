@@ -14,6 +14,8 @@
 #define SCREEN_WIDTH_VAR_NAME "SCREEN_WIDTH"
 #define SCREEN_HEIGHT_VAR_NAME "SCREEN_HEIGHT"
 
+#define COLLISION_FLAG_VAR_NAME "COL_FLAG"
+
 namespace Runner {
     //delete all old values stored in memory
     void flushMem();

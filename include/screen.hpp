@@ -4,8 +4,8 @@
 
 #include "built-in.hpp"
 
-#define SCREEN_WIDTH 200
-#define SCREEN_HEIGHT 100
+#define SCREEN_WIDTH 400
+#define SCREEN_HEIGHT 400
 
 #define SCREEN_REFRESH_DELAY 20
 

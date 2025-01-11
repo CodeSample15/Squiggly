@@ -1,0 +1,82 @@
+:VARS: {
+    OBJECT test
+    OBJECT ground
+
+    float xVel
+    float yVel
+    float fallSpeed = 20
+    float fallAccel = 0.5
+
+    bool onGround = false
+}
+
+:START: {
+    createGround()
+    xVel = 0
+    yVel = 0
+
+    test.x = 200
+    test.y = 200
+    test.width = 10
+    test.height = 10
+}
+
+:UPDATE: {
+    int f = 0
+
+	test.x += 40 * xVel * $DTIME
+    test.y += fallSpeed * yVel * $DTIME
+
+    keepWithinBounds(test) #make sure the player is within the bounds of the screen
+
+    landOnGround(test, ground)
+
+    xVel += $JOYSTICK_X
+    xVel *= 0.8
+
+    if(not(onGround)) {
+        yVel += fallAccel
+    } else if($A_BTN) {
+        #jump
+        yVel = -20  # jump force
+        onGround = false
+    }
+
+    ground.draw()
+    test.draw()
+}
+
+createGround() {
+    #set up ground
+    ground.width = $SCREEN_WIDTH
+    ground.height = 20
+    ground.y = $SCREEN_HEIGHT - ground.height
+
+    ground.color_r = 0
+    ground.color_g = 255
+    ground.color_b = 0
+}
+
+keepWithinBounds(OBJECT player) {
+    if(player.x + player.width > $SCREEN_WIDTH) {
+        player.x = $SCREEN_WIDTH - player.width
+    }
+    else if(player.x < 0) {
+        player.x = 0
+    }
+}
+
+landOnGround(OBJECT player, OBJECT ground) 
+{
+    if(not(onGround)) {
+        #player is falling
+        player.testCollision(ground)
+        if($COL_FLAG) {
+            #ground the player to the ground
+            player.y = ground.y - player.height
+            onGround = true
+
+            yVel = 0
+        }
+    }
+}

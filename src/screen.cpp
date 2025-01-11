@@ -18,7 +18,7 @@ void Screen::clear() {
 void Screen::drawObj(BuiltIn::Object& obj)
 {
     for(int y=0; y<obj.getHeight(); y++) {
-        for(int x=0; x<obj.getHeight(); x++) {
+        for(int x=0; x<obj.getWidth(); x++) {
             int xDraw = x+(int)obj.getX();
             int yDraw = y+(int)obj.getY();
             if(xDraw < 0 || xDraw >= SCREEN_WIDTH || yDraw < 0 || yDraw >= SCREEN_HEIGHT)

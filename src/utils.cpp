@@ -93,7 +93,7 @@ std::string Utils::ParseString(std::string s)
                         atEnd = true;
                         break; //no need to error, can simply be that the program reached the end of the argument string
                     }
-                } while(isalpha(s[++i]) || s[i]==BUILT_IN_VAR_PREFIX || s[i]=='_' || s[i]=='.');
+                } while(isalpha(s[++i]) || s[i]==BUILT_IN_VAR_PREFIX || s[i]=='_' || s[i]=='.' || s[i]=='!');
                 
                 if(!atEnd) i--;
 
@@ -134,9 +134,6 @@ SVariable Utils::convertToVariable(std::string input, VarType expectedType) {
         tmp.type = VarType::STRING;
         tmp.ptr = std::make_shared<std::string>(s);
     } else {
-        if(expectedType == VarType::STRING)
-            throwUtilError("Value '" + input + "' is not a string!");
-
         //replace variables in string with their values
         std::stringstream ss;
         for(size_t i=0; i<input.length(); i++) {
@@ -149,7 +146,7 @@ SVariable Utils::convertToVariable(std::string input, VarType expectedType) {
                         atEnd = true;
                         break; //no need to error, can simply be that the program reached the end of the argument string
                     }
-                } while(isalpha(input[++i]) || input[i]==BUILT_IN_VAR_PREFIX || input[i]=='_' || input[i]=='.');
+                } while(isalpha(input[++i]) || input[i]==BUILT_IN_VAR_PREFIX || input[i]=='_' || input[i]=='.' || input[i]=='!');
                 
                 if(!atEnd) i--; //only do this if the scanner did not reach the end of the string (otherwise the scanner might go back and read the last character again and consider it a separate variable, causing an error)
 
@@ -159,10 +156,15 @@ SVariable Utils::convertToVariable(std::string input, VarType expectedType) {
             }
         }
 
-        //run expression through expression parser library
-        double res = expressionToDouble(ss.str());
-        tmp.type = expectedType;
-        tmp.ptr = createSharedPtr(expectedType, res);
+        if(expectedType != VarType::STRING) {
+            //run expression through expression parser library
+            double res = expressionToDouble(ss.str());
+            tmp.type = expectedType;
+            tmp.ptr = createSharedPtr(expectedType, res);
+        } else {
+            tmp.type = expectedType;
+            tmp.ptr = createSharedPtr((std::string)ss.str());
+        }
     }
 
     if(expectedType!=VarType::NONE && tmp.type!=expectedType)

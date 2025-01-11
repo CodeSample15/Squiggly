@@ -21,7 +21,7 @@ namespace BuiltIn
     void PrintErr(std::string message); //same thing as print, just print to error stream
     void PrintErr(char c);
 
-    enum ObjectShape {
+    enum ObjectShape { //not implemented yet
         RECT,
         TRIANGLE,
         CIRCLE,
@@ -59,7 +59,10 @@ namespace BuiltIn
             ObjectShape shape;
 
             void draw();
-            void isTouching(Object& other);
+            bool isTouching(Object& other);
+
+            //pointers to variables in main memory that objects will need access to
+            bool* collisionFlag;
     };
 
     class Text { 

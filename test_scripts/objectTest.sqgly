@@ -16,8 +16,8 @@
 }
 
 :UPDATE: {
-	test.x += 0.05 * xVel * $DTIME
-    test.y += 0.05 * yVel * $DTIME
+	test.x += 40 * xVel * $DTIME
+    test.y += 40 * yVel * $DTIME
 
     xVel += $JOYSTICK_X
     yVel -= $JOYSTICK_Y
