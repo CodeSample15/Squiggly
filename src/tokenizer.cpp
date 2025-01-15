@@ -4,7 +4,7 @@
 #include "linter.hpp"
 #include "built-in.hpp"
 
-#define TOK_DEBUGGING false
+#define TOK_DEBUGGING true
 
 using namespace Tokenizer;
 
@@ -191,7 +191,7 @@ void findOpenCloseBraces(std::vector<std::string>& lines, size_t& start, size_t&
             }
         }
     }
-    end = start;
+    end = start; //safe default if there is no end found to the braces
 }
 
 /*
@@ -670,7 +670,7 @@ int numSegmentsInString(std::string line) {
             alphaFound = true;
             count++;
         }
-        else if(!std::isalpha(line[i]) && line[i]!='_') { //_ is used to join strings, treat as a string not a delimiter 
+        else if(!std::isalpha(line[i]) && line[i]!='_' && line[i]!='[' && line[i]!=']') { //_ is used to join strings, treat as a string not a delimiter. Brackets are also on the ignore list to allow the creation of array declarations. Since this method is only used (as of right now) for detecting declaration statements, I see no problem with adding this edge case
             //found a delimiter (non-alpha character)
             alphaFound = false;
         }

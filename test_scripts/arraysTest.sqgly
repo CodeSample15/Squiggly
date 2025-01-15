@@ -1,0 +1,13 @@
+:VARS: {
+    # global variables go here
+}
+
+:START: {
+    int size = 20
+
+	int testArr[size + 5]
+}
+
+:UPDATE: {
+	# game loop logic goes here
+}
