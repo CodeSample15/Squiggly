@@ -40,11 +40,4 @@ namespace Utils
     std::shared_ptr<void> createSharedPtr(double d);
     std::shared_ptr<void> createSharedPtr(float f);
     std::shared_ptr<void> createSharedPtr(bool b);
-
-    //for arrays of values
-    std::shared_ptr<void> createSharedPtr(std::string s, int arrSize);  //I know this method is going to make it more of a pain in the ass to make it so that multi-dimensional arrays can work in Squiggly, but quite frankly right now I don't care, just gotta get this dang project finished before it consumes me
-    std::shared_ptr<void> createSharedPtr(int i, int arrSize);          //It would be more developer friendly to instead make an array of shared pointers that in turn point to values, but instead I'm making it so that each shared pointer points to it's own array of values, rather than an array of more shared pointers. My hope is that by doing so, I save some memory space. Will make a git commit as a checkpoint just in case
-    std::shared_ptr<void> createSharedPtr(double d, int arrSize);
-    std::shared_ptr<void> createSharedPtr(float f, int arrSize);
-    std::shared_ptr<void> createSharedPtr(bool b, int arrSize);
 }

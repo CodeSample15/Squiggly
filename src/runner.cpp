@@ -263,10 +263,14 @@ void runProgram(std::vector<TOKENIZED_PTR>& tokens, std::vector<Utils::SVariable
                 if(fetchVariable(assignLine->assignDst))
                     throwRunnerError("Variable '" + assignLine->assignDst + "' is already defined!");
 
-                newVariableHolder.name = assignLine->assignDst;
-                newVariableHolder.type = Utils::stringToVarType(assignLine->assignType);
-                newVariableHolder.ptr = Utils::createEmptyShared(newVariableHolder.type);
-                newVariableHolder.isArray = false;
+                if(assignLine->assignDst.find("[")==std::string::npos) {
+                    newVariableHolder.name = assignLine->assignDst;
+                    newVariableHolder.type = Utils::stringToVarType(assignLine->assignType);
+                    newVariableHolder.ptr = Utils::createEmptyShared(newVariableHolder.type);
+                    newVariableHolder.isArray = false;
+                } else {
+                    throwRunnerError("Squiggly does not yet support assign-initialization of arrays! Please initialize each value in array '" + assignLine->assignDst + "' with a loop"); //this is just from laziness/lack of time :/
+                }
 
                 setVariable( newVariableHolder.ptr, 
                         Utils::convertToVariable(assignLine->assignSrc, newVariableHolder.type).ptr, 

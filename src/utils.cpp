@@ -186,6 +186,19 @@ std::shared_ptr<void> Utils::createEmptyShared(VarType type) {
     }
 }
 
+std::shared_ptr<void> Utils::createEmptyShared(VarType type, int size) 
+{
+    switch(type) {
+        case VarType::STRING: return std::shared_ptr<std::string[]>(new std::string[size]);
+        case VarType::INTEGER: return std::shared_ptr<int[]>(new int[size]);
+        case VarType::DOUBLE: return std::shared_ptr<double[]>(new double[size]);
+        case VarType::FLOAT: return std::shared_ptr<float[]>(new float[size]);
+        case VarType::BOOL: return std::shared_ptr<bool[]>(new bool[size]);
+        case VarType::OBJECT: return std::shared_ptr<BuiltIn::Object[]>(new BuiltIn::Object[size]);
+        default: return std::shared_ptr<int[]>(new int[size]);
+    }
+}
+
 std::shared_ptr<void> Utils::createSharedPtr(VarType type, double value) {
     switch(type) {
         case VarType::STRING: return createSharedPtr(std::to_string(value));
