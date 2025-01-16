@@ -21,7 +21,7 @@ std::vector<Utils::SVariable> gVars;    //global variables
 std::vector<Utils::SVariable> sVars;    //stack variables
 std::vector<Utils::SVariable> bVars;    //built-in variables
 
-int currStackFrame = 0; //points to where the program is currently using as a stack frame in sVars
+size_t currStackFrame = 0; //points to where the program is currently using as a stack frame in sVars
 
 //called by the program while executing a script to set all the built in Squiggly variables
 void setBIVars();

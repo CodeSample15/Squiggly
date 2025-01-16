@@ -20,7 +20,7 @@ using namespace Frontend;
     }
 
     bool Frontend::getABtn() {
-        return false
+        return false;
     }
 
     bool Frontend::getBBtn() {
@@ -91,7 +91,7 @@ using namespace Frontend;
         }
 
         bool Frontend::getABtn() {
-            return false
+            return false;
         }
 
         bool Frontend::getBBtn() {
