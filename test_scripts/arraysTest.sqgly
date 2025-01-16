@@ -6,6 +6,8 @@
     int size = 20
 
 	int testArr[size + 5]
+
+    testArr[0] = 5
 }
 
 :UPDATE: {
