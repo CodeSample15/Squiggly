@@ -6,6 +6,30 @@ using namespace Frontend;
 #if BUILD_FOR_RASPI
     //arduino port for frontend
     #include <wiringPi.h>
+
+    void Frontend::drawScreen() {
+
+    }
+
+    float Frontend::getHorAxis() {
+        return 0.0;
+    }
+
+    float Frontend::getVertAxis() {
+        return 0.0;
+    }
+
+    bool Frontend::getABtn() {
+        return false
+    }
+
+    bool Frontend::getBBtn() {
+        return false;
+    }
+
+    bool Frontend::getExitBtn() {
+        return false;
+    }
 #else
     //PC port using opencv
     #include <opencv2/opencv.hpp>
