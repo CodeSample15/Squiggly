@@ -3,8 +3,9 @@
 
 using namespace Frontend;
 
-#if BUILD_FOR_ARDUINO
+#if BUILD_FOR_RASPI
     //arduino port for frontend
+    #include <wiringPi.h>
 #else
     //PC port using opencv
     #include <opencv2/opencv.hpp>
@@ -57,5 +58,24 @@ using namespace Frontend;
             return GetAsyncKeyState(VK_ESCAPE) & 0x8000;
         }
     #else //todo: implement keyboard input for mac and linux
+        float Frontend::getHorAxis() {
+            return 0.0;
+        }
+
+        float Frontend::getVertAxis() {
+            return 0.0;
+        }
+
+        bool Frontend::getABtn() {
+            return false
+        }
+
+        bool Frontend::getBBtn() {
+            return false;
+        }
+
+        bool Frontend::getExitBtn() {
+            return false;
+        }
     #endif
 #endif
