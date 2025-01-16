@@ -19,16 +19,16 @@ if(false)
     target_link_libraries( squiggly ${OpenCV_LIBS} )
 else()
     #console build (raspberry pi)
-    find_package( wiringPi REQUIRED )
+    find_package( WiringPi REQUIRED )
 
-    message(STATUS "wiringPi version: ${wiringPi_VERSION}")
-    message(STATUS "wiringPi include directories: ${wiringPi_INCLUDE_DIRS}")
-    message(STATUS "wiringPi libraries: ${wiringPi_LIBS}")
+    message(STATUS "WiringPi version: ${WiringPi_VERSION}")
+    message(STATUS "WiringPi include directories: ${WiringPi_INCLUDE_DIRS}")
+    message(STATUS "WiringPi libraries: ${WiringPi_LIBS}")
 
-    include_directories( include ${wiringPi_INCLUDE_DIRS} )
+    include_directories( include ${WiringPi_INCLUDE_DIRS} )
 
     add_executable( squiggly ${SOURCES} )
-    target_link_libraries( squiggly ${wiringPi_LIBS} )
+    target_link_libraries( squiggly ${WiringPi_LIBS} )
 endif()
 
 install( TARGETS squiggly )
