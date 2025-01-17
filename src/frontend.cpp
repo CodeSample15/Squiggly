@@ -28,7 +28,7 @@ using namespace Frontend;
     }
 
     bool Frontend::getExitBtn() {
-        return false;
+        return true;
     }
 #else
     //PC port using opencv
