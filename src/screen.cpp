@@ -41,8 +41,8 @@ std::vector<screen_loc> Screen::changedPixels(Screen& other)
         for(int y=0; y<SCREEN_HEIGHT; y++) {
             if(other.screenBuff[y][x][0] != screenBuff[y][x][0] || other.screenBuff[y][x][1] != screenBuff[y][x][1] || other.screenBuff[y][x][2] != screenBuff[y][x][2]) 
             {
-                temp.x = x;
-                temp.y = y;
+                temp.x = y;
+                temp.y = x;
                 changed.push_back(temp);
             }
         }
