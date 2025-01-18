@@ -25,8 +25,8 @@ void throwFrontendError(std::string message);
 
     uint8_t OFFSET_COL = 0;  // 2, These offsets can be adjusted for any issues->
     uint8_t OFFSET_ROW = 0; // 3, with manufacture tolerance/defects at edge of display
-    uint16_t TFT_WIDTH = 128;// Screen width in pixels
-    uint16_t TFT_HEIGHT = 160; // Screen height in pixels
+    uint16_t TFT_WIDTH = SCREEN_WIDTH;// Screen width in pixels (128)
+    uint16_t TFT_HEIGHT = SCREEN_HEIGHT; // Screen height in pixels (160)
 
     uint16_t SWSPI_CommDelay = 0; //uS GPIO SW SPI delay
 
@@ -35,6 +35,7 @@ void throwFrontendError(std::string message);
     void Frontend::init() {
         if(SetupSWSPI()!=0)
             throwFrontendError("Unable to initialize SPI screen!");
+        myTFT.fillScreen(RDLC_BLACK);
     }
 
     void Frontend::cleanUp() {
@@ -43,10 +44,14 @@ void throwFrontendError(std::string message);
     }
 
     void Frontend::drawScreen() {
-        myTFT.fillScreen(RDLC_BLACK);
-        myTFT.setCursor(10,10);
-        myTFT.setTextColor(RDLC_WHITE, RDLC_BLACK);
-        myTFT.print("Hello World");
+        uint16_t* buff = malloc(SCREEN_WIDTH * SCREEN_HEIGHT * sizeof(uint16_t));
+        for(int y=0; y<SCREEN_HEIGHT; y++) {
+            for(int x=0; x<SCREEN_WIDTH; x++) {
+                buff[i * 2 + (h-1-j) * 2 * w] = myTFT.Color565(screen.screenBuff[x][y][0], screen.screenBuff[x][y][1], screen.screenBuff[x][y][2])
+            }
+        }
+
+        myTFT.drawBitmap16(0, 0, buff, SCREEN_WIDTH, SCREEN_HEIGHT);
     }
 
     float Frontend::getHorAxis() {

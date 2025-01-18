@@ -4,10 +4,15 @@
 
 #include "built-in.hpp"
 
-#define SCREEN_WIDTH 400
-#define SCREEN_HEIGHT 400
+#define SCREEN_WIDTH 128
+#define SCREEN_HEIGHT 160
 
 #define SCREEN_REFRESH_DELAY 20
+
+// typedef struct {
+//     uint16_t x;
+//     uint16_t y;
+// } screen_loc;
 
 class Screen {
     public:
