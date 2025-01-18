@@ -28,7 +28,9 @@ else()
     add_compile_options(-llgpio -lrpidisplaygl)
     include_directories( include ${WiringPi_INCLUDE_DIRS} )
 
-    add_executable( squiggly ${SOURCES} )
+    file( GLOB SCREEN_LIB "lib/Display_Lib_RPI/src/*.cpp" )
+
+    add_executable( squiggly ${SOURCES} ${SCREEN_LIB} )
     target_link_libraries( squiggly ${WiringPi_LIBS} )
 endif()
 
