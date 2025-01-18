@@ -10,7 +10,7 @@ void throwFrontendError(std::string message);
 #if BUILD_FOR_RASPI
     //arduino port for frontend
     #include <wiringPi.h>
-    #include "../lib/Display_Lib_RPI/include/st7735/ST7735_TFT_LCD_RDL.hpp"
+    #include "../lib/ST7735_TFT_RPI/include/ST7735_TFT.hpp"
 
     //code taken from Display_Lib_RPI GitHub: https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/examples/st7735/Hello_world_SWSPI/main.cpp
     ST7735_TFT myTFT;
