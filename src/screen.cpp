@@ -33,4 +33,22 @@ void Screen::drawObj(BuiltIn::Object& obj)
     }
 }
 
+std::vector<screen_loc> Screen::changedPixels(Screen& other) 
+{
+    std::vector<screen_loc> changed;
+    screen_loc temp;
+    for(int x=0; x<SCREEN_WIDTH; x++) {
+        for(int y=0; y<SCREEN_HEIGHT; y++) {
+            if(other.screenBuff[y][x][0] != screenBuff[y][x][0] || other.screenBuff[y][x][1] != screenBuff[y][x][1] || other.screenBuff[y][x][2] != screenBuff[y][x][2]) 
+            {
+                temp.x = x;
+                temp.y = y;
+                changed.push_back(temp);
+            }
+        }
+    }
+
+    return changed;
+}
+
 Screen screen = Screen();

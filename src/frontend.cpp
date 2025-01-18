@@ -32,6 +32,8 @@ void throwFrontendError(std::string message);
 
     uint8_t SetupSWSPI(void); // setup + user options for software SPI
 
+    Screen lastScreen;
+
     void Frontend::init() {
         if(SetupSWSPI()!=0)
             throwFrontendError("Unable to initialize SPI screen!");
@@ -44,14 +46,15 @@ void throwFrontendError(std::string message);
     }
 
     void Frontend::drawScreen() {
-        uint16_t* buff = (uint16_t*)malloc(SCREEN_WIDTH * SCREEN_HEIGHT * sizeof(uint16_t)); //freed in drawBitmap16
-        for(int y=0; y<SCREEN_HEIGHT; y++) {
-            for(int x=0; x<SCREEN_WIDTH; x++) {
-                buff[x * 2 + (SCREEN_HEIGHT-1-y) * 2 * SCREEN_WIDTH] = myTFT.Color565(screen.screenBuff[x][y][0], screen.screenBuff[x][y][1], screen.screenBuff[x][y][2])
-            }
+        std::vector<screen_loc> changedPixels = screen.changedPixels(lastScreen);
+
+        uint16_t color;
+        for(screen_loc& loc : changedPixels) {
+            color = myTFT.Color565(((int16_t)screen.screenBuff[loc.y][loc.x][0])<<8, ((int16_t)screen.screenBuff[loc.y][loc.x][1])<<8, ((int16_t)screen.screenBuff[loc.y][loc.x][2])<<8);
+            myTFT.drawPixel(loc.x, loc.y, color);
         }
 
-        myTFT.drawBitmap16(0, 0, buff, SCREEN_WIDTH, SCREEN_HEIGHT);
+        lastScreen = screen;
     }
 
     float Frontend::getHorAxis() {
