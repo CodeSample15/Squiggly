@@ -71,9 +71,6 @@ void throwFrontendError(std::string message);
 
     uint8_t SetupSWSPI(void)
     {
-        std::cout << "TFT Start Test 101 HWSPI" << std::endl;
-        std::cout << "Display_Lib_RPI library version : " << GetRDLibVersionNum()<< std::endl;
-        std::cout <<"Lgpio library version :" << lguVersion() << std::endl;
         // ** USER OPTION 1 GPIO/SPI TYPE SW **
         myTFT.TFTSetupGPIO(RST_TFT, DC_TFT, CS_TFT, SCLK_TFT, SDIN_TFT);
         //********************************************
@@ -87,8 +84,6 @@ void throwFrontendError(std::string message);
             return 3;
         }
         //*****************************
-
-        initialized = true;
         return 0;
     }
 #else
