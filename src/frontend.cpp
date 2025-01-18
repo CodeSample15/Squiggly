@@ -51,7 +51,7 @@ void throwFrontendError(std::string message);
         uint16_t color;
         for(screen_loc& loc : changedPixels) {
             color = myTFT.Color565(((int16_t)screen.screenBuff[loc.y][loc.x][0])<<8, ((int16_t)screen.screenBuff[loc.y][loc.x][1])<<8, ((int16_t)screen.screenBuff[loc.y][loc.x][2])<<8);
-            myTFT.drawPixel(loc.x, loc.y, color);
+            myTFT.drawPixel(loc.y, loc.x, color);
         }
 
         lastScreen = screen;
