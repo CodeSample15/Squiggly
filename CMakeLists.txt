@@ -25,13 +25,12 @@ else()
     message(STATUS "WiringPi include directories: ${WiringPi_INCLUDE_DIRS}")
     message(STATUS "WiringPi libraries: ${WiringPi_LIBS}")
 
-    add_compile_options(-llgpio -lrpidisplaygl)
     include_directories( include ${WiringPi_INCLUDE_DIRS} )
 
     file( GLOB SCREEN_LIB "lib/Display_Lib_RPI/src/*.cpp" "lib/Display_Lib_RPI/src/st7735/*.cpp" )
 
     add_executable( squiggly ${SOURCES} ${SCREEN_LIB} )
-    target_link_libraries( squiggly ${WiringPi_LIBS} )
+    target_link_libraries( squiggly ${WiringPi_LIBS} -llgpio -lrpidisplaygl )
 endif()
 
 install( TARGETS squiggly )
