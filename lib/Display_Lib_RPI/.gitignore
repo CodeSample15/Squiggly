@@ -1,0 +1,8 @@
+stuff/
+bin/
+build/
+examples/Bin
+examples/Build
+display.cppcheck
+run.sh
+
