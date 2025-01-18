@@ -95,6 +95,8 @@ void Runner::execute()
     executeVars();
     executeStart();
 
+    Frontend::init();
+
     runningProgram = true;
     while(runningProgram) {
         screen.clear(); //clear the current screen
@@ -106,6 +108,8 @@ void Runner::execute()
         if(Frontend::getExitBtn())
             runningProgram = false;
     }
+
+    Frontend::cleanUp();
 }
 
 Utils::SVariable* Runner::fetchVariable(std::string name) 

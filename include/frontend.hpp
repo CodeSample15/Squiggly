@@ -41,4 +41,5 @@ namespace Frontend {
 
     void drawScreen();
     void init();
+    void cleanUp();
 }

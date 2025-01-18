@@ -25,6 +25,7 @@ else()
     message(STATUS "WiringPi include directories: ${WiringPi_INCLUDE_DIRS}")
     message(STATUS "WiringPi libraries: ${WiringPi_LIBS}")
 
+    add_compile_options(-llgpio -lrpidisplaygl)
     include_directories( include ${WiringPi_INCLUDE_DIRS} )
 
     add_executable( squiggly ${SOURCES} )

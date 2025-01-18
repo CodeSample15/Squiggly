@@ -1,0 +1,3 @@
+[submodule "lib/Display_Lib_RPI"]
+	path = lib/Display_Lib_RPI
+	url = https://github.com/gavinlyonsrepo/Display_Lib_RPI.git

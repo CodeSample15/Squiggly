@@ -1,14 +1,52 @@
+#include <string>
+
 #include "frontend.hpp"
 #include "screen.hpp"
 
 using namespace Frontend;
 
+void throwFrontendError(std::string message);
+
 #if BUILD_FOR_RASPI
     //arduino port for frontend
     #include <wiringPi.h>
+    #include "../lib/Display_Lib_RPI/include/st7735/ST7735_TFT_LCD_RDL.hpp"
+
+    //code taken from Display_Lib_RPI GitHub: https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/examples/st7735/Hello_world_SWSPI/main.cpp
+    ST7735_TFT myTFT;
+
+    // GPIO
+    int8_t RST_TFT  = 25;
+    int8_t DC_TFT   = 24;
+    int8_t SCLK_TFT = 6;
+    int8_t SDIN_TFT = 5;
+    int8_t CS_TFT   = 21;
+    int  GPIO_CHIP_DEV = 4; // RPI 5 = 4 , other RPIs = 0
+
+    uint8_t OFFSET_COL = 0;  // 2, These offsets can be adjusted for any issues->
+    uint8_t OFFSET_ROW = 0; // 3, with manufacture tolerance/defects at edge of display
+    uint16_t TFT_WIDTH = 128;// Screen width in pixels
+    uint16_t TFT_HEIGHT = 160; // Screen height in pixels
+
+    uint16_t SWSPI_CommDelay = 0; //uS GPIO SW SPI delay
+
+    uint8_t SetupSWSPI(void); // setup + user options for software SPI
+
+    void Frontend::init() {
+        if(SetupSWSPI()!=0)
+            throwFrontendError("Unable to initialize SPI screen!");
+    }
+
+    void Frontend::cleanUp() {
+        myTFT.fillScreen(RDLC_BLACK);
+        myTFT.TFTPowerDown();
+    }
 
     void Frontend::drawScreen() {
-
+        myTFT.fillScreen(RDLC_BLACK);
+        myTFT.setCursor(10,10);
+        myTFT.setTextColor(RDLC_WHITE, RDLC_BLACK);
+        myTFT.print("Hello World");
     }
 
     float Frontend::getHorAxis() {
@@ -28,13 +66,39 @@ using namespace Frontend;
     }
 
     bool Frontend::getExitBtn() {
-        return true;
+        return false;
+    }
+
+    uint8_t SetupSWSPI(void)
+    {
+        std::cout << "TFT Start Test 101 HWSPI" << std::endl;
+        std::cout << "Display_Lib_RPI library version : " << GetRDLibVersionNum()<< std::endl;
+        std::cout <<"Lgpio library version :" << lguVersion() << std::endl;
+        // ** USER OPTION 1 GPIO/SPI TYPE SW **
+        myTFT.TFTSetupGPIO(RST_TFT, DC_TFT, CS_TFT, SCLK_TFT, SDIN_TFT);
+        //********************************************
+        // ** USER OPTION 2 Screen Setup **
+        myTFT.TFTInitScreenSize(OFFSET_COL, OFFSET_ROW , TFT_WIDTH , TFT_HEIGHT);
+        // ***********************************
+        // ** USER OPTION 3 PCB_TYPE **
+        // pass enum to param1 ,4 choices,see README
+        if(myTFT.TFTInitPCBType(myTFT.TFT_ST7735R_Red, SWSPI_CommDelay, GPIO_CHIP_DEV) != rpiDisplay_Success)
+        {
+            return 3;
+        }
+        //*****************************
+
+        initialized = true;
+        return 0;
     }
 #else
     //PC port using opencv
     #include <opencv2/opencv.hpp>
     #include <opencv2/imgproc/imgproc.hpp>
     #include <opencv2/core/utils/logger.hpp>
+
+    void Frontend::init() {}
+    void Frontend::cleanUp() {}
 
     void Frontend::drawScreen() {
         //convert virtual screen to opencv Mat
@@ -103,3 +167,7 @@ using namespace Frontend;
         }
     #endif
 #endif
+
+void throwFrontendError(std::string message) {
+    throw std::runtime_error("Program frontend failed! : " + message);
+}
