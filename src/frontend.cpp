@@ -28,6 +28,11 @@ void throwFrontendError(std::string message);
     uint16_t TFT_WIDTH = SCREEN_WIDTH;// Screen width in pixels (128)
     uint16_t TFT_HEIGHT = SCREEN_HEIGHT; // Screen height in pixels (160)
 
+    int SPI_DEV = 0; // A SPI device, >= 0. which SPI interface to use
+    int SPI_CHANNEL = 0; // A SPI channel, >= 0. Which Chip enable pin to use
+    int SPI_SPEED = 8000000; // The speed of serial communication in bits per second.
+    int SPI_FLAGS = 0;
+
     uint16_t SWSPI_CommDelay = 0; //uS GPIO SW SPI delay
 
     uint8_t SetupSWSPI(void); // setup + user options for software SPI
@@ -37,6 +42,7 @@ void throwFrontendError(std::string message);
     void Frontend::init() {
         if(SetupSWSPI()!=0)
             throwFrontendError("Unable to initialize SPI screen!");
+
         myTFT.fillScreen(RDLC_BLACK);
     }
 
@@ -87,7 +93,7 @@ void throwFrontendError(std::string message);
         // ***********************************
         // ** USER OPTION 3 PCB_TYPE **
         // pass enum to param1 ,4 choices,see README
-        if(myTFT.TFTInitPCBType(myTFT.TFT_ST7735R_Red, SWSPI_CommDelay, GPIO_CHIP_DEV) != rpiDisplay_Success)
+        if(myTFT.TFTInitPCBType(myTFT.TFT_ST7735R_Red, SPI_DEV, SPI_CHANNEL, SPI_SPEED, SPI_FLAGS, GPIO_CHIP_DEV) != rpiDisplay_Success)
         {
             return 3;
         }
