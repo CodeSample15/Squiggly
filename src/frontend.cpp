@@ -23,12 +23,12 @@ void throwFrontendError(std::string message);
             throwFrontendError("Unable to initialize SPI screen!");
         }
 
-        myTFT.fillScreen(ST7735_BLACK);
+        myTFT.TFTfillScreen(ST7735_BLACK);
         myTFT.IMClear();
     }
 
     void Frontend::cleanUp() {
-        myTFT.fillScreen(ST7735_BLACK);
+        myTFT.TFTfillScreen(ST7735_BLACK);
         myTFT.TFTPowerDown();
         bcm2835_close();
     }
