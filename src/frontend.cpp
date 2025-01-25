@@ -32,16 +32,16 @@ void throwFrontendError(std::string message);
     }
 
     void Frontend::drawScreen() {
-        //uint16_t color;
+        uint16_t color;
+        BuiltIn::Print("drawing screen");
         for(int x=0; x<SCREEN_WIDTH; x++) {
             for(int y=0; y<SCREEN_HEIGHT; y++) {
-                //color = myTFT.Color565(((int16_t)screen.screenBuff[y][x][0])<<8, ((int16_t)screen.screenBuff[y][x][1])<<8, ((int16_t)screen.screenBuff[y][x][2])<<8);
-                myTFT.IMDrawPixel(x, y, 0xFBFB);
+                color = myTFT.Color565(((int16_t)screen.screenBuff[y][x][0])<<8, ((int16_t)screen.screenBuff[y][x][1])<<8, ((int16_t)screen.screenBuff[y][x][2])<<8);
+                myTFT.IMDrawPixel(x, y, color);
             }
         }
 
         myTFT.IMDisplay();
-        TFT_MILLISEC_DELAY(1000);
     }
 
     float Frontend::getHorAxis() {
