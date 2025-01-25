@@ -9,7 +9,6 @@ void throwFrontendError(std::string message);
 
 #if BUILD_FOR_RASPI
     //arduino port for frontend
-    #include <wiringPi.h>
     #include <bcm2835.h> 
     #include "ST7735_TFT.hpp"
 
@@ -19,10 +18,8 @@ void throwFrontendError(std::string message);
     uint8_t SetupSWSPI(void); // setup + user options for software SPI
 
     void Frontend::init() {
-        if(SetupSWSPI()!=0) {
-            bcm2835_close();
+        if(SetupSWSPI()!=0)
             throwFrontendError("Unable to initialize SPI screen!");
-        }
 
         myTFT.TFTfillScreen(ST7735_BLACK);
         myTFT.IMClear();
@@ -68,6 +65,12 @@ void throwFrontendError(std::string message);
 
     uint8_t SetupSWSPI(void)
     {
+        if(!bcm2835_init())
+        {
+            std::cout << "Error 1201 Problem with init bcm2835 library" << std::endl;
+            return 2;
+        }
+
         // GPIO
         int8_t RST_TFT  = 25;
         int8_t DC_TFT   = 24;
