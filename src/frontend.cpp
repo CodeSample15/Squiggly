@@ -36,7 +36,7 @@ void throwFrontendError(std::string message);
         for(int x=0; x<SCREEN_WIDTH; x++) {
             for(int y=0; y<SCREEN_HEIGHT; y++) {
                 color = myTFT.Color565(((int16_t)screen.screenBuff[y][x][0])<<8, ((int16_t)screen.screenBuff[y][x][1])<<8, ((int16_t)screen.screenBuff[y][x][2])<<8);
-                myTFT.IMDrawPixel(x, y, color);
+                myTFT.IMDrawPixel(x, y, 0xFBFB);
             }
         }
 
@@ -95,6 +95,7 @@ void throwFrontendError(std::string message);
         // pass enum to param1 ,4 choices,see README
         if(myTFT.TFTInitPCBType(myTFT.TFT_ST7735R_Red, SWSPI_CommDelay) != 0)
         {
+            bcm2835_close();
             return 3;
         }
         //*****************************
