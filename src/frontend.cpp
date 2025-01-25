@@ -41,7 +41,7 @@ void throwFrontendError(std::string message);
         }
 
         myTFT.IMDisplay();
-        TFT_MILLISEC_DELAY(10);
+        TFT_MILLISEC_DELAY(1000);
     }
 
     float Frontend::getHorAxis() {
@@ -100,6 +100,8 @@ void throwFrontendError(std::string message);
             return 3;
         }
         //*****************************
+
+        TFT_MILLISEC_DELAY(50);
         return 0;
     }
 #else
