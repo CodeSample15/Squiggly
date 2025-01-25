@@ -28,7 +28,7 @@ else()
     include_directories( include ${WiringPi_INCLUDE_DIRS} )
 
     add_executable( squiggly ${SOURCES} )
-    target_link_libraries( squiggly ${WiringPi_LIBS} -llgpio -lbcm2835 -lrt -lST7735_TFT_RPI )
+    target_link_libraries( squiggly ${WiringPi_LIBS} -lbcm2835 -lrt -lST7735_TFT_RPI )
 endif()
 
 install( TARGETS squiggly )
