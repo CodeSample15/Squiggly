@@ -28,7 +28,8 @@ class ST7735_TFT_graphics : public Print {
  public:
 
 	ST7735_TFT_graphics(); // Constructor
-	~ST7735_TFT_graphics(){};
+	ST7735_TFT_graphics(uint8_t w, uint8_t h); //for if the user wishes to use the in-memory buffer
+	~ST7735_TFT_graphics();
 	
 	/*! Font type 1-8 */
 	enum TFT_Font_Type_e : uint8_t
@@ -52,6 +53,11 @@ class ST7735_TFT_graphics : public Print {
 	void TFTsetAddrWindow(uint8_t, uint8_t, uint8_t, uint8_t);
 	void TFTfillScreen(uint16_t color);
 	void TFTsetCursor(int16_t x, int16_t y);
+
+	// In memory screen drawing
+	void IMClear();
+	void IMDrawPixel(uint8_t x, uint8_t y, uint16_t color);
+	void IMDisplay(); //write in-memory display buffer to screen over SPI
 	
 	// Shapes and lines
 	void TFTdrawPixel(uint8_t, uint8_t, uint16_t);
@@ -125,6 +131,11 @@ protected:
 	uint16_t _HighFreqDelay = 0; /**< uS GPIO Communications delay, SW SPI ONLY */
 	
 private:
+	//in-memory screen buffer
+	uint8_t* IMScreenBuff = nullptr;
+	uint8_t IMScreenWidth = 0;
+	uint8_t IMScreenHeight = 0;
+	uint32_t IMScreenBuffLen = 0;
 
 	/*! Width of the font in bits each representing a bytes sized column*/
 	enum TFT_Font_width_e : uint8_t

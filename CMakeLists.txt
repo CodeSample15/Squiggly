@@ -25,12 +25,10 @@ else()
     message(STATUS "WiringPi include directories: ${WiringPi_INCLUDE_DIRS}")
     message(STATUS "WiringPi libraries: ${WiringPi_LIBS}")
 
-    include_directories( include ${WiringPi_INCLUDE_DIRS} "lib/ST7735_TFT_RPI/include" )
+    include_directories( include ${WiringPi_INCLUDE_DIRS} )
 
-    file( GLOB SCREEN_LIB "lib/ST7735_TFT_RPI/src/*.cpp" )
-
-    add_executable( squiggly ${SOURCES} ${SCREEN_LIB} )
-    target_link_libraries( squiggly ${WiringPi_LIBS} -llgpio -lrpidisplaygl )
+    add_executable( squiggly ${SOURCES} )
+    target_link_libraries( squiggly ${WiringPi_LIBS} -llgpio -lbcm2835 -lrt -lST7735_TFT_RPI )
 endif()
 
 install( TARGETS squiggly )

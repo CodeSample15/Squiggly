@@ -13,7 +13,7 @@
 # Pick ONE example "SRC" dir and ONE ONLY.
 # Comment out the others. #
 
-SRC=src/Hello_world
+#SRC=src/Hello_world
 #SRC=src/Hello_world_SWSPI
 #SRC=src/Text_Tests
 #SRC=src/Graphic_Tests
@@ -21,6 +21,8 @@ SRC=src/Hello_world
 #SRC=src/Bitmap_Tests
 #SRC=src/Frame_rate_test
 #SRC=src/Frame_rate_test_2
+
+SRC=src/IM_test
 # ************************************************
 
 # lang c plus plus

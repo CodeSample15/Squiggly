@@ -10,57 +10,39 @@ void throwFrontendError(std::string message);
 #if BUILD_FOR_RASPI
     //arduino port for frontend
     #include <wiringPi.h>
-    #include "../lib/ST7735_TFT_RPI/include/ST7735_TFT.hpp"
+    #include "ST7735_TFT.hpp"
 
     //code taken from Display_Lib_RPI GitHub: https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/examples/st7735/Hello_world_SWSPI/main.cpp
-    ST7735_TFT myTFT;
-
-    // GPIO
-    int8_t RST_TFT  = 25;
-    int8_t DC_TFT   = 24;
-    int8_t SCLK_TFT = 6;
-    int8_t SDIN_TFT = 5;
-    int8_t CS_TFT   = 21;
-    int  GPIO_CHIP_DEV = 4; // RPI 5 = 4 , other RPIs = 0
-
-    uint8_t OFFSET_COL = 0;  // 2, These offsets can be adjusted for any issues->
-    uint8_t OFFSET_ROW = 0; // 3, with manufacture tolerance/defects at edge of display
-    uint16_t TFT_WIDTH = SCREEN_WIDTH;// Screen width in pixels (128)
-    uint16_t TFT_HEIGHT = SCREEN_HEIGHT; // Screen height in pixels (160)
-
-    int SPI_DEV = 0; // A SPI device, >= 0. which SPI interface to use
-    int SPI_CHANNEL = 0; // A SPI channel, >= 0. Which Chip enable pin to use
-    int SPI_SPEED = 8000000; // The speed of serial communication in bits per second.
-    int SPI_FLAGS = 0;
-
-    uint16_t SWSPI_CommDelay = 0; //uS GPIO SW SPI delay
+    ST7735_TFT myTFT(SCREEN_WIDTH, SCREEN_HEIGHT);
 
     uint8_t SetupSWSPI(void); // setup + user options for software SPI
 
-    Screen lastScreen;
-
     void Frontend::init() {
-        if(SetupSWSPI()!=0)
+        if(SetupSWSPI()!=0) {
+            bcm2835_close();
             throwFrontendError("Unable to initialize SPI screen!");
+        }
 
         myTFT.fillScreen(RDLC_BLACK);
+        myTFT.IMClear();
     }
 
     void Frontend::cleanUp() {
         myTFT.fillScreen(RDLC_BLACK);
         myTFT.TFTPowerDown();
+        bcm2835_close();
     }
 
     void Frontend::drawScreen() {
-        std::vector<screen_loc> changedPixels = screen.changedPixels(lastScreen);
-
         uint16_t color;
-        for(screen_loc& loc : changedPixels) {
-            color = myTFT.Color565(((int16_t)screen.screenBuff[loc.x][loc.y][0])<<8, ((int16_t)screen.screenBuff[loc.x][loc.y][1])<<8, ((int16_t)screen.screenBuff[loc.x][loc.y][2])<<8);
-            myTFT.drawPixel(loc.x, loc.y, color);
+        for(int x=0; x<SCREEN_WIDTH; x++) {
+            for(int y=0; y<SCREEN_HEIGHT; y++) {
+                color = myTFT.Color565(((int16_t)screen.screenBuff[y][x][0])<<8, ((int16_t)screen.screenBuff[y][x][1])<<8, ((int16_t)screen.screenBuff[y][x][2])<<8);
+                myTFT.IMDrawPixel(loc.x, loc.y, color);
+            }
         }
 
-        lastScreen = screen;
+        myTFT.IMDisplay();
     }
 
     float Frontend::getHorAxis() {
@@ -85,6 +67,20 @@ void throwFrontendError(std::string message);
 
     uint8_t SetupSWSPI(void)
     {
+        // GPIO
+        int8_t RST_TFT  = 25;
+        int8_t DC_TFT   = 24;
+        int8_t SCLK_TFT = 6;
+        int8_t SDIN_TFT = 5;
+        int8_t CS_TFT   = 21;
+
+        uint8_t OFFSET_COL = 0;  // 2, These offsets can be adjusted for any issues->
+        uint8_t OFFSET_ROW = 0; // 3, with manufacture tolerance/defects at edge of display
+        uint16_t TFT_WIDTH = SCREEN_WIDTH;// Screen width in pixels (128)
+        uint16_t TFT_HEIGHT = SCREEN_HEIGHT; // Screen height in pixels (160)
+
+        uint16_t SWSPI_CommDelay = 0; //uS GPIO SW SPI delay
+
         // ** USER OPTION 1 GPIO/SPI TYPE SW **
         myTFT.TFTSetupGPIO(RST_TFT, DC_TFT, CS_TFT, SCLK_TFT, SDIN_TFT);
         //********************************************
@@ -93,7 +89,7 @@ void throwFrontendError(std::string message);
         // ***********************************
         // ** USER OPTION 3 PCB_TYPE **
         // pass enum to param1 ,4 choices,see README
-        if(myTFT.TFTInitPCBType(myTFT.TFT_ST7735R_Red, SPI_DEV, SPI_CHANNEL, SPI_SPEED, SPI_FLAGS, GPIO_CHIP_DEV) != rpiDisplay_Success)
+        if(myTFT.TFTInitPCBType(myTFT.TFT_ST7735R_Red, SWSPI_CommDelay) != 0)
         {
             return 3;
         }

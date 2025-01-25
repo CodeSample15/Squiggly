@@ -133,6 +133,7 @@ class ST7735_TFT : public ST7735_TFT_graphics
 public:
 
 	ST7735_TFT();
+	ST7735_TFT(uint8_t w, uint8_t h);
 	~ST7735_TFT(){};
 
 	//  Enums

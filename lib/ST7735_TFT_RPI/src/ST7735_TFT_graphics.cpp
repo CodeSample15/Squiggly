@@ -15,6 +15,66 @@
 ST7735_TFT_graphics::ST7735_TFT_graphics(){}
 
 /*!
+	@brief Construct a new st7735 tft graphics::st7735 tft graphics object
+ */
+ST7735_TFT_graphics::ST7735_TFT_graphics(uint8_t w, uint8_t h) {
+	IMScreenBuff = (uint8_t*)malloc(w*h*sizeof(uint16_t));
+	IMScreenWidth = w;
+	IMScreenHeight = h;
+	IMScreenBuffLen = w*h*sizeof(uint16_t);
+
+	if(IMScreenBuff == NULL) {
+		std::cout << "ST7735_TFT_graphics: Unable to allocate virtual screen buffer" << std::endl;
+	}
+}
+
+ST7735_TFT_graphics::~ST7735_TFT_graphics() {
+	if(IMScreenBuff)
+		free(IMScreenBuff);
+}
+
+
+/**
+	@brief Clear in-memory screen buffer
+ */
+void ST7735_TFT_graphics ::IMClear() {
+	if(!IMScreenBuff) {
+		std::cout << "IMClear: Screen buffer is null!" << std::endl;
+		return; 
+	}
+
+	for(uint32_t i=0; i<IMScreenWidth*IMScreenHeight*sizeof(uint16_t); i++)
+		IMScreenBuff[i] = 0;
+}
+
+/**
+	@brief Draw pixel to in-memory screen buffer
+	@param x Screen x position
+	@param y Screen y position
+	@param color Pixel color
+*/
+void ST7735_TFT_graphics ::IMDrawPixel(uint8_t x, uint8_t y, uint16_t color) {
+
+	uint8_t hi = color >> 8;
+	uint8_t lo = color & 0xFF;
+	uint32_t buffLoc = (x*2)+(IMScreenWidth*y*2);
+
+	if(buffLoc < 0 || buffLoc >= IMScreenBuffLen)
+		return; //avoid segfault
+
+	IMScreenBuff[buffLoc] = hi;
+	IMScreenBuff[buffLoc+1] = lo;
+}
+
+/**
+	@brief Send in-memory screen buffer to physical screen
+ */
+void ST7735_TFT_graphics ::IMDisplay() {
+	TFTsetAddrWindow(0, 0, IMScreenWidth - 1, IMScreenHeight - 1);
+	spiWriteDataBuffer(IMScreenBuff, IMScreenHeight*IMScreenWidth*sizeof(uint16_t)); //i think this is how it works, idk
+}
+
+/*!
 	@brief Draw a pixel to screen
 	@param x  Column co-ord
 	@param y  row co-ord
@@ -621,7 +681,7 @@ size_t ST7735_TFT_graphics ::write(uint8_t character)
 			_cursorY += _textSize*_CurrentFontheight;
 			_cursorX  = 0;
 		break;
-		case'\r':/* skip */ break;
+		case '\r':/* skip */ break;
 		default:
 				if(TFTdrawChar(_cursorX, _cursorY, character, _textcolor, _textbgcolor, _textSize) != 0)
 				{

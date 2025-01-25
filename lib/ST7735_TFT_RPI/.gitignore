@@ -6,3 +6,4 @@ examples/bin/
 src/*.o
 *.o
 extra/doc/doxygen/html
+.vscode/

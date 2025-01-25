@@ -11,13 +11,16 @@
 #include <bcm2835.h> 
 #include "ST7735_TFT.hpp"
 
+#define SCREEN_WIDTH 128
+#define SCREEN_HEIGHT 160
+
 // Section :: Globals 
-ST7735_TFT myTFT;
+ST7735_TFT myTFT(SCREEN_WIDTH, SCREEN_HEIGHT);
 
 //  Section ::  Function Headers 
 
 uint8_t Setup(void); // setup + user options
-void HelloWorld(void);
+void IMTest(void);
 void EndTests(void);
 
 
@@ -27,7 +30,7 @@ int main(int argc, char **argv)
 {
 
 	if(Setup() != 0)return -1;
-	HelloWorld();
+	IMTest();
 	EndTests();
 	return 0;
 }
@@ -59,8 +62,8 @@ uint8_t Setup(void)
 // ** USER OPTION 2 Screen Setup **
 	uint8_t OFFSET_COL = 0;  // 2, These offsets can be adjusted for any issues->
 	uint8_t OFFSET_ROW = 0; // 3, with manufacture tolerance/defects
-	uint16_t TFT_WIDTH = 128;// Screen width in pixels
-	uint16_t TFT_HEIGHT = 160; // Screen height in pixels
+	uint16_t TFT_WIDTH = SCREEN_WIDTH;// Screen width in pixels
+	uint16_t TFT_HEIGHT = SCREEN_HEIGHT; // Screen height in pixels
 	myTFT.TFTInitScreenSize(OFFSET_COL, OFFSET_ROW , TFT_WIDTH , TFT_HEIGHT);
 // ***********************************
 
@@ -79,13 +82,14 @@ uint8_t Setup(void)
 	return 0;
 }
 
-void HelloWorld(void) 
+void IMTest(void) 
 {
-	char teststr1[] = "Hello World";
-	std::cout << "Hello World" << std::endl;
-	myTFT.TFTfillScreen(ST7735_BLACK);
-	myTFT.TFTFontNum(myTFT.TFTFont_Default);
-	myTFT.TFTdrawText(15, 30, teststr1, ST7735_WHITE, ST7735_BLACK, 1);
+    myTFT.IMClear();
+    for(int x=0; x<128; x++) {
+        myTFT.IMDrawPixel(x, 0, 0xFFFF);
+    }
+    myTFT.IMDisplay();
+
 	TFT_MILLISEC_DELAY(5000);
 }
 
