@@ -23,12 +23,12 @@ void throwFrontendError(std::string message);
             throwFrontendError("Unable to initialize SPI screen!");
         }
 
-        myTFT.fillScreen(RDLC_BLACK);
+        myTFT.fillScreen(ST7735_BLACK);
         myTFT.IMClear();
     }
 
     void Frontend::cleanUp() {
-        myTFT.fillScreen(RDLC_BLACK);
+        myTFT.fillScreen(ST7735_BLACK);
         myTFT.TFTPowerDown();
         bcm2835_close();
     }
@@ -38,7 +38,7 @@ void throwFrontendError(std::string message);
         for(int x=0; x<SCREEN_WIDTH; x++) {
             for(int y=0; y<SCREEN_HEIGHT; y++) {
                 color = myTFT.Color565(((int16_t)screen.screenBuff[y][x][0])<<8, ((int16_t)screen.screenBuff[y][x][1])<<8, ((int16_t)screen.screenBuff[y][x][2])<<8);
-                myTFT.IMDrawPixel(loc.x, loc.y, color);
+                myTFT.IMDrawPixel(x, y, color);
             }
         }
 
