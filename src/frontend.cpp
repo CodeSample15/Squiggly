@@ -79,10 +79,10 @@ void throwFrontendError(std::string message);
         int8_t SDIN_TFT = 5;
         int8_t CS_TFT   = 21;
 
-        uint8_t OFFSET_COL = 32;  // 2, These offsets can be adjusted for any issues->
+        uint8_t OFFSET_COL = 0;  // 2, These offsets can be adjusted for any issues->
         uint8_t OFFSET_ROW = 0; // 3, with manufacture tolerance/defects at edge of display
-        uint16_t TFT_WIDTH = SCREEN_WIDTH;// Screen width in pixels (128)
-        uint16_t TFT_HEIGHT = SCREEN_HEIGHT; // Screen height in pixels (160)
+        uint16_t TFT_WIDTH = SCREEN_HEIGHT;// Screen width in pixels (128)
+        uint16_t TFT_HEIGHT = SCREEN_WIDTH; // Screen height in pixels (160)
 
         uint16_t SWSPI_CommDelay = 0; //uS GPIO SW SPI delay
 
