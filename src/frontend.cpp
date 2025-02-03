@@ -22,7 +22,6 @@ void throwFrontendError(std::string message);
             throwFrontendError("Unable to initialize SPI screen!");
 
         myTFT.TFTfillScreen(ST7735_BLACK);
-        myTFT.TFTsetRotation(myTFT.TFT_Degrees_90);
         myTFT.IMClear();
     }
 
