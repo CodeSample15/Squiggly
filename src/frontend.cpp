@@ -35,8 +35,8 @@ void throwFrontendError(std::string message);
         uint16_t color;
         for(int x=0; x<SCREEN_WIDTH; x++) {
             for(int y=0; y<SCREEN_HEIGHT; y++) {
-                color = myTFT.Color565(((int16_t)screen.screenBuff[y][x][0])<<8, ((int16_t)screen.screenBuff[y][x][1])<<8, ((int16_t)screen.screenBuff[y][x][2])<<8);
-                myTFT.IMDrawPixel(y, x, color);
+                color = myTFT.Color565(((int16_t)screen.screenBuff[y][x][0]), ((int16_t)screen.screenBuff[y][x][1]), ((int16_t)screen.screenBuff[y][x][2]));
+                myTFT.IMDrawPixel(x, y, color);
             }
         }
 
