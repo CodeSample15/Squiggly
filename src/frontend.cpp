@@ -13,7 +13,7 @@ void throwFrontendError(std::string message);
     #include "ST7735_TFT.hpp"
 
     //code taken from Display_Lib_RPI GitHub: https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/examples/st7735/Hello_world_SWSPI/main.cpp
-    ST7735_TFT myTFT(SCREEN_HEIGHT, SCREEN_WDITH);
+    ST7735_TFT myTFT(SCREEN_HEIGHT, SCREEN_WIDTH);
 
     uint8_t SetupSWSPI(void); // setup + user options for software SPI
 
