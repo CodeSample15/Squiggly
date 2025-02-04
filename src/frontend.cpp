@@ -36,7 +36,7 @@ void throwFrontendError(std::string message);
         for(int x=0; x<SCREEN_WIDTH; x++) {
             for(int y=0; y<SCREEN_HEIGHT; y++) {
                 color = myTFT.Color565(((int16_t)screen.screenBuff[y][x][0])<<8, ((int16_t)screen.screenBuff[y][x][1])<<8, ((int16_t)screen.screenBuff[y][x][2])<<8);
-                myTFT.IMDrawPixel(x, y, color);
+                myTFT.IMDrawPixel(y, x, color);
             }
         }
 
@@ -99,8 +99,6 @@ void throwFrontendError(std::string message);
             return 3;
         }
         //*****************************
-
-        myTFT.TFTsetRotation(myTFT.TFT_Degrees_90);
 
         TFT_MILLISEC_DELAY(50);
         return 0;
