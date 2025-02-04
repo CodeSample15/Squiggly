@@ -36,7 +36,7 @@ void throwFrontendError(std::string message);
         for(int x=0; x<SCREEN_WIDTH; x++) {
             for(int y=0; y<SCREEN_HEIGHT; y++) {
                 color = myTFT.Color565(((int16_t)screen.screenBuff[y][x][0]), ((int16_t)screen.screenBuff[y][x][1]), ((int16_t)screen.screenBuff[y][x][2]));
-                myTFT.IMDrawPixel(x, y, color);
+                myTFT.IMDrawPixel(y, x, color);
             }
         }
 
@@ -80,8 +80,8 @@ void throwFrontendError(std::string message);
 
         uint8_t OFFSET_COL = 0;  // 2, These offsets can be adjusted for any issues->
         uint8_t OFFSET_ROW = 0; // 3, with manufacture tolerance/defects at edge of display
-        uint16_t TFT_WIDTH = SCREEN_WIDTH;// Screen width in pixels (128)
-        uint16_t TFT_HEIGHT = SCREEN_HEIGHT; // Screen height in pixels (160)
+        uint16_t TFT_WIDTH = SCREEN_HEIGHT;// Screen width in pixels (128)
+        uint16_t TFT_HEIGHT = SCREEN_WIDTH; // Screen height in pixels (160)
 
         uint16_t SWSPI_CommDelay = 0; //uS GPIO SW SPI delay
 
