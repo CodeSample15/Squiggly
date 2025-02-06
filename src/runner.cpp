@@ -544,6 +544,19 @@ void setBIVars() {
                 Utils::createSharedPtr(dtime/1000),
                 Utils::VarType::FLOAT, "=");
 
+    #if BUILD_FOR_RASPI
+    temp = SCREEN_WIDTH_VAR_NAME;
+    temp.insert(0, 1, BUILT_IN_VAR_PREFIX);
+    setVariable(fetchVariable(temp)->ptr, 
+                Utils::createSharedPtr(SCREEN_WIDTH), //reversed due to how the rows and columns get swapped somewhere in the graphics code, idk
+                Utils::VarType::INTEGER, "=");
+
+    temp = SCREEN_HEIGHT_VAR_NAME;
+    temp.insert(0, 1, BUILT_IN_VAR_PREFIX);
+    setVariable(fetchVariable(temp)->ptr, 
+                Utils::createSharedPtr(SCREEN_HEIGHT),
+                Utils::VarType::INTEGER, "=");
+    #else
     temp = SCREEN_WIDTH_VAR_NAME;
     temp.insert(0, 1, BUILT_IN_VAR_PREFIX);
     setVariable(fetchVariable(temp)->ptr, 
@@ -555,6 +568,7 @@ void setBIVars() {
     setVariable(fetchVariable(temp)->ptr, 
                 Utils::createSharedPtr(SCREEN_WIDTH),
                 Utils::VarType::INTEGER, "=");
+    #endif
 }
 
 void throwRunnerError(std::string message) {
