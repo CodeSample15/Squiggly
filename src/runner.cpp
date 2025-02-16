@@ -104,6 +104,10 @@ void Runner::execute()
 
     runningProgram = true;
     while(runningProgram) {
+        #if BUILD_FOR_RASPI
+        Frontend::updateReadings(); //need to manually pull values from USB Gamepad into memory
+        #endif
+
         screen.clear(); //clear the current screen
         setBIVars(); //set built in variables
 

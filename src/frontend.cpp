@@ -10,10 +10,15 @@ void throwFrontendError(std::string message);
 
 #if BUILD_FOR_RASPI
     //arduino port for frontend
-    #include <bcm2835.h> 
+    #include <bcm2835.h>
     #include "ST7735_TFT.hpp"
 
     Joystick joystick;
+    float x_val = 0.0;
+    float y_val = 0.0;
+    bool A_pressed = false;
+    bool B_pressed = false;
+    bool ESC_pressed = false;
 
     //code taken from Display_Lib_RPI GitHub: https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/examples/st7735/Hello_world_SWSPI/main.cpp
     ST7735_TFT myTFT(SCREEN_HEIGHT, SCREEN_WIDTH);
@@ -46,30 +51,71 @@ void throwFrontendError(std::string message);
         myTFT.IMDisplay();
     }
 
-    float Frontend::getHorAxis() {
-        return 0.0;
-    }
-
-    float Frontend::getVertAxis() {
-        return 0.0;
-    }
-
-    bool Frontend::getABtn() {
+    void Frontend::updateReadings() {
+        //read from joystick events and update values
         JoystickEvent event;
         if (joystick.sample(&event))
         {
             if (event.isButton()) {
-                std::cout << "Button " << event.number << std::endl;
+                switch(event.number) {
+                    case 1:
+                        A_pressed = event.value==0 ? false : true;
+                        break;
+
+                    case 2:
+                        B_pressed = event.value==0 ? false : true;
+                        break;
+
+                    case 9:
+                        ESC_pressed = event.value==0 ? false : true;
+                        break;
+
+                    default:
+                        //button not implemented
+                        break;
+                }
+            } 
+            else if(event.isAxis()) {
+                switch(event.number) {
+                    case 0:
+                        if(event.value > 0)
+                            x_val = 1;
+                        else if(event.value < 0)
+                            x_val = -1;
+                        else
+                            x_val = 0;
+                        break;
+                    case 1:
+                        if(event.value > 0)
+                            y_val = 1;
+                        else if(event.value < 0)
+                            y_val = -1;
+                        else
+                            y_val = 0;
+                        break;
+                }
             }
         }
     }
 
+    float Frontend::getHorAxis() {
+        return x_val;
+    }
+
+    float Frontend::getVertAxis() {
+        return y_val;
+    }
+
+    bool Frontend::getABtn() {
+        return A_pressed;
+    }
+
     bool Frontend::getBBtn() {
-        return false;
+        return B_pressed;
     }
 
     bool Frontend::getExitBtn() {
-        return false;
+        return ESC_pressed;
     }
 
     uint8_t SetupSPI(void)

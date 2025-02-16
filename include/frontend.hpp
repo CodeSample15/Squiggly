@@ -26,6 +26,10 @@
 namespace Frontend {
     //input control: -------------------------------
 
+    #if BUILD_FOR_RASPI
+    void updateReadings();
+    #endif
+
     //directional control
     float getHorAxis();
     float getVertAxis();
