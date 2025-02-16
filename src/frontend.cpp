@@ -2,6 +2,7 @@
 
 #include "frontend.hpp"
 #include "screen.hpp"
+#include "joystick.hh"
 
 using namespace Frontend;
 
@@ -11,6 +12,8 @@ void throwFrontendError(std::string message);
     //arduino port for frontend
     #include <bcm2835.h> 
     #include "ST7735_TFT.hpp"
+
+    Joystick joystick;
 
     //code taken from Display_Lib_RPI GitHub: https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/examples/st7735/Hello_world_SWSPI/main.cpp
     ST7735_TFT myTFT(SCREEN_HEIGHT, SCREEN_WIDTH);
@@ -52,7 +55,13 @@ void throwFrontendError(std::string message);
     }
 
     bool Frontend::getABtn() {
-        return false;
+        JoystickEvent event;
+        if (joystick.sample(&event))
+        {
+            if (event.isButton()) {
+                std::cout << "Button " << event.number << std::endl;
+            }
+        }
     }
 
     bool Frontend::getBBtn() {

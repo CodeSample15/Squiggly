@@ -1,3 +1,6 @@
 [submodule "lib/ST7735_TFT_RPI"]
 	path = lib/ST7735_TFT_RPI
 	url = https://github.com/CodeSample15/ST7735_TFT_RPI.git
+[submodule "lib/joystick"]
+	path = lib/joystick
+	url = https://github.com/drewnoakes/joystick.git

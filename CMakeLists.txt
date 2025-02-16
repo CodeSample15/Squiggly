@@ -19,16 +19,10 @@ if(false)
     target_link_libraries( squiggly ${OpenCV_LIBS} )
 else()
     #console build (raspberry pi)
-    find_package( WiringPi REQUIRED )
+    include_directories( include lib/joystick )
 
-    message(STATUS "WiringPi version: ${WiringPi_VERSION}")
-    message(STATUS "WiringPi include directories: ${WiringPi_INCLUDE_DIRS}")
-    message(STATUS "WiringPi libraries: ${WiringPi_LIBS}")
-
-    include_directories( include ${WiringPi_INCLUDE_DIRS} )
-
-    add_executable( squiggly ${SOURCES} )
-    target_link_libraries( squiggly ${WiringPi_LIBS} -lbcm2835 -lrt -lST7735_TFT_RPI )
+    add_executable( squiggly ${SOURCES} "lib/joystick/joystick.cc" )
+    target_link_libraries( squiggly -lbcm2835 -lrt -lST7735_TFT_RPI )
 endif()
 
 install( TARGETS squiggly )
