@@ -87,9 +87,9 @@ void throwFrontendError(std::string message);
                         break;
                     case 1:
                         if(event.value > 0)
-                            y_val = 1;
-                        else if(event.value < 0)
                             y_val = -1;
+                        else if(event.value < 0)
+                            y_val = 1;
                         else
                             y_val = 0;
                         break;
