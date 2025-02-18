@@ -15,8 +15,8 @@
     xVel = 0
     yVel = 0
 
-    test.x = 200
-    test.y = 200
+    test.x = 0
+    test.y = 0
     test.width = 10
     test.height = 10
 }

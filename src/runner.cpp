@@ -67,13 +67,8 @@ void Runner::executeVars() {
     createVariable(bVars, FPS_VAR_NAME, Utils::VarType::INTEGER, Utils::createSharedPtr((int)0));
     createVariable(bVars, DTIME_VAR_NAME, Utils::VarType::FLOAT, Utils::createSharedPtr((float)0.0));
 
-    #if BUILD_FOR_RASPI
     createVariable(bVars, SCREEN_WIDTH_VAR_NAME, Utils::VarType::INTEGER, Utils::createSharedPtr((int)SCREEN_WIDTH));
     createVariable(bVars, SCREEN_HEIGHT_VAR_NAME, Utils::VarType::INTEGER, Utils::createSharedPtr((int)SCREEN_HEIGHT));
-    #else
-    createVariable(bVars, SCREEN_WIDTH_VAR_NAME, Utils::VarType::INTEGER, Utils::createSharedPtr((int)SCREEN_HEIGHT));
-    createVariable(bVars, SCREEN_HEIGHT_VAR_NAME, Utils::VarType::INTEGER, Utils::createSharedPtr((int)SCREEN_WIDTH));
-    #endif
 
     //flags for built in functions to set
     createVariable(bVars, COLLISION_FLAG_VAR_NAME, Utils::VarType::BOOL, Utils::createSharedPtr(false));
@@ -553,7 +548,6 @@ void setBIVars() {
                 Utils::createSharedPtr(dtime/1000),
                 Utils::VarType::FLOAT, "=");
 
-    #if BUILD_FOR_RASPI
     temp = SCREEN_WIDTH_VAR_NAME;
     temp.insert(0, 1, BUILT_IN_VAR_PREFIX);
     setVariable(fetchVariable(temp)->ptr, 
@@ -565,19 +559,6 @@ void setBIVars() {
     setVariable(fetchVariable(temp)->ptr, 
                 Utils::createSharedPtr(SCREEN_HEIGHT),
                 Utils::VarType::INTEGER, "=");
-    #else
-    temp = SCREEN_WIDTH_VAR_NAME;
-    temp.insert(0, 1, BUILT_IN_VAR_PREFIX);
-    setVariable(fetchVariable(temp)->ptr, 
-                Utils::createSharedPtr(SCREEN_HEIGHT), //reversed due to how the rows and columns get swapped somewhere in the graphics code, idk
-                Utils::VarType::INTEGER, "=");
-
-    temp = SCREEN_HEIGHT_VAR_NAME;
-    temp.insert(0, 1, BUILT_IN_VAR_PREFIX);
-    setVariable(fetchVariable(temp)->ptr, 
-                Utils::createSharedPtr(SCREEN_WIDTH),
-                Utils::VarType::INTEGER, "=");
-    #endif
 }
 
 void throwRunnerError(std::string message) {
