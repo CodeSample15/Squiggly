@@ -21,7 +21,7 @@ std::vector<Utils::SVariable> gVars;    //global variables
 std::vector<Utils::SVariable> sVars;    //stack variables
 std::vector<Utils::SVariable> bVars;    //built-in variables
 
-int currStackFrame = 0; //points to where the program is currently using as a stack frame in sVars
+size_t currStackFrame = 0; //points to where the program is currently using as a stack frame in sVars
 
 //called by the program while executing a script to set all the built in Squiggly variables
 void setBIVars();
@@ -67,8 +67,8 @@ void Runner::executeVars() {
     createVariable(bVars, FPS_VAR_NAME, Utils::VarType::INTEGER, Utils::createSharedPtr((int)0));
     createVariable(bVars, DTIME_VAR_NAME, Utils::VarType::FLOAT, Utils::createSharedPtr((float)0.0));
 
-    createVariable(bVars, SCREEN_WIDTH_VAR_NAME, Utils::VarType::INTEGER, Utils::createSharedPtr((int)SCREEN_HEIGHT));
-    createVariable(bVars, SCREEN_HEIGHT_VAR_NAME, Utils::VarType::INTEGER, Utils::createSharedPtr((int)SCREEN_WIDTH));
+    createVariable(bVars, SCREEN_WIDTH_VAR_NAME, Utils::VarType::INTEGER, Utils::createSharedPtr((int)SCREEN_WIDTH));
+    createVariable(bVars, SCREEN_HEIGHT_VAR_NAME, Utils::VarType::INTEGER, Utils::createSharedPtr((int)SCREEN_HEIGHT));
 
     //flags for built in functions to set
     createVariable(bVars, COLLISION_FLAG_VAR_NAME, Utils::VarType::BOOL, Utils::createSharedPtr(false));
@@ -95,8 +95,14 @@ void Runner::execute()
     executeVars();
     executeStart();
 
+    Frontend::init();
+
     runningProgram = true;
     while(runningProgram) {
+        #if BUILD_FOR_RASPI
+        Frontend::updateReadings(); //need to manually pull values from USB Gamepad into memory
+        #endif
+
         screen.clear(); //clear the current screen
         setBIVars(); //set built in variables
 
@@ -106,6 +112,8 @@ void Runner::execute()
         if(Frontend::getExitBtn())
             runningProgram = false;
     }
+
+    Frontend::cleanUp();
 }
 
 Utils::SVariable* Runner::fetchVariable(std::string name) 
@@ -543,13 +551,13 @@ void setBIVars() {
     temp = SCREEN_WIDTH_VAR_NAME;
     temp.insert(0, 1, BUILT_IN_VAR_PREFIX);
     setVariable(fetchVariable(temp)->ptr, 
-                Utils::createSharedPtr(SCREEN_HEIGHT), //reversed due to how the rows and columns get swapped somewhere in the graphics code, idk
+                Utils::createSharedPtr(SCREEN_WIDTH),
                 Utils::VarType::INTEGER, "=");
 
     temp = SCREEN_HEIGHT_VAR_NAME;
     temp.insert(0, 1, BUILT_IN_VAR_PREFIX);
     setVariable(fetchVariable(temp)->ptr, 
-                Utils::createSharedPtr(SCREEN_WIDTH),
+                Utils::createSharedPtr(SCREEN_HEIGHT),
                 Utils::VarType::INTEGER, "=");
 }
 
