@@ -2,7 +2,6 @@
 
 #include "frontend.hpp"
 #include "screen.hpp"
-#include "joystick.hh"
 
 using namespace Frontend;
 
@@ -11,6 +10,7 @@ void throwFrontendError(std::string message);
 #if BUILD_FOR_RASPI
     //arduino port for frontend
     #include <bcm2835.h>
+    #include "joystick.hh"
     #include "ST7735_TFT.hpp"
 
     Joystick joystick;

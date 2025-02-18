@@ -17,7 +17,7 @@
 #pragma once
 
 //this will allow both the arduino port and the pc port to be in the same codebase
-#define BUILD_FOR_RASPI true
+#define BUILD_FOR_RASPI false
 
 //for windows builds
 #define WIN_A_BTN_CODE 0x5A
