@@ -5,7 +5,7 @@ PROJECT (squiggly)
 add_compile_options(-std=c++20 -Wall -Werror)
 file( GLOB SOURCES "src/*.cpp" "src/Built-In/*.cpp" )
 
-if(true)
+if(false)
     #regular build (pc)
     find_package( OpenCV REQUIRED )
 
