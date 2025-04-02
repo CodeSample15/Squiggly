@@ -11,7 +11,6 @@ void throwFrontendError(std::string message);
     //arduino port for frontend
     #include <bcm2835.h>
     #include "joystick.hh"
-    #include "ST7735_TFT.hpp"
 
     Joystick joystick;
     float x_val = 0.0;
@@ -96,6 +95,10 @@ void throwFrontendError(std::string message);
                 }
             }
         }
+    }
+
+    ST7735_TFT* get_tft() {
+        return &myTFT;
     }
 
     float Frontend::getHorAxis() {

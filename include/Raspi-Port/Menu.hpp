@@ -5,6 +5,9 @@
 
 #include "frontend.hpp"
 
+#define TEXT_PIXEL_HEIGHT 10
+
+
 /*
     This entire file will be written with the assumption that BUILD_FOR_RASPI is true
     This file SHOULD NOT be included anywhere unless it is made certain that the BUILD_FOR_RASPI flag is true (defined in frontend.hpp)
