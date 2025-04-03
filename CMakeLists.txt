@@ -21,7 +21,8 @@ else()
     #console build (raspberry pi)
     include_directories( include lib/joystick )
 
-    add_executable( squiggly ${SOURCES} "lib/joystick/joystick.cc" )
+    file( GLOB RASPI_SRC "src/Raspi-Port/*.cpp")
+    add_executable( squiggly ${SOURCES} ${RASPI_SRC} "lib/joystick/joystick.cc")
     target_link_libraries( squiggly -lbcm2835 -lrt -lST7735_TFT_RPI )
 endif()
 
