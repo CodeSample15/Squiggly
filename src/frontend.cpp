@@ -97,7 +97,7 @@ void throwFrontendError(std::string message);
         }
     }
 
-    ST7735_TFT* get_tft() {
+    ST7735_TFT* Frontend::get_tft() {
         return &myTFT;
     }
 
