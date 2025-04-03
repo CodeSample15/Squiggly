@@ -14,7 +14,7 @@ void run_menu(std::vector<std::string>& fileLines) {
     readFiles(paths);
 
     for(size_t i=0; i<paths.size(); i++) {
-        screen->TFTdrawText(5, i*TEXT_PIXEL_HEIGHT, paths[i], ST7735_WHITE, ST7735_BLACK, 1, true); //draw text to the in memory buffer of the screen
+        screen->TFTdrawText(5, i*TEXT_PIXEL_HEIGHT, paths[i].c_str(), ST7735_WHITE, ST7735_BLACK, 1, true); //draw text to the in memory buffer of the screen
     }
 
     screen->IMDisplay(); //render the in memory buffer to the physical screen
