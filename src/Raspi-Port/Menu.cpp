@@ -73,7 +73,7 @@ void draw_menu(ST7735_TFT* screen, std::vector<std::string>& paths, int selectio
     for(size_t i=0; i<paths.size(); i++) {
         //extract the name of the script from the path
         path_len = std::string(SCRIPT_PATH).length();
-        filename = paths[i].substr(path_len, paths[i].length-path_len);
+        filename = paths[i].substr(path_len, paths[i].length()-path_len);
 
         //calculate if we are still rendering on screen (avoid overflow/underflow when calculating text position)
 
