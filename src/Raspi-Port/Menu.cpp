@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include "Raspi-Port/Menu.hpp"
+#include "screen.hpp"
 
 void readFiles(std::vector<std::string>& paths);
 void draw_menu(ST7735_TFT* screen, std::vector<std::string>& paths, int selection);
@@ -62,6 +63,8 @@ std::string run_menu(std::vector<std::string>& fileLines) {
 }
 
 void draw_menu(ST7735_TFT* screen, std::vector<std::string>& paths, int selection) {
+    screen->IMClear();
+
     size_t path_len;
     std::string filename;
 
@@ -76,8 +79,13 @@ void draw_menu(ST7735_TFT* screen, std::vector<std::string>& paths, int selectio
         filename = paths[i].substr(path_len, paths[i].length()-path_len);
 
         //calculate if we are still rendering on screen (avoid overflow/underflow when calculating text position)
+        uint8_t text_y = (SCREEN_HEIGHT/2)+((uint8_t)i*TEXT_PIXEL_HEIGHT) - (uint8_t)menu_offset;
 
-        screen->TFTdrawText(TEXT_LEFT_BUFFER, ((uint8_t)i*TEXT_PIXEL_HEIGHT) - (uint8_t)menu_offset, (char*)filename.c_str(), ST7735_WHITE, ST7735_BLACK, 1, true); //draw text to the in memory buffer of the screen
+        screen->TFTdrawText(TEXT_LEFT_BUFFER, text_y, 
+                            (char*)filename.c_str(),
+                            ST7735_WHITE, 
+                            ST7735_BLACK, 
+                            1, true); //draw text to the in memory buffer of the screen
     }
 
     //todo: draw line under selected path
