@@ -5,7 +5,9 @@
 
 #include "frontend.hpp"
 
-#define TEXT_PIXEL_HEIGHT 10
+#define TEXT_PIXEL_HEIGHT 15
+#define TEXT_LEFT_BUFFER 5
+#define SCRIPT_PATH "boot/sqgly_scripts/"
 
 
 /*
@@ -14,6 +16,6 @@
 */
 
 /*
-    Draws the selection menu on the 
+    Draws the selection menu on the TFT screen
 */
-void run_menu(std::vector<std::string>& fileLines);
+std::string run_menu(std::vector<std::string>& fileLines);
