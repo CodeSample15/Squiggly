@@ -22,14 +22,14 @@ std::string run_menu(std::vector<std::string>& fileLines) {
     readFiles(paths);
 
     //for determining what the user wants
-    int selection = 0;
+    size_t selection = 0;
     bool selection_made = false;
     std::string path = "";
 
     bool pressed = false;
     while(!selection_made) {
         do {
-            draw_menu(paths, selection); //continue to draw screen each loop (allows for animations to play)
+            draw_menu(screen, paths, selection); //continue to draw screen each loop (allows for animations to play)
             Frontend::updateReadings();
             TFT_MILLISEC_DELAY(10);
         } while(pressed && Frontend::getVertAxis()!=0); //wait until there is no more input
@@ -44,9 +44,10 @@ std::string run_menu(std::vector<std::string>& fileLines) {
             pressed = true;
         } 
         else if(Frontend::getVertAxis() == -1) {
-            selection--;
-            if(selection<0)
+            if(selection<1)
                 selection = paths.size()-1;
+            else
+                selection--;
             pressed = true;
         } else if(Frontend::getABtn()) {
             path = paths[selection];
@@ -60,7 +61,7 @@ std::string run_menu(std::vector<std::string>& fileLines) {
     return path;
 }
 
-void draw_menu(std::vector<std::string>& paths, int selection) {
+void draw_menu(ST7735_TFT& screen, std::vector<std::string>& paths, int selection) {
     size_t path_len;
     std::string filename;
 
@@ -69,7 +70,7 @@ void draw_menu(std::vector<std::string>& paths, int selection) {
     if(abs(menu_offset-target_menu_loc) < min_menu_dist)
         menu_offset = target_menu_loc;
 
-    for(int i=0; i<paths.size(); i++) {
+    for(size_t i=0; i<paths.size(); i++) {
         //extract the name of the script from the path
         path_len = std::string(SCRIPT_PATH).length();
         filename = paths[i].substr(path_len, paths[i].length-path_len);
