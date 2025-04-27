@@ -61,7 +61,7 @@ std::string run_menu(std::vector<std::string>& fileLines) {
     return path;
 }
 
-void draw_menu(ST7735_TFT& screen, std::vector<std::string>& paths, int selection) {
+void draw_menu(ST7735_TFT* screen, std::vector<std::string>& paths, int selection) {
     size_t path_len;
     std::string filename;
 
