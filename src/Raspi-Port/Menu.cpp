@@ -2,7 +2,7 @@
 #include "Raspi-Port/Menu.hpp"
 
 void readFiles(std::vector<std::string>& paths);
-void draw_menu(std::vector<std::string>& paths, int selection);
+void draw_menu(ST7735_TFT* screen, std::vector<std::string>& paths, int selection);
 
 float menu_offset = 0; //for sliding animation of menu
 float menu_speed = 0.1; //menu move speed
@@ -81,7 +81,7 @@ void draw_menu(ST7735_TFT* screen, std::vector<std::string>& paths, int selectio
     }
 
     //todo: draw line under selected path
-    screen->TFTdrawFastHLine(TEXT_LEFT_BUFFER, ((uint8_t)i*TEXT_PIXEL_HEIGHT) - (uint8_t)menu_offset + (uint8_t)(TEXT_PIXEL_HEIGHT/2), 2, 0xFFFF);
+    //screen->TFTdrawFastHLine(TEXT_LEFT_BUFFER, ((uint8_t)i*TEXT_PIXEL_HEIGHT) - (uint8_t)menu_offset + (uint8_t)(TEXT_PIXEL_HEIGHT/2), 2, 0xFFFF);
 
     screen->IMDisplay(); //render the in memory buffer to the physical screen
 }
