@@ -7,7 +7,7 @@
 
 #define TEXT_PIXEL_HEIGHT 15
 #define TEXT_LEFT_BUFFER 5
-#define SCRIPT_PATH "boot/sqgly_scripts/"
+#define SCRIPT_PATH std::string("boot/sqgly_scripts/")
 
 
 /*
