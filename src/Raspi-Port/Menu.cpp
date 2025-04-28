@@ -30,6 +30,7 @@ std::string run_menu(std::vector<std::string>& fileLines) {
         //only redraw menu if there was a change (prevent wasted resources with redraw to TFT)
         if(change)
             draw_menu(screen, paths, selection);
+        while(true){}
 
         do {
             Frontend::updateReadings();
@@ -97,7 +98,8 @@ void draw_menu(ST7735_TFT* screen, std::vector<std::string>& paths, size_t selec
     }
 
     //draw line under selected path
-    screen->TFTdrawFastHLine(TEXT_LEFT_BUFFER, (uint8_t)(SCREEN_HEIGHT/2), 10, 0xFFFF, true);
+    uint8_t line_length = paths[selection].length() * 5;
+    screen->TFTdrawFastHLine(TEXT_LEFT_BUFFER, (uint8_t)((SCREEN_HEIGHT/2)-(TEXT_PIXEL_HEIGHT/2)), 5, 0xFFFF, true);
 
     screen->IMDisplay(); //render the in memory buffer to the physical screen
 }
