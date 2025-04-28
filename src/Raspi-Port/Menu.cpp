@@ -99,7 +99,7 @@ void draw_menu(ST7735_TFT* screen, std::vector<std::string>& paths, size_t selec
 
     //draw line under selected path
     uint8_t line_length = paths[selection].length() * 5;
-    screen->TFTdrawFastHLine(TEXT_LEFT_BUFFER, (uint8_t)((SCREEN_HEIGHT/2)-(TEXT_PIXEL_HEIGHT/2)), 5, 0xFFFF, true);
+    screen->TFTdrawFastHLine(TEXT_LEFT_BUFFER, (uint8_t)((SCREEN_HEIGHT/2)-(TEXT_PIXEL_HEIGHT/2)), line_length, 0xFFFF, true);
 
     screen->IMDisplay(); //render the in memory buffer to the physical screen
 }
