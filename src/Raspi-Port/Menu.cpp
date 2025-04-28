@@ -4,6 +4,8 @@
 #include "Raspi-Port/Menu.hpp"
 #include "screen.hpp"
 
+namespace fs = std::filesystem;
+
 void readFiles(std::vector<std::string>& paths);
 void draw_menu(ST7735_TFT* screen, std::vector<std::string>& paths, size_t selection);
 
@@ -103,6 +105,6 @@ void draw_menu(ST7735_TFT* screen, std::vector<std::string>& paths, size_t selec
 }
 
 void readFiles(std::vector<std::string>& paths) {
-    for (const auto & entry : std::filesytem::directory_iterator(SCRIPT_PATH))
+    for (const auto & entry : fs::directory_iterator(SCRIPT_PATH))
         paths.push_back(entry.path());
 }
