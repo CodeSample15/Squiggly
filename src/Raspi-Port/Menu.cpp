@@ -13,7 +13,7 @@ std::string run_menu(std::vector<std::string>& fileLines) {
     ST7735_TFT* screen = Frontend::get_tft();
     screen->IMClear();
     screen->TFTFontNum(screen->TFTFont_Default);
-    //screen->TFTsetRotation(screen->TFT_rotate_e::TFT_Degrees_90); //rotate screen
+    screen->TFTsetRotation(screen->TFT_rotate_e::TFT_Degrees_90); //rotate screen
 
     //fetch paths from file system
     std::vector<std::string> paths;
@@ -94,7 +94,7 @@ void draw_menu(ST7735_TFT* screen, std::vector<std::string>& paths, size_t selec
     }
 
     //draw line under selected path
-    uint8_t line_length = paths[selection].substr(path_len, paths[selection].length()-path_len).length() * 5;
+    uint8_t line_length = paths[selection].substr(path_len, paths[selection].length()-path_len).length() * 5.5;
     screen->TFTdrawFastHLine(TEXT_LEFT_BUFFER, (uint8_t)((SCREEN_HEIGHT/2)-(TEXT_PIXEL_HEIGHT/2)), line_length, 0xFFFF, true);
 
     screen->IMDisplay(); //render the in memory buffer to the physical screen
