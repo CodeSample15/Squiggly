@@ -18,4 +18,4 @@
 /*
     Draws the selection menu on the TFT screen
 */
-std::string run_menu(std::vector<std::string>& fileLines);
+std::string run_menu();

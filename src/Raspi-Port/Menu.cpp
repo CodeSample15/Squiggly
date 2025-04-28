@@ -11,7 +11,7 @@ void draw_menu(ST7735_TFT* screen, std::vector<std::string>& paths, size_t selec
 
 float menu_offset = 0;
 
-std::string run_menu(std::vector<std::string>& fileLines) {
+std::string run_menu() {
     //start screen and get screen pointer
     Frontend::init();
     ST7735_TFT* screen = Frontend::get_tft();
