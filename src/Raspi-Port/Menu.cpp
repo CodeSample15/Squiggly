@@ -30,11 +30,9 @@ std::string run_menu(std::vector<std::string>& fileLines) {
         //only redraw menu if there was a change (prevent wasted resources with redraw to TFT)
         if(change)
             draw_menu(screen, paths, selection);
-        while(true){}
 
         do {
             Frontend::updateReadings();
-            TFT_MILLISEC_DELAY(10);
         } while(pressed && Frontend::getVertAxis()!=0); //wait until there is no more input
 
         pressed = false;
@@ -59,8 +57,6 @@ std::string run_menu(std::vector<std::string>& fileLines) {
             path = paths[selection];
             break;
         }
-
-        TFT_MILLISEC_DELAY(10);
     }
 
     //reset screen rotation
@@ -98,7 +94,7 @@ void draw_menu(ST7735_TFT* screen, std::vector<std::string>& paths, size_t selec
     }
 
     //draw line under selected path
-    uint8_t line_length = paths[selection].length() * 5;
+    uint8_t line_length = paths[selection].length();
     screen->TFTdrawFastHLine(TEXT_LEFT_BUFFER, (uint8_t)((SCREEN_HEIGHT/2)-(TEXT_PIXEL_HEIGHT/2)), line_length, 0xFFFF, true);
 
     screen->IMDisplay(); //render the in memory buffer to the physical screen
