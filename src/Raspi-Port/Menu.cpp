@@ -13,7 +13,7 @@ std::string run_menu(std::vector<std::string>& fileLines) {
     ST7735_TFT* screen = Frontend::get_tft();
     screen->IMClear();
     screen->TFTFontNum(screen->TFTFont_Default);
-    screen->TFTsetRotation(screen->TFT_rotate_e::TFT_Degrees_90); //rotate screen
+    //screen->TFTsetRotation(screen->TFT_rotate_e::TFT_Degrees_90); //rotate screen
 
     //fetch paths from file system
     std::vector<std::string> paths;
@@ -80,8 +80,7 @@ void draw_menu(ST7735_TFT* screen, std::vector<std::string>& paths, size_t selec
         filename = paths[i].substr(path_len, paths[i].length()-path_len);
 
         //calculate if we are still rendering on screen (avoid overflow/underflow when calculating text position)
-        //uint8_t text_y = (SCREEN_HEIGHT/2)+((uint8_t)i*TEXT_PIXEL_HEIGHT) - (uint8_t)menu_offset - TEXT_PIXEL_HEIGHT;
-        uint8_t text_y = ((uint8_t)i*TEXT_PIXEL_HEIGHT) - (uint8_t)menu_offset - TEXT_PIXEL_HEIGHT;
+        uint8_t text_y = (SCREEN_HEIGHT/2)+((uint8_t)i*TEXT_PIXEL_HEIGHT) - (uint8_t)menu_offset - TEXT_PIXEL_HEIGHT;
 
         //make sure we're drawing on the screen (prevent underflow/overflow)
         if(text_y < 0 || text_y>=SCREEN_HEIGHT-TEXT_PIXEL_HEIGHT)
@@ -99,7 +98,6 @@ void draw_menu(ST7735_TFT* screen, std::vector<std::string>& paths, size_t selec
     screen->TFTdrawFastHLine(TEXT_LEFT_BUFFER, (uint8_t)((SCREEN_HEIGHT/2)-(TEXT_PIXEL_HEIGHT/2)), line_length, 0xFFFF, true);
 
     screen->IMDisplay(); //render the in memory buffer to the physical screen
-    while(true){}
 }
 
 void readFiles(std::vector<std::string>& paths) {
