@@ -23,6 +23,9 @@ int main(int argc, char** argv) {
     #if BUILD_FOR_RASPI
     while(true) {
         std::string path = run_menu();
+        
+        std::cout << "Loading from " << path << std::endl;
+
         read_file((char*)path.c_str(), fileLines);
         run_squiggly(fileLines);
 
