@@ -1,4 +1,6 @@
 #include <stdlib.h>
+#include <filesystem>
+
 #include "Raspi-Port/Menu.hpp"
 #include "screen.hpp"
 
@@ -39,14 +41,14 @@ std::string run_menu(std::vector<std::string>& fileLines) {
         change = false;
 
         //input from joystick
-        if(Frontend::getVertAxis() == 1) {
+        if(Frontend::getVertAxis() == -1) {
             selection++;
             if(selection>=paths.size())
                 selection = 0;
             pressed = true;
             change=true;
         } 
-        else if(Frontend::getVertAxis() == -1) {
+        else if(Frontend::getVertAxis() == 1) {
             if(selection<1)
                 selection = paths.size()-1;
             else
@@ -94,19 +96,13 @@ void draw_menu(ST7735_TFT* screen, std::vector<std::string>& paths, size_t selec
     }
 
     //draw line under selected path
-    uint8_t line_length = paths[selection].substr(path_len, paths[selection].length()-path_len).length() * 5.5;
+    uint8_t line_length = paths[selection].substr(path_len, paths[selection].length()-path_len).length() * 6;
     screen->TFTdrawFastHLine(TEXT_LEFT_BUFFER, (uint8_t)((SCREEN_HEIGHT/2)-(TEXT_PIXEL_HEIGHT/2)), line_length, 0xFFFF, true);
 
     screen->IMDisplay(); //render the in memory buffer to the physical screen
 }
 
 void readFiles(std::vector<std::string>& paths) {
-    //TODO: replace with actual files (JUST A TEST)
-    paths.push_back(SCRIPT_PATH + "test");
-    paths.push_back(SCRIPT_PATH + "another test");
-    paths.push_back(SCRIPT_PATH + "Menu test");
-    paths.push_back(SCRIPT_PATH + "Menu Item 1");
-    paths.push_back(SCRIPT_PATH + "Menu Item 2");
-    paths.push_back(SCRIPT_PATH + "Menu Item 3");
-    paths.push_back(SCRIPT_PATH + "Menu Item 4");
+    for (const auto & entry : std::filesytem::directory_iterator(path))
+        paths.push_back(entry.path());
 }
