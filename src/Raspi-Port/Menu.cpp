@@ -3,12 +3,9 @@
 #include "screen.hpp"
 
 void readFiles(std::vector<std::string>& paths);
-void draw_menu(ST7735_TFT* screen, std::vector<std::string>& paths, int selection);
+void draw_menu(ST7735_TFT* screen, std::vector<std::string>& paths, size_t selection);
 
-float menu_offset = 0; //for sliding animation of menu
-float menu_speed = 0.1; //menu move speed
-float min_menu_dist = 0.1; //snap to location after this minimum distance from target offset
-float target_menu_loc = 0;
+float menu_offset = 0;
 
 std::string run_menu(std::vector<std::string>& fileLines) {
     //start screen and get screen pointer
@@ -29,8 +26,8 @@ std::string run_menu(std::vector<std::string>& fileLines) {
 
     bool pressed = false;
     while(!selection_made) {
+        draw_menu(screen, paths, selection);
         do {
-            draw_menu(screen, paths, selection); //continue to draw screen each loop (allows for animations to play)
             Frontend::updateReadings();
             TFT_MILLISEC_DELAY(10);
         } while(pressed && Frontend::getVertAxis()!=0); //wait until there is no more input
@@ -62,16 +59,14 @@ std::string run_menu(std::vector<std::string>& fileLines) {
     return path;
 }
 
-void draw_menu(ST7735_TFT* screen, std::vector<std::string>& paths, int selection) {
+void draw_menu(ST7735_TFT* screen, std::vector<std::string>& paths, size_t selection) {
     screen->IMClear();
 
     size_t path_len;
     std::string filename;
 
     //update offset
-    menu_offset += (target_menu_loc - menu_offset) * menu_speed;
-    if(abs(menu_offset-target_menu_loc) < min_menu_dist)
-        menu_offset = target_menu_loc;
+    menu_offset = selection * TEXT_PIXEL_HEIGHT;
 
     for(size_t i=0; i<paths.size(); i++) {
         //extract the name of the script from the path
@@ -79,7 +74,7 @@ void draw_menu(ST7735_TFT* screen, std::vector<std::string>& paths, int selectio
         filename = paths[i].substr(path_len, paths[i].length()-path_len);
 
         //calculate if we are still rendering on screen (avoid overflow/underflow when calculating text position)
-        uint8_t text_y = (SCREEN_HEIGHT/2)+((uint8_t)i*TEXT_PIXEL_HEIGHT) - (uint8_t)menu_offset;
+        uint8_t text_y = (SCREEN_HEIGHT/2)+((uint8_t)i*TEXT_PIXEL_HEIGHT) - (uint8_t)menu_offset - TEXT_PIXEL_HEIGHT;
 
         screen->TFTdrawText(TEXT_LEFT_BUFFER, text_y, 
                             (char*)filename.c_str(),
