@@ -25,14 +25,19 @@ std::string run_menu(std::vector<std::string>& fileLines) {
     std::string path = "";
 
     bool pressed = false;
+    bool change = true;
     while(!selection_made) {
-        draw_menu(screen, paths, selection);
+        //only redraw menu if there was a change (prevent wasted resources with redraw to TFT)
+        if(change)
+            draw_menu(screen, paths, selection);
+
         do {
             Frontend::updateReadings();
             TFT_MILLISEC_DELAY(10);
         } while(pressed && Frontend::getVertAxis()!=0); //wait until there is no more input
 
         pressed = false;
+        change = false;
 
         //input from joystick
         if(Frontend::getVertAxis() == 1) {
@@ -40,6 +45,7 @@ std::string run_menu(std::vector<std::string>& fileLines) {
             if(selection>=paths.size())
                 selection = 0;
             pressed = true;
+            change=true;
         } 
         else if(Frontend::getVertAxis() == -1) {
             if(selection<1)
@@ -47,10 +53,13 @@ std::string run_menu(std::vector<std::string>& fileLines) {
             else
                 selection--;
             pressed = true;
+            change = true;
         } else if(Frontend::getABtn()) {
             path = paths[selection];
             break;
         }
+
+        TFT_MILLISEC_DELAY(10);
     }
 
     //reset screen rotation
@@ -65,7 +74,7 @@ void draw_menu(ST7735_TFT* screen, std::vector<std::string>& paths, size_t selec
     size_t path_len;
     std::string filename;
 
-    //update offset
+    //update offset of menu items
     menu_offset = selection * TEXT_PIXEL_HEIGHT;
 
     for(size_t i=0; i<paths.size(); i++) {
@@ -76,6 +85,10 @@ void draw_menu(ST7735_TFT* screen, std::vector<std::string>& paths, size_t selec
         //calculate if we are still rendering on screen (avoid overflow/underflow when calculating text position)
         uint8_t text_y = (SCREEN_HEIGHT/2)+((uint8_t)i*TEXT_PIXEL_HEIGHT) - (uint8_t)menu_offset - TEXT_PIXEL_HEIGHT;
 
+        //make sure we're drawing on the screen (prevent underflow/overflow)
+        if(text_y < 0 || text_y>=SCREEN_HEIGHT-TEXT_PIXEL_HEIGHT)
+            continue;
+
         screen->TFTdrawText(TEXT_LEFT_BUFFER, text_y, 
                             (char*)filename.c_str(),
                             ST7735_WHITE, 
@@ -83,13 +96,14 @@ void draw_menu(ST7735_TFT* screen, std::vector<std::string>& paths, size_t selec
                             1, true); //draw text to the in memory buffer of the screen
     }
 
-    //todo: draw line under selected path
-    //screen->TFTdrawFastHLine(TEXT_LEFT_BUFFER, ((uint8_t)i*TEXT_PIXEL_HEIGHT) - (uint8_t)menu_offset + (uint8_t)(TEXT_PIXEL_HEIGHT/2), 2, 0xFFFF);
+    //draw line under selected path
+    screen->TFTdrawFastHLine(TEXT_LEFT_BUFFER, (uint8_t)(SCREEN_HEIGHT/2), 10, 0xFFFF);
 
     screen->IMDisplay(); //render the in memory buffer to the physical screen
 }
 
 void readFiles(std::vector<std::string>& paths) {
+    //TODO: replace with actual files (JUST A TEST)
     paths.push_back(SCRIPT_PATH + "test");
     paths.push_back(SCRIPT_PATH + "another test");
     paths.push_back(SCRIPT_PATH + "Menu test");
