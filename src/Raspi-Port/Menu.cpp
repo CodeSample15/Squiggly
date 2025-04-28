@@ -70,17 +70,18 @@ void draw_menu(ST7735_TFT* screen, std::vector<std::string>& paths, size_t selec
 
     size_t path_len;
     std::string filename;
+    path_len = std::string(SCRIPT_PATH).length();
 
     //update offset of menu items
     menu_offset = selection * TEXT_PIXEL_HEIGHT;
 
     for(size_t i=0; i<paths.size(); i++) {
         //extract the name of the script from the path
-        path_len = std::string(SCRIPT_PATH).length();
         filename = paths[i].substr(path_len, paths[i].length()-path_len);
 
         //calculate if we are still rendering on screen (avoid overflow/underflow when calculating text position)
-        uint8_t text_y = (SCREEN_HEIGHT/2)+((uint8_t)i*TEXT_PIXEL_HEIGHT) - (uint8_t)menu_offset - TEXT_PIXEL_HEIGHT;
+        //uint8_t text_y = (SCREEN_HEIGHT/2)+((uint8_t)i*TEXT_PIXEL_HEIGHT) - (uint8_t)menu_offset - TEXT_PIXEL_HEIGHT;
+        uint8_t text_y = ((uint8_t)i*TEXT_PIXEL_HEIGHT) - (uint8_t)menu_offset - TEXT_PIXEL_HEIGHT;
 
         //make sure we're drawing on the screen (prevent underflow/overflow)
         if(text_y < 0 || text_y>=SCREEN_HEIGHT-TEXT_PIXEL_HEIGHT)
@@ -94,7 +95,7 @@ void draw_menu(ST7735_TFT* screen, std::vector<std::string>& paths, size_t selec
     }
 
     //draw line under selected path
-    uint8_t line_length = paths[selection].length();
+    uint8_t line_length = paths[selection].substr(path_len, paths[i].length()-path_len).length() * 5;
     screen->TFTdrawFastHLine(TEXT_LEFT_BUFFER, (uint8_t)((SCREEN_HEIGHT/2)-(TEXT_PIXEL_HEIGHT/2)), line_length, 0xFFFF, true);
 
     screen->IMDisplay(); //render the in memory buffer to the physical screen
