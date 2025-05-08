@@ -9,7 +9,7 @@
 #include "linter.hpp"
 
 int parse_args(int argc, char** argv, std::vector<std::string>& fileLines);
-void read_file(char* path, std::vector<std::string>& fileLines);
+int read_file(char* path, std::vector<std::string>& fileLines);
 int run_squiggly(std::vector<std::string>& fileLines);
 
 
