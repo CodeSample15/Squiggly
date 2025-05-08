@@ -23,18 +23,16 @@ int parse_args(int argc, char** argv, std::vector<std::string>& fileLines) {
         return 0;
     }
 
-    read_file(argv[1], fileLines);
-
-    return 0;
+    return read_file(argv[1], fileLines);
 }
 
-void read_file(char* path, std::vector<std::string>& fileLines) {
+int read_file(char* path, std::vector<std::string>& fileLines) {
     //attempt to open and then read from file
     std::ifstream file;
     file.open(path);
     if(!file.is_open()) {
         std::cout << "Could not find file \'" << path << "\' in current directory. Exiting..." << std::endl;
-        return;
+        return 1;
     }
 
     //read from the input file
@@ -45,7 +43,9 @@ void read_file(char* path, std::vector<std::string>& fileLines) {
 
         fileLines.push_back(temp);
     }
+
     file.close();
+    return 0;
 }
 
 int run_squiggly(std::vector<std::string>& fileLines) {

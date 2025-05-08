@@ -13,6 +13,8 @@ int main(int argc, char** argv) {
 
     #if BUILD_FOR_RASPI
     while(true) {
+        fileLines.clear(); //tokenizer clears filelines automatically, but let's clear it here just in case
+
         std::string path = run_menu();
         read_file((char*)path.c_str(), fileLines);
         run_squiggly(fileLines);
