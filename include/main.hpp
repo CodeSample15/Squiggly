@@ -52,6 +52,10 @@ int run_squiggly(std::vector<std::string>& fileLines) {
     //TODO: Run linter
     Linter::preprocess(fileLines);
 
+    for(std::string s : fileLines) {
+        std::cout << s << std::endl;
+    }
+
     //Run tokenizer
     try {
         Tokenizer::tokenize(fileLines);
