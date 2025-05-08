@@ -261,6 +261,7 @@ void tokenizeSection(std::vector<std::string>& lines, std::vector< std::shared_p
 
     //loop through the code starting and ending at the provided lines and store the tokenized strings in the tokenBuff
     for(size_t i=start+1; i<end-1; i++) {
+        std::cout << lines[i] << std::endl;
         size_t found;
 
         //search for assignments (equals character)
@@ -459,7 +460,7 @@ void tokenizeSection(std::vector<std::string>& lines, std::vector< std::shared_p
         }
         else {
             //will change this to a proper tokenizerError message when testing is finished
-            std::cerr << "\nError! Unrecognized syntax at line \'" << lines[i] << "\'. Skipping..." << std::endl;
+            //std::cerr << "\nError! Unrecognized syntax at line \'" << lines[i] << "\'. Skipping..." << std::endl;
             tokenizerError("Error parsing line: '" + lines[i] + "'");
         }
     }
