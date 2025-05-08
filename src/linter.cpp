@@ -47,21 +47,6 @@ void Linter::preprocess(std::vector<std::string>& lines)
             lines.erase(lines.begin() + i);
             i--;
         }
-        else {
-            //check if string is just spaces
-            bool allWhite = true;
-            for(char c : lines[i]) {
-                if(c!=' ') {
-                    allWhite = false;
-                    break;
-                }
-            }
-
-            if(allWhite) {
-                lines.erase(lines.begin() + i);
-                i--;
-            }
-        }
     }
 
     BuiltIn::Print("Done");
