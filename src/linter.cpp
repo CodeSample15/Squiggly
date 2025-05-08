@@ -43,9 +43,24 @@ void Linter::preprocess(std::vector<std::string>& lines)
 
     //delete empty lines
     for(size_t i=0; i < lines.size(); i++) {
-        if(lines[i].length() == 0 || lines[i][0] == '\n') {
+        if(lines[i].length() == 0) {
             lines.erase(lines.begin() + i);
             i--;
+        }
+        else {
+            //check if string is just spaces
+            bool allWhite = true;
+            for(char c : lines[i]) {
+                if(c!=' ') {
+                    allWhite = false;
+                    break;
+                }
+            }
+
+            if(allWhite) {
+                lines.erase(lines.begin() + i);
+                i--;
+            }
         }
     }
 
