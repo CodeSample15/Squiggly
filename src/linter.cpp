@@ -43,7 +43,7 @@ void Linter::preprocess(std::vector<std::string>& lines)
 
     //delete empty lines
     for(size_t i=0; i < lines.size(); i++) {
-        if(lines[i].length() == 0) {
+        if(lines[i].length() == 0 || lines[i][0] == '\n') {
             lines.erase(lines.begin() + i);
             i--;
         }
