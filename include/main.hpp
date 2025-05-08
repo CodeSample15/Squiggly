@@ -38,7 +38,7 @@ int read_file(char* path, std::vector<std::string>& fileLines) {
     //read from the input file
     std::string temp;
     while(std::getline(file, temp)) {
-        if(temp.empty())
+        if(temp.empty() || temp=='\n')
             continue; //skip empty lines
 
         fileLines.push_back(temp);
