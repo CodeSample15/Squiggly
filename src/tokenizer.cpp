@@ -464,6 +464,8 @@ void tokenizeSection(std::vector<std::string>& lines, std::vector< std::shared_p
             //just skip broken lines if running on raspi (temporary fix TODO: figure out permanent fix to whitespace issue)
             #if !BUILD_FOR_RASPI
             tokenizerError("Error parsing line: '" + lines[i] + "'");
+            #else
+            std::cerr << lines[i] << std::endl;
             #endif
         }
     }
