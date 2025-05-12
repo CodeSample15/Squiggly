@@ -6,6 +6,7 @@
 #include <fstream>
 
 #include "tokenizer.hpp"
+#include "runner.hpp"
 #include "linter.hpp"
 
 int parse_args(int argc, char** argv, std::vector<std::string>& fileLines);
