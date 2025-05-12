@@ -3,11 +3,12 @@
 wget -q --spider http://google.com
 
 if [ $? -eq 0 ]; then
-	cd Squiggly && git fetch && git pull
+	git fetch && git pull
 	cd build
 	make
 else
 	echo "Offline"
+	cd build
 fi
 
-sudo ~/Documents/Projects/Squiggly/build/squiggly
+sudo squiggly
