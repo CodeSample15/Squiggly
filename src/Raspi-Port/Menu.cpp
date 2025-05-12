@@ -69,8 +69,10 @@ std::string run_menu() {
             break;
         } 
         else if(Frontend::getExitBtn()) {
-            if(exit_pressed)
+            if(exit_pressed) {
+                Frontend::cleanUp();
                 system("shutdown now"); //poweroff
+            }
             else
                 exit_pressed = true;
         }
