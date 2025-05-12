@@ -17,7 +17,7 @@ std::string run_menu() {
     ST7735_TFT* screen = Frontend::get_tft();
     screen->IMClear();
     screen->TFTFontNum(screen->TFTFont_Default);
-    screen->TFTsetRotation(screen->TFT_rotate_e::TFT_Degrees_90); //rotate screen
+    screen->TFTsetRotation(screen->TFT_rotate_e::TFT_Degrees_270); //rotate screen
 
     //fetch paths from file system
     std::vector<std::string> paths;

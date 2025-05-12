@@ -1,0 +1,72 @@
+:VARS: {
+    # global variables go here
+    OBJECT color
+
+    int r = 0
+    int g = 20
+    int b = 50
+
+    bool rup = true
+    bool gup = true
+    bool bup = true
+}
+
+:START: {
+	color.x = 0
+    color.y = 0
+    color.width = $SCREEN_WIDTH
+    color.height = $SCREEN_HEIGHT
+}
+
+:UPDATE: {
+    #R color channel
+	if(rup) {
+        r+=6
+        if(r>255) {
+            rup = false
+            r = 255
+        }
+    } else {
+        r-=3
+        if(r<0) {
+            rup = true
+            r = 0
+        }
+    }
+
+    #G color channel
+    if(gup) {
+        g+=2
+        if(g>255) {
+            gup = false
+            g = 255
+        }
+    } else {
+        g-=7
+        if(g<0) {
+            gup = true
+            g = 0
+        }
+    }
+
+    #B color channel
+    if(bup) {
+        b+=5
+        if(b>255) {
+            bup = false
+            b = 255
+        }
+    } else {
+        b-=2
+        if(b<0) {
+            bup = true
+            b = 0
+        }
+    }
+
+    color.color_r = r
+    color.color_g = g
+    color.color_b = b
+
+    color.draw()
+}
