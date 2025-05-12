@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <cstdlib>
 #include <filesystem>
 
 #include "Raspi-Port/Menu.hpp"
@@ -30,6 +31,7 @@ std::string run_menu() {
 
     bool pressed = false;
     bool change = true;
+    bool exit_pressed = false; //require the user to double click the exit button for shutdown
     while(!selection_made) {
         //only redraw menu if there was a change (prevent wasted resources with redraw to TFT)
         if(change)
@@ -49,6 +51,8 @@ std::string run_menu() {
                 selection = 0;
             pressed = true;
             change=true;
+
+            exit_pressed = false;
         } 
         else if(Frontend::getVertAxis() == 1) {
             if(selection<1)
@@ -57,9 +61,18 @@ std::string run_menu() {
                 selection--;
             pressed = true;
             change = true;
-        } else if(Frontend::getABtn()) {
+
+            exit_pressed = false;
+        } 
+        else if(Frontend::getABtn()) {
             path = paths[selection];
             break;
+        } 
+        else if(Frontend::getExitBtn()) {
+            if(exit_pressed)
+                system("shutdown now"); //poweroff
+            else
+                exit_pressed = true;
         }
     }
 
