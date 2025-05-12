@@ -39,7 +39,7 @@ std::string run_menu() {
 
         do {
             Frontend::updateReadings();
-        } while(pressed && Frontend::getVertAxis()!=0); //wait until there is no more input
+        } while(pressed && Frontend::getVertAxis()!=0 && Frontend::getExitBtn()); //wait until there is no more input
 
         pressed = false;
         change = false;
@@ -73,8 +73,10 @@ std::string run_menu() {
                 Frontend::cleanUp();
                 system("shutdown now"); //poweroff
             }
-            else
+            else {
                 exit_pressed = true;
+                pressed = true;
+            }
         }
     }
 
