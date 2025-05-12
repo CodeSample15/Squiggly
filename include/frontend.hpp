@@ -17,7 +17,7 @@
 #pragma once
 
 //this will allow both the arduino port and the pc port to be in the same codebase
-#define BUILD_FOR_RASPI false
+#define BUILD_FOR_RASPI true
 
 #if BUILD_FOR_RASPI
 #include "ST7735_TFT.hpp"
