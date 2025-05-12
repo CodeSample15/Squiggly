@@ -1,5 +1,5 @@
 #!/bin/bash
-
+cd "$(dirname "$0")"
 wget -q --spider http://google.com
 
 if [ $? -eq 0 ]; then
@@ -11,4 +11,4 @@ else
 	cd build
 fi
 
-sudo squiggly
+sudo ./squiggly
