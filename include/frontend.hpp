@@ -17,7 +17,11 @@
 #pragma once
 
 //this will allow both the arduino port and the pc port to be in the same codebase
-#define BUILD_FOR_ARDUINO false
+#define BUILD_FOR_RASPI false
+
+#if BUILD_FOR_RASPI
+#include "ST7735_TFT.hpp"
+#endif
 
 //for windows builds
 #define WIN_A_BTN_CODE 0x5A
@@ -25,6 +29,11 @@
 
 namespace Frontend {
     //input control: -------------------------------
+
+    #if BUILD_FOR_RASPI
+    void updateReadings();
+    ST7735_TFT* get_tft();
+    #endif
 
     //directional control
     float getHorAxis();
@@ -41,4 +50,5 @@ namespace Frontend {
 
     void drawScreen();
     void init();
+    void cleanUp();
 }

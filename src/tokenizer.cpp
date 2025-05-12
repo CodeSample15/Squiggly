@@ -3,6 +3,7 @@
 #include "tokenizer.hpp"
 #include "linter.hpp"
 #include "built-in.hpp"
+#include "frontend.hpp"
 
 #define TOK_DEBUGGING true
 
@@ -457,7 +458,6 @@ void tokenizeSection(std::vector<std::string>& lines, std::vector< std::shared_p
             continue; //ignore lines with just { or }
         }
         else {
-            //will change this to a proper tokenizerError message when testing is finished
             //std::cerr << "\nError! Unrecognized syntax at line \'" << lines[i] << "\'. Skipping..." << std::endl;
             tokenizerError("Error parsing line: '" + lines[i] + "'");
         }

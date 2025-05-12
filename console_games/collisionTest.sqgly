@@ -38,7 +38,7 @@
         yVel += fallAccel
     } else if($A_BTN) {
         #jump
-        yVel = -20  # jump force
+        yVel = -8  # jump force
         onGround = false
     }
 

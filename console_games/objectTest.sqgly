@@ -1,0 +1,43 @@
+:VARS: {
+    OBJECT test
+
+    float xVel
+    float yVel
+}
+
+:START: {
+    xVel = 0
+    yVel = 0
+
+    test.x = 0
+    test.y = 0
+    test.width = 10
+    test.height = 10
+}
+
+:UPDATE: {
+	test.x += 40 * xVel * $DTIME
+    test.y += 40 * yVel * $DTIME
+
+    xVel += $JOYSTICK_X
+    yVel -= $JOYSTICK_Y
+
+    xVel *= 0.8
+    yVel *= 0.8
+
+    ^PRINT("X: " + test.x + "   Y: " + test.y)
+
+    if($A_BTN) {
+        test.color_r = 0
+    } else {
+        test.color_r = 255
+    }
+
+    if($B_BTN) {
+        test.color_g = 255
+    } else {
+        test.color_g = 0
+    }
+
+    test.draw()
+}

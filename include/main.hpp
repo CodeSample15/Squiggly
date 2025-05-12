@@ -1,28 +1,39 @@
-#include <iostream>
-#include <fstream>
+#pragma once
+
 #include <vector>
 #include <string>
-#include <exception>
+#include <iostream>
+#include <fstream>
 
-#include "linter.hpp"
 #include "tokenizer.hpp"
 #include "runner.hpp"
+#include "linter.hpp"
 
-int main(int argc, char** argv) {
-    //quick check to make sure file was passed as input to the program
+int parse_args(int argc, char** argv, std::vector<std::string>& fileLines);
+int read_file(char* path, std::vector<std::string>& fileLines);
+int run_squiggly(std::vector<std::string>& fileLines);
+
+
+/*
+    Main Squiggly functionality:
+*/
+int parse_args(int argc, char** argv, std::vector<std::string>& fileLines) {
+    //check to make sure file was passed as input to the program
     if(argc < 2) {
         std::cout << "No file not provided. Exiting..." << std::endl;
         return 0;
     }
 
-    std::vector<std::string> fileLines;
+    return read_file(argv[1], fileLines);
+}
 
+int read_file(char* path, std::vector<std::string>& fileLines) {
     //attempt to open and then read from file
     std::ifstream file;
-    file.open(argv[1]);
+    file.open(path);
     if(!file.is_open()) {
-        std::cout << "Could not find file \'" << argv[1] << "\' in current directory. Exiting..." << std::endl;
-        return 0;
+        std::cout << "Could not find file \'" << path << "\' in current directory. Exiting..." << std::endl;
+        return 1;
     }
 
     //read from the input file
@@ -33,9 +44,13 @@ int main(int argc, char** argv) {
 
         fileLines.push_back(temp);
     }
-    file.close();
 
-    //TODO: Run linter
+    file.close();
+    return 0;
+}
+
+int run_squiggly(std::vector<std::string>& fileLines) {
+    //TODO: Run linter for precheck
     Linter::preprocess(fileLines);
 
     //Run tokenizer
