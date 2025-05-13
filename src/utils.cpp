@@ -186,17 +186,25 @@ std::shared_ptr<void> Utils::createEmptyShared(VarType type) {
     }
 }
 
+/**
+    Create a shared pointer of an array of squiggly variables
+    Array is of size "size"
+*/
 std::shared_ptr<void> Utils::createEmptyShared(VarType type, int size) 
 {
-    switch(type) {
-        case VarType::STRING: return std::shared_ptr<std::string[]>(new std::string[size]);
-        case VarType::INTEGER: return std::shared_ptr<int[]>(new int[size]);
-        case VarType::DOUBLE: return std::shared_ptr<double[]>(new double[size]);
-        case VarType::FLOAT: return std::shared_ptr<float[]>(new float[size]);
-        case VarType::BOOL: return std::shared_ptr<bool[]>(new bool[size]);
-        case VarType::OBJECT: return std::shared_ptr<BuiltIn::Object[]>(new BuiltIn::Object[size]);
-        default: return std::shared_ptr<int[]>(new int[size]);
+    std::vector<SVariable> arr;
+    //init all values in array
+    for(int i=0; i<size; i++) {
+        SVariable temp;
+        temp.name = std::to_string(i);
+        temp.type = type;
+        temp.ptr = createEmptyShared(type);
+        temp.isArray = false;
+        
+        arr.push_back(temp);
     }
+
+    return std::make_shared<std::vector<SVariable>>(arr);
 }
 
 std::shared_ptr<void> Utils::createSharedPtr(VarType type, double value) {

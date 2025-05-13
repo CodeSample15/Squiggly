@@ -1,8 +1,7 @@
 #include <string>
-#include <vector>
 #include <memory>
-#include <stdexcept>
 #include <chrono>
+#include <stdexcept>
 
 #include "runner.hpp"
 #include "built-in.hpp"
@@ -84,6 +83,7 @@ void Runner::executeUpdate() { runProgram(mainLoop_tok, sVars, 0, true, 0, 0, tr
 void Runner::flushMem() {
     gVars.clear();
     sVars.clear();
+    bVars.clear();
 }
 
 bool runningProgram = false;
@@ -114,6 +114,7 @@ void Runner::execute()
             runningProgram = false;
     }
 
+    flushMem(); //avoid memory leaks
     Frontend::cleanUp();
 }
 
@@ -297,8 +298,9 @@ void runProgram(std::vector<TOKENIZED_PTR>& tokens, std::vector<Utils::SVariable
     //clear out stack frame
     if(clearStackWhenDone) {
         size_t numVars = memory.size() - stackFrameIdx; //number of variables created in this stack frame
-        for(size_t i=0; i<numVars; i++)
+        for(size_t i=0; i<numVars; i++) {
             memory.erase(memory.begin() + stackFrameIdx);
+        }
     }
 }
 

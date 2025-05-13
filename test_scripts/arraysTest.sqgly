@@ -7,7 +7,7 @@
 
 	int testArr[size + 5]
 
-    testArr[0] = 5
+    #testArr[0] = 5
 }
 
 :UPDATE: {
