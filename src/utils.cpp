@@ -8,7 +8,9 @@
 #include "external-libs.hpp"
 
 using namespace Utils;
- 
+
+void skipBracketsWhenParsing(std::string& s, size_t& i, std::string& tmp); //when parsing a variable string name, skip everything 
+
 void convertAndAppendVariable(std::stringstream& ss, std::string& varName);
 inline void throwUtilError(std::string message);
 
@@ -88,12 +90,15 @@ std::string Utils::ParseString(std::string s)
                 bool atEnd = false; //did the scanner reach the end of the string?
                 std::string temp = "";
                 do {
+                    if(s[i]=='[')
+                        skipBracketsWhenParsing(s, i, temp);
+
                     temp += s[i];
                     if(i+1 >= s.length()) {
                         atEnd = true;
                         break; //no need to error, can simply be that the program reached the end of the argument string
                     }
-                } while(isalpha(s[++i]) || s[i]==BUILT_IN_VAR_PREFIX || s[i]=='_' || s[i]=='.');
+                } while(isalpha(s[++i]) || s[i]==BUILT_IN_VAR_PREFIX || s[i]=='_' || s[i]=='.' || s[i]=='[');
                 
                 if(!atEnd) i--;
 
@@ -141,12 +146,15 @@ SVariable Utils::convertToVariable(std::string input, VarType expectedType) {
                 bool atEnd = false; //did the scanner reach the end of the string?
                 std::string temp = "";
                 do {
+                    if(input[i]=='[')
+                        skipBracketsWhenParsing(input, i, temp);
+
                     temp += input[i];
                     if(i+1 >= input.length()) {
                         atEnd = true;
                         break; //no need to error, can simply be that the program reached the end of the argument string
                     }
-                } while(isalpha(input[++i]) || input[i]==BUILT_IN_VAR_PREFIX || input[i]=='_' || input[i]=='.');
+                } while(isalpha(input[++i]) || input[i]==BUILT_IN_VAR_PREFIX || input[i]=='_' || input[i]=='.' || input[i]=='[');
                 
                 if(!atEnd) i--; //only do this if the scanner did not reach the end of the string (otherwise the scanner might go back and read the last character again and consider it a separate variable, causing an error)
 
@@ -251,6 +259,30 @@ void convertAndAppendVariable(std::stringstream& ss, std::string& varName) {
     }
     else {
         throwUtilError("Variable '" + varName + "' is not in scope!");
+    }
+}
+
+/*
+    When parsing a variable name, skip the '[]' in the string. This will allow array references to be parsed from variable strings
+*/
+void skipBracketsWhenParsing(std::string& s, size_t& i, std::string& tmp) 
+{
+    int nest_depth = 1; //keep track of how many nexted brackets are in this bracket statement 
+
+    if(s[i] != '[')
+        return; //error with the calling of this method, use this guard to prevent further errors
+
+    for(; i<s.length(); i++) {
+        if(s[i] == ']')
+            nest_depth--;
+        else if(s[i] == '[')
+            nest_depth++;
+
+        //exit loop once nest_depth is 0 (no more brackets)
+        if(nest_depth==0)
+            break;
+
+        tmp += s[i]; //update the tmp variable that holds the string literal of the variable to be converted
     }
 }
 

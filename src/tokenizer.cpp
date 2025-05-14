@@ -3,7 +3,6 @@
 #include "tokenizer.hpp"
 #include "linter.hpp"
 #include "built-in.hpp"
-#include "frontend.hpp"
 
 #define TOK_DEBUGGING true
 

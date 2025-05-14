@@ -3,11 +3,16 @@
 }
 
 :START: {
-    int size = 20
+    int size = 10
 
-	int testArr[size + 5]
+	int testArr[size]
+    testArr[5] = 5
 
-    #testArr[0] = 5
+    int counter = 0
+    repeat(size) {
+        ^PRINT(testArr[counter])
+        counter += 1
+    }
 }
 
 :UPDATE: {

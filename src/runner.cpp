@@ -130,6 +130,11 @@ Utils::SVariable* Runner::fetchVariable(std::string name)
         memberName = name.substr(splitLocation+1, name.length()-(splitLocation+1));
         name = name.substr(0, splitLocation);
     }
+    
+    int arrIndex = -1; //for use with array variables
+    //check if this is an array index and parse the correct name
+    if(name.find("[") != std::string::npos)
+        arrIndex = parseArrayDecl(name);
 
     if(name[0] == BUILT_IN_VAR_PREFIX) {
         name = name.substr(1, name.length()-1); //get rid of the prefix before searching
@@ -160,6 +165,23 @@ Utils::SVariable* Runner::fetchVariable(std::string name)
             if(var.name == name) {
                 tmp = &var;
                 break;
+            }
+        }
+
+        if(tmp && tmp->isArray) {
+            if(arrIndex<0 || arrIndex>=tmp->arrSize)
+                throwRunnerError("Array index [" + std::to_string(arrIndex) + "] out of range for array: " + tmp->name);
+
+            try {
+                //good lord, where do I start on this one-liner
+                //basically, this line casts the shared pointer into a vector of squiggly variables (which should be what the SVariable pointer is pointing to if it is marked as an array)
+                //and then gets the location of the Squiggly variable at the parsed array index. That location is then stored in the tmp pointer to be returned to whatever part of the program requested it.
+                //anyway, here it is:
+                tmp = &((std::vector<Utils::SVariable>*)tmp->ptr.get())->at(arrIndex);
+
+            } catch(const std::exception& e) {
+                //if the above code fails in anyway, catch the error and let the programmer know they messed up
+                throwRunnerError("Variable \"" + tmp->name + "\" was marked as array, but was unable to be dereferenced properly!"); //again, should NEVER appear to any normal user, but will be useful for catching programmer's mistakes for this project
             }
         }
 
@@ -257,7 +279,11 @@ void runProgram(std::vector<TOKENIZED_PTR>& tokens, std::vector<Utils::SVariable
                     std::string tmpName = declareLine->varName;
                     int arrSize = parseArrayDecl(tmpName);
 
-                    newVariableHolder.name = declareLine->varName;
+                    //make sure arrSize is valid
+                    if(arrSize <= 0)
+                        throwRunnerError("Cannot create an array with size 0 or less! Parsed array size '" + std::to_string(arrSize) + "' from '" + tmpName + "'");
+
+                    newVariableHolder.name = tmpName;
                     newVariableHolder.type = Utils::stringToVarType(declareLine->varType);
                     newVariableHolder.ptr = Utils::createEmptyShared(newVariableHolder.type, arrSize);
                     newVariableHolder.isArray = true;
@@ -607,10 +633,6 @@ int parseArrayDecl(std::string& name)
 
     //parse string for integer using Utils
     int arrSize = *(int*)Utils::convertToVariable(bracketVal, Utils::VarType::INTEGER).ptr.get();
-
-    //make sure integer is valid
-    if(arrSize<=0)
-        throwRunnerError("Cannot create an array with size 0 or less! Parsed array size '" + std::to_string(arrSize) + "' from '" + name + "'");
 
     //remove the brackets from the name
     name = name.substr(0, bracketStart);
