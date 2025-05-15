@@ -4,7 +4,7 @@
 #include "linter.hpp"
 #include "built-in.hpp"
 
-#define TOK_DEBUGGING true
+#define TOK_DEBUGGING false
 
 using namespace Tokenizer;
 
