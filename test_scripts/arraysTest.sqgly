@@ -1,23 +1,23 @@
 :VARS: {
     # global variables go here
+    int arrSize = 10
 }
 
 :START: {
-    int size = 10
-
-	int testArr[size]
+	int testArr[arrSize]
     testArr[5] = 5
 
-    int newArr[testArr[5]]
-    newArr[4] = 3
-
-    int counter = 0
-    repeat(size) {
-        ^PRINT(testArr[counter])
-        counter += 1
-    }
+    printAllItems(testArr)
 }
 
 :UPDATE: {
 	# game loop logic goes here
+}
+
+printAllItems(int arr[]) {
+    int counter = 0
+    repeat(arrSize) {
+        ^PRINT(arr[counter])
+        counter += 1
+    }
 }

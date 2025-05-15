@@ -118,7 +118,7 @@ void Runner::execute()
     Frontend::cleanUp();
 }
 
-Utils::SVariable* Runner::fetchVariable(std::string name) 
+Utils::SVariable* Runner::fetchVariable(std::string name, bool allowArrays) 
 {
     if(name.length()<1)
         return nullptr;
@@ -170,6 +170,9 @@ Utils::SVariable* Runner::fetchVariable(std::string name)
 
         //variable fetched is array, return the SVariable at the requested array index
         if(tmp && tmp->isArray) {
+            if(allowArrays) //ONLY IF ALLOWED: return the array object and not an indexed Squiggly variable
+                return tmp;
+
             if(arrIndex<0 || arrIndex>=tmp->arrSize)
                 throwRunnerError("Array index [" + std::to_string(arrIndex) + "] out of range for array: " + tmp->name);
 
@@ -182,7 +185,7 @@ Utils::SVariable* Runner::fetchVariable(std::string name)
 
             } catch(const std::exception& e) {
                 //if the above code fails in anyway, catch the error and let the programmer know they messed up
-                throwRunnerError("Variable \"" + tmp->name + "\" was marked as array, but was unable to be dereferenced properly!"); //again, should NEVER appear to any normal user, but will be useful for catching programmer's mistakes for this project
+                throwRunnerError("Variable \"" + tmp->name + "\" was marked as array, but was unable to be dereferenced properly!");
             }
         } else if(tmp && arrIndex != -1) {
             //variable was indexed as an array but is not an array
@@ -369,8 +372,23 @@ void runUserFunction(std::string name, std::vector<std::string>& args) {
                     std::string etype = expected.substr(0, spaceLocation);
                     std::string ename = expected.substr(spaceLocation+1, expected.length()-spaceLocation-1);
 
-                    Utils::SVariable nextVar = Utils::convertToVariable(args[i], Utils::stringToVarType(etype));
-                    nextVar.name = ename; //split expected arg into type and name, get the name
+                    Utils::SVariable nextVar;
+
+                    if(ename.find("[]") != std::string::npos) {
+                        //variable is expected to be an array
+                        nextVar = *fetchVariable(args[i], true);
+
+                        //get rid of brackets in ename
+                        size_t bracket_loc = ename.find('[');
+                        nextVar.name = ename.substr(0, bracket_loc);
+
+                        if(!nextVar.isArray)
+                            throwRunnerError("Expected \"" + args[i] + "\" to be an array, but it isn't.");
+                    }
+                    else {
+                        nextVar = Utils::convertToVariable(args[i], Utils::stringToVarType(etype));
+                        nextVar.name = ename; //split expected arg into type and name, get the name
+                    }
 
                     sVars.push_back(nextVar); //push to stack
                 }

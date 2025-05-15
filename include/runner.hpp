@@ -29,5 +29,5 @@ namespace Runner {
     void execute();
 
     //allow external cpp files to access variables
-    Utils::SVariable* fetchVariable(std::string varName);
+    Utils::SVariable* fetchVariable(std::string varName, bool allowArrays=false);
 }
