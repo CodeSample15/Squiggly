@@ -8,6 +8,9 @@
 	int testArr[size]
     testArr[5] = 5
 
+    int newArr[testArr[5]]
+    newArr[4] = 3
+
     int counter = 0
     repeat(size) {
         ^PRINT(testArr[counter])

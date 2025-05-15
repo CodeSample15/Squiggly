@@ -9,7 +9,7 @@
 
 using namespace Utils;
 
-void skipBracketsWhenParsing(std::string& s, size_t& i, std::string& tmp); //when parsing a variable string name, skip everything 
+void skipBracketsWhenParsing(std::string& s, size_t& i, std::string& tmp); //when parsing a variable string name, skip everything inside of the brackets
 
 void convertAndAppendVariable(std::stringstream& ss, std::string& varName);
 inline void throwUtilError(std::string message);

@@ -168,6 +168,7 @@ Utils::SVariable* Runner::fetchVariable(std::string name)
             }
         }
 
+        //variable fetched is array, return the SVariable at the requested array index
         if(tmp && tmp->isArray) {
             if(arrIndex<0 || arrIndex>=tmp->arrSize)
                 throwRunnerError("Array index [" + std::to_string(arrIndex) + "] out of range for array: " + tmp->name);
@@ -183,6 +184,9 @@ Utils::SVariable* Runner::fetchVariable(std::string name)
                 //if the above code fails in anyway, catch the error and let the programmer know they messed up
                 throwRunnerError("Variable \"" + tmp->name + "\" was marked as array, but was unable to be dereferenced properly!"); //again, should NEVER appear to any normal user, but will be useful for catching programmer's mistakes for this project
             }
+        } else if(tmp && arrIndex != -1) {
+            //variable was indexed as an array but is not an array
+            throwRunnerError("Variable \"" + tmp->name + "\" is not an array!");
         }
 
         if(tmp && tmp->type==Utils::VarType::OBJECT && memberName!="") {
@@ -623,8 +627,8 @@ void setBIVars() {
 int parseArrayDecl(std::string& name) 
 {
     //get the value in between the brackets
-    size_t bracketStart = name.find("[");
-    size_t bracketEnd = name.find("]");
+    size_t bracketStart = name.find("[");    
+    size_t bracketEnd = name.find_last_of("]");
 
     if(bracketStart >= bracketEnd)
         throwRunnerError("Unable to parse array size from '" + name + "'");
