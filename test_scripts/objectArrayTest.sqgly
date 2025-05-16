@@ -1,0 +1,52 @@
+:VARS: {
+    OBJECT objs[10]
+
+    setAllColorSize(objs, 0, 255, 144, 20)
+}
+
+:START: {
+	# initialization code goes here
+}
+
+:UPDATE: {
+    objs[0].x = 0
+
+    objs[1].x = 20
+    objs[1].y = 20
+
+    objs[2].x = 50
+    
+    objs[3].x = 60
+    
+    drawAll(objs)
+}
+
+setAllColorSize(OBJECT objs[], int r, int g, int b, int size) {
+    #calculate length of object array (stored in $I_RET)
+    ^LEN(objs)
+
+    int i=0
+    repeat($I_RET) {
+        objs[i].color_r = r
+        objs[i].color_g = g
+        objs[i].color_b = b
+
+        objs[i].width = size
+        objs[i].height = size
+
+        objs[i].x = 0
+        objs[i].y = 0
+
+        i += 1
+    }
+}
+
+drawAll(OBJECT objs[]) {
+    ^LEN(objs)
+
+    int i=0
+    repeat($I_RET) {
+        objs[i].draw()
+        i+=1
+    }
+}

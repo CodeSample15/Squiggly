@@ -35,7 +35,7 @@ addOneToArray(int arr[]) {
 
     int i = 0
     repeat($I_RET) {
-        arr[i] = arr[i] + 4
+        arr[i] = arr[i] + 1
         ^PRINT(" [+] " + arr[i])
         i += 1
     }
