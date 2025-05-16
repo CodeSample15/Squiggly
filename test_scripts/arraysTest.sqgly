@@ -5,9 +5,15 @@
 
 :START: {
 	int testArr[arrSize]
+
     testArr[5] = 5
+    testArr[4-2] = 4
+    testArr[0] = 1
 
     printAllItems(testArr)
+
+    ^PRINT("Adding 1 to array items: ")
+    addOneToArray(testArr)
 }
 
 :UPDATE: {
@@ -15,9 +21,22 @@
 }
 
 printAllItems(int arr[]) {
+    ^LEN(arr)
+
     int counter = 0
-    repeat(arrSize) {
+    repeat($I_RET) {
         ^PRINT(arr[counter])
         counter += 1
+    }
+}
+
+addOneToArray(int arr[]) {
+    ^LEN(arr)
+
+    int i = 0
+    repeat($I_RET) {
+        arr[i] = arr[i] + 4
+        ^PRINT(" [+] " + arr[i])
+        i += 1
     }
 }

@@ -72,6 +72,11 @@ void Runner::executeVars() {
 
     //flags for built in functions to set
     createVariable(bVars, COLLISION_FLAG_VAR_NAME, Utils::VarType::BOOL, Utils::createSharedPtr(false));
+    createVariable(bVars, FLOAT_RETURN_BUCKET_VAR_NAME, Utils::VarType::FLOAT, Utils::createSharedPtr((float)0.0));
+    createVariable(bVars, INT_RETURN_BUCKET_VAR_NAME, Utils::VarType::INTEGER, Utils::createSharedPtr((int)0));
+
+    //set up built-in function pointers for quick access to built-in variables
+    BuiltIn::fetchBuiltInReturnVariables();
 
     //run global variable section of the Squiggly code and add created variables to global scope (gVars)
     runProgram(varsBlock_tok, gVars, gVars.size(), false, 0, 0, true);

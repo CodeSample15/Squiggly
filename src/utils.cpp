@@ -267,7 +267,7 @@ void convertAndAppendVariable(std::stringstream& ss, std::string& varName) {
 */
 void skipBracketsWhenParsing(std::string& s, size_t& i, std::string& tmp) 
 {
-    int nest_depth = 1; //keep track of how many nexted brackets are in this bracket statement 
+    int nest_depth = 0; //keep track of how many nexted brackets are in this bracket statement 
 
     if(s[i] != '[')
         return; //error with the calling of this method, use this guard to prevent further errors

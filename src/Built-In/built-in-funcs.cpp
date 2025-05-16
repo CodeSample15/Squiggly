@@ -3,20 +3,50 @@
 
 #include "built-in.hpp"
 #include "utils.hpp"
+#include "runner.hpp"
+#include "linter.hpp"
 
 using namespace BuiltIn;
 
+//for returning values to built in variables
+int* INT_RET_PTR = nullptr;
+float* FLOAT_RET_PTR = nullptr;
+
 inline void throwError(std::string message);
+
+void BuiltIn::fetchBuiltInReturnVariables() {
+    //fetch int return variable
+    std::string flagName = INT_RETURN_BUCKET_VAR_NAME;
+    flagName.insert(0, 1, BUILT_IN_VAR_PREFIX);
+    INT_RET_PTR = (int*)Runner::fetchVariable(flagName)->ptr.get();
+
+    //fetch float return variable
+    flagName = FLOAT_RETURN_BUCKET_VAR_NAME;
+    flagName.insert(0, 1, BUILT_IN_VAR_PREFIX);
+    FLOAT_RET_PTR = (float*)Runner::fetchVariable(flagName)->ptr.get();
+}
 
 void BuiltIn::runFunction(std::string name, std::vector<std::string>& args) 
 {
-    //ho boy, ignore the inefficiencies displayed in this code
-    if(name.compare("PRINT")==0) {
+    if(name == "PRINT") {
         if(args.size() != 1)
             throwError("PRINT: expected 1 argument, got " + std::to_string(args.size()));
 
         std::string s = *((std::string*)Utils::convertToVariable(args[0], Utils::VarType::STRING).ptr.get());
         Print(s);
+    }
+    else if(name == "LEN") {
+        if(args.size() != 1)
+            throwError("LEN: expected 1 argument, got " + std::to_string(args.size()));
+
+        //attempt to fetch array variable from runner
+        Utils::SVariable* arrVar = Runner::fetchVariable(args[0], true);
+
+        if(!arrVar || !arrVar->isArray)
+            throwError("Value passed to LEN either doesn't exist or is not an array.");
+
+        //assign return value
+        *INT_RET_PTR = arrVar->arrSize;
     }
     else {
         //throw error

@@ -12,6 +12,9 @@
 
 namespace BuiltIn 
 {
+    //set variables to avoid having to constantly refetch built-in variable pointers
+    void fetchBuiltInReturnVariables();
+
     //scan for a function and run it with the provided arguments
     void runFunction(std::string name, std::vector<std::string>& args);
 
