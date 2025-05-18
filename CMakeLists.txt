@@ -1,22 +1,29 @@
-cmake_minimum_required(VERSION 3.18)
+cmake_minimum_required(VERSION 3.28)
 
-PROJECT (squiggly)
+PROJECT (squiggly LANGUAGES CXX)
 
-add_compile_options(-std=c++20 -Wall -Werror)
+add_compile_options(-Wall -Werror)
 file( GLOB SOURCES "src/*.cpp" "src/Built-In/*.cpp" )
 
 if(true)
     #regular build (pc)
-    find_package( OpenCV REQUIRED )
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-    message(STATUS "OpenCV version: ${OpenCV_VERSION}")
-    message(STATUS "OpenCV include directories: ${OpenCV_INCLUDE_DIRS}")
-    message(STATUS "OpenCV libraries: ${OpenCV_LIBS}")
+    #include SFML to project
+    include(FetchContent)
+    FetchContent_Declare(SFML
+        GIT_REPOSITORY https://github.com/SFML/SFML.git
+        GIT_TAG 3.0.1
+        GIT_SHALLOW ON
+        EXCLUDE_FROM_ALL
+        SYSTEM)
+    FetchContent_MakeAvailable(SFML)
 
-    include_directories( include ${OpenCV_INCLUDE_DIRS} )
+    include_directories( include )
 
     add_executable( squiggly ${SOURCES} )
-    target_link_libraries( squiggly ${OpenCV_LIBS} )
+    target_compile_features( squiggly PRIVATE cxx_std_17 )
+    target_link_libraries( squiggly PRIVATE SFML::Graphics )
 else()
     #console build (raspberry pi)
     include_directories( include lib/joystick )
