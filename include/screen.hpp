@@ -26,8 +26,6 @@ class Screen {
         void clear();
         void drawObj(BuiltIn::Object& obj);
 
-        std::vector<screen_loc> changedPixels(Screen& other);
-
         uint8_t screenBuff[SCREEN_HEIGHT][SCREEN_WIDTH][3];
 };
 
