@@ -161,78 +161,64 @@ void throwFrontendError(std::string message);
 #else
     //PC port using opencv
     #include <SFML/Window.hpp>
+    #include <SFML/RenderWindow.hpp>
+    #include <SFML/Graphics/Image.hpp>
+    #include <SFML/Graphics/Color.hpp>
+    #include <windows.h>
+
+    sf::Render window;
 
     void Frontend::init() {
-        sf::Window window(sf::VideoMode({SCREEN_WIDTH, SCREEN_HEIGHT}), "Squiggly Project");
+        window.create(sf::VideoMode({SCREEN_WIDTH, SCREEN_HEIGHT}), "Squiggly Project");
     }
-    void Frontend::cleanUp() {}
+
+    void Frontend::cleanUp() {
+        window.close();
+    }
 
     void Frontend::drawScreen() {
-        //convert virtual screen to opencv Mat
-        // cv::utils::logging::setLogLevel(cv::utils::logging::LogLevel::LOG_LEVEL_SILENT);
+        //create uint8_t version of in-memory buffer
+        sf::Image img({SCREEN_HEIGHT, SCREEN_WIDTH}, sf::Color::Black);
 
-        // cv::Mat display(SCREEN_HEIGHT, SCREEN_WIDTH, CV_8UC3, screen.screenBuff);
-        // cv::cvtColor(display, display, cv::COLOR_RGB2BGR);
-        
-        // //draw Mat in window
-        // cv::imshow("Squiggly Project", display);
-        // cv::waitKey(SCREEN_REFRESH_DELAY);
+        for(unsigned int x=0; x<SCREEN_WIDTH; x++) {
+            for(unsigned int y=0; y<SCREEN_HEIGHT; y++) {
+                img.setPixel({y, x}, sf::Color(screen.screenBuff[y][x][0], screen.screenBuff[y][x][1], screen.screenBuff[y][x][2], 255));
+            }
+        }
+
+        window.clear();
+        window.display();
     }
 
-    //getting keboard input
-    #if _WIN32
-        #include <windows.h>
-
-        float Frontend::getHorAxis() {
-            if(GetAsyncKeyState(VK_RIGHT) & 0x8000)
-                return 1.0;
-            else if(GetAsyncKeyState(VK_LEFT) & 0x8000)
-                return -1.0;
-            else
-                return 0.0;
-        }
-
-        float Frontend::getVertAxis() {
-            if(GetAsyncKeyState(VK_UP) & 0x8000)
-                return 1.0;
-            else if(GetAsyncKeyState(VK_DOWN) & 0x8000)
-                return -1.0;
-            else
-                return 0.0;
-        }
-
-        bool Frontend::getABtn() {
-            return GetAsyncKeyState(WIN_A_BTN_CODE) & 0x8000;
-        }
-
-        bool Frontend::getBBtn() {
-            return GetAsyncKeyState(WIN_B_BTN_CODE) & 0x8000;
-        }
-
-        bool Frontend::getExitBtn() {
-            return GetAsyncKeyState(VK_ESCAPE) & 0x8000;
-        }
-    #else //todo: implement keyboard input for mac and linux
-        float Frontend::getHorAxis() {
+    float Frontend::getHorAxis() {
+        if(GetAsyncKeyState(VK_RIGHT) & 0x8000)
+            return 1.0;
+        else if(GetAsyncKeyState(VK_LEFT) & 0x8000)
+            return -1.0;
+        else
             return 0.0;
-        }
+    }
 
-        float Frontend::getVertAxis() {
+    float Frontend::getVertAxis() {
+        if(GetAsyncKeyState(VK_UP) & 0x8000)
+            return 1.0;
+        else if(GetAsyncKeyState(VK_DOWN) & 0x8000)
+            return -1.0;
+        else
             return 0.0;
-        }
+    }
 
-        bool Frontend::getABtn() {
-            return false;
-        }
+    bool Frontend::getABtn() {
+        return GetAsyncKeyState(WIN_A_BTN_CODE) & 0x8000;
+    }
 
-        bool Frontend::getBBtn() {
-            return false;
-        }
+    bool Frontend::getBBtn() {
+        return GetAsyncKeyState(WIN_B_BTN_CODE) & 0x8000;
+    }
 
-        bool Frontend::getExitBtn() {
-            return false;
-        }
-    #endif
+    bool Frontend::getExitBtn() {
+        return (GetAsyncKeyState(VK_ESCAPE) & 0x8000) || !window.isOpen();
+    }
 #endif
 
 void throwFrontendError(std::string message) {
