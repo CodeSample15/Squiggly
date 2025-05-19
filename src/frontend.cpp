@@ -165,7 +165,8 @@ void throwFrontendError(std::string message);
     #include <SFML/Graphics/Color.hpp>
     #include <SFML/Graphics/Texture.hpp>
     #include <SFML/Graphics/Sprite.hpp>
-    #include <windows.h>
+    
+    #include <SFML/Window/Keyboard.hpp>
 
     sf::RenderWindow window;
     sf::Texture texture;
@@ -201,33 +202,33 @@ void throwFrontendError(std::string message);
     }
 
     float Frontend::getHorAxis() {
-        if(GetAsyncKeyState(VK_RIGHT) & 0x8000)
+        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right))
             return 1.0;
-        else if(GetAsyncKeyState(VK_LEFT) & 0x8000)
+        else if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left))
             return -1.0;
         else
             return 0.0;
     }
 
     float Frontend::getVertAxis() {
-        if(GetAsyncKeyState(VK_UP) & 0x8000)
+        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up))
             return 1.0;
-        else if(GetAsyncKeyState(VK_DOWN) & 0x8000)
+        else if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down))
             return -1.0;
         else
             return 0.0;
     }
 
     bool Frontend::getABtn() {
-        return GetAsyncKeyState(WIN_A_BTN_CODE) & 0x8000;
+        return sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Z);
     }
 
     bool Frontend::getBBtn() {
-        return GetAsyncKeyState(WIN_B_BTN_CODE) & 0x8000;
+        return sf::Keyboard::isKeyPressed(sf::Keyboard::Key::X);
     }
 
     bool Frontend::getExitBtn() {
-        return (GetAsyncKeyState(VK_ESCAPE) & 0x8000) || !window.isOpen();
+        return sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Escape) || !window.isOpen();
     }
 #endif
 
