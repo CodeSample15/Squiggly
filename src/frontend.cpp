@@ -160,12 +160,16 @@ void throwFrontendError(std::string message);
     }
 #else
     //PC port using opencv
-    #include <SFML/Window.hpp>
+    #include <SFML/Graphics/RenderWindow.hpp>
     #include <SFML/Graphics/Image.hpp>
     #include <SFML/Graphics/Color.hpp>
+    #include <SFML/Graphics/Texture.hpp>
+    #include <SFML/Graphics/Sprite.hpp>
     #include <windows.h>
 
-    sf::Window window;
+    sf::RenderWindow window;
+    sf::Texture texture;
+    sf::Sprite sprite(texture);
 
     void Frontend::init() {
         window.create(sf::VideoMode({SCREEN_WIDTH, SCREEN_HEIGHT}), "Squiggly Project");
@@ -177,16 +181,23 @@ void throwFrontendError(std::string message);
 
     void Frontend::drawScreen() {
         //create uint8_t version of in-memory buffer
-        sf::Image img({SCREEN_HEIGHT, SCREEN_WIDTH}, sf::Color::Black);
+        sf::Image img({SCREEN_WIDTH, SCREEN_HEIGHT}, sf::Color::Black);
 
         for(unsigned int x=0; x<SCREEN_WIDTH; x++) {
             for(unsigned int y=0; y<SCREEN_HEIGHT; y++) {
-                img.setPixel({y, x}, sf::Color(screen.screenBuff[y][x][0], screen.screenBuff[y][x][1], screen.screenBuff[y][x][2], 255));
+                img.setPixel({x, y}, sf::Color(screen.screenBuff[y][x][0], screen.screenBuff[y][x][1], screen.screenBuff[y][x][2], 255));
             }
         }
 
-        //window.clear();
-        //window.display();
+        window.clear();
+
+        bool t = texture.loadFromImage(img);
+        if(!t)
+            throwFrontendError("Unable to load screen to SFML!");
+
+        sprite.setTexture(texture, true);
+        window.draw(sprite);
+        window.display();
     }
 
     float Frontend::getHorAxis() {
