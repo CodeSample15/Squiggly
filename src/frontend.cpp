@@ -172,6 +172,8 @@ void throwFrontendError(std::string message);
     sf::Texture texture;
     sf::Sprite sprite(texture);
 
+    void handleSFMLEvents();
+
     void Frontend::init() {
         window.create(sf::VideoMode({SCREEN_WIDTH, SCREEN_HEIGHT}), "Squiggly Project");
         window.setFramerateLimit(60);
@@ -182,6 +184,8 @@ void throwFrontendError(std::string message);
     }
 
     void Frontend::drawScreen() {
+        handleSFMLEvents();
+
         //create uint8_t version of in-memory buffer
         sf::Image img({SCREEN_WIDTH, SCREEN_HEIGHT}, sf::Color::Black);
 
@@ -230,6 +234,17 @@ void throwFrontendError(std::string message);
 
     bool Frontend::getExitBtn() {
         return sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Escape) || !window.isOpen();
+    }
+
+    void handleSFMLEvents() {
+        if(window.isOpen()) {
+            while (const std::optional event = window.pollEvent())
+            {
+                // Request for closing the window
+                if (event->is<sf::Event::Closed>())
+                    window.close();
+            }
+        }
     }
 #endif
 

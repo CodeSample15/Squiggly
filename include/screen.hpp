@@ -5,8 +5,12 @@
 
 #include "built-in.hpp"
 
-#define SCREEN_WIDTH 160
-#define SCREEN_HEIGHT 128
+#define SCREEN_WIDTH 500
+#define SCREEN_HEIGHT 500
+
+//Dimensions for console
+//#define SCREEN_WIDTH 160
+//#define SCREEN_HEIGHT 128
 
 #define SCREEN_REFRESH_DELAY 20
 
