@@ -174,6 +174,7 @@ void throwFrontendError(std::string message);
 
     void Frontend::init() {
         window.create(sf::VideoMode({SCREEN_WIDTH, SCREEN_HEIGHT}), "Squiggly Project");
+        window.setFramerateLimit(60);
     }
 
     void Frontend::cleanUp() {
