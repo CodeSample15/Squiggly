@@ -161,12 +161,11 @@ void throwFrontendError(std::string message);
 #else
     //PC port using opencv
     #include <SFML/Window.hpp>
-    #include <SFML/RenderWindow.hpp>
     #include <SFML/Graphics/Image.hpp>
     #include <SFML/Graphics/Color.hpp>
     #include <windows.h>
 
-    sf::Render window;
+    sf::Window window;
 
     void Frontend::init() {
         window.create(sf::VideoMode({SCREEN_WIDTH, SCREEN_HEIGHT}), "Squiggly Project");
@@ -186,8 +185,8 @@ void throwFrontendError(std::string message);
             }
         }
 
-        window.clear();
-        window.display();
+        //window.clear();
+        //window.display();
     }
 
     float Frontend::getHorAxis() {

@@ -513,6 +513,7 @@ void createVariable(std::vector<Utils::SVariable>& memory, std::string name, Uti
     temp.name = name;
     temp.type = type;
     temp.ptr = ptr;
+    temp.isArray = false;
 
     memory.push_back(temp);
 }
