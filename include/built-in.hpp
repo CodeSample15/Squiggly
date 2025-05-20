@@ -24,6 +24,9 @@ namespace BuiltIn
     void PrintErr(std::string message); //same thing as print, just print to error stream
     void PrintErr(char c);
 
+    void GenRandNum(int min, int max);
+    void GenRandNum();
+
     enum ObjectShape { //not implemented yet
         RECT,
         TRIANGLE,
