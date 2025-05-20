@@ -82,14 +82,12 @@ void BuiltIn::Print(std::string m, bool newline) {
     std::cout << m;
     if(newline)
         std::cout << std::endl;
-    //Serial.print() //for arduino
 }
 
 void BuiltIn::Print(char c, bool newline) {
     std::cout << c;
     if(newline)
         std::cout << std::endl;
-    //Serial.print() //for arduino
 }
 
 void BuiltIn::PrintErr(std::string m) {
