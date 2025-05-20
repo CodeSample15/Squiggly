@@ -1,0 +1,21 @@
+:VARS: {
+    
+}
+
+:START: {
+    ^PRINT("Generating numbers in range...")
+	repeat(20) {
+        ^I_RAND(10, 15)
+        ^PRINT($I_RET)
+    }
+
+    ^PRINT("Generating random float values...")
+    repeat(20) {
+        ^F_RAND()
+        ^PRINT($F_RET)
+    }
+}
+
+:UPDATE: {
+	
+}

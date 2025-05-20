@@ -160,79 +160,92 @@ void throwFrontendError(std::string message);
     }
 #else
     //PC port using opencv
-    #include <opencv2/opencv.hpp>
-    #include <opencv2/imgproc/imgproc.hpp>
-    #include <opencv2/core/utils/logger.hpp>
+    #include <SFML/Graphics/RenderWindow.hpp>
+    #include <SFML/Graphics/Image.hpp>
+    #include <SFML/Graphics/Color.hpp>
+    #include <SFML/Graphics/Texture.hpp>
+    #include <SFML/Graphics/Sprite.hpp>
+    
+    #include <SFML/Window/Keyboard.hpp>
 
-    void Frontend::init() {}
-    void Frontend::cleanUp() {}
+    sf::RenderWindow window;
+    sf::Texture texture;
+    sf::Sprite sprite(texture);
 
-    void Frontend::drawScreen() {
-        //convert virtual screen to opencv Mat
-        cv::utils::logging::setLogLevel(cv::utils::logging::LogLevel::LOG_LEVEL_SILENT);
+    void handleSFMLEvents();
 
-        cv::Mat display(SCREEN_HEIGHT, SCREEN_WIDTH, CV_8UC3, screen.screenBuff);
-        cv::cvtColor(display, display, cv::COLOR_RGB2BGR);
-        
-        //draw Mat in window
-        cv::imshow("Squiggly Project", display);
-        cv::waitKey(SCREEN_REFRESH_DELAY);
+    void Frontend::init() {
+        window.create(sf::VideoMode({SCREEN_WIDTH, SCREEN_HEIGHT}), "Squiggly Project");
+        window.setFramerateLimit(60);
     }
 
-    //getting keboard input
-    #if _WIN32
-        #include <windows.h>
+    void Frontend::cleanUp() {
+        window.close();
+    }
 
-        float Frontend::getHorAxis() {
-            if(GetAsyncKeyState(VK_RIGHT) & 0x8000)
-                return 1.0;
-            else if(GetAsyncKeyState(VK_LEFT) & 0x8000)
-                return -1.0;
-            else
-                return 0.0;
+    void Frontend::drawScreen() {
+        handleSFMLEvents();
+
+        //create uint8_t version of in-memory buffer
+        sf::Image img({SCREEN_WIDTH, SCREEN_HEIGHT}, sf::Color::Black);
+
+        for(unsigned int x=0; x<SCREEN_WIDTH; x++) {
+            for(unsigned int y=0; y<SCREEN_HEIGHT; y++) {
+                img.setPixel({x, y}, sf::Color(screen.screenBuff[y][x][0], screen.screenBuff[y][x][1], screen.screenBuff[y][x][2], 255));
+            }
         }
 
-        float Frontend::getVertAxis() {
-            if(GetAsyncKeyState(VK_UP) & 0x8000)
-                return 1.0;
-            else if(GetAsyncKeyState(VK_DOWN) & 0x8000)
-                return -1.0;
-            else
-                return 0.0;
-        }
+        window.clear();
 
-        bool Frontend::getABtn() {
-            return GetAsyncKeyState(WIN_A_BTN_CODE) & 0x8000;
-        }
+        bool t = texture.loadFromImage(img);
+        if(!t)
+            throwFrontendError("Unable to load screen to SFML!");
 
-        bool Frontend::getBBtn() {
-            return GetAsyncKeyState(WIN_B_BTN_CODE) & 0x8000;
-        }
+        sprite.setTexture(texture, true);
+        window.draw(sprite);
+        window.display();
+    }
 
-        bool Frontend::getExitBtn() {
-            return GetAsyncKeyState(VK_ESCAPE) & 0x8000;
-        }
-    #else //todo: implement keyboard input for mac and linux
-        float Frontend::getHorAxis() {
+    float Frontend::getHorAxis() {
+        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right))
+            return 1.0;
+        else if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left))
+            return -1.0;
+        else
             return 0.0;
-        }
+    }
 
-        float Frontend::getVertAxis() {
+    float Frontend::getVertAxis() {
+        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up))
+            return 1.0;
+        else if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down))
+            return -1.0;
+        else
             return 0.0;
-        }
+    }
 
-        bool Frontend::getABtn() {
-            return false;
-        }
+    bool Frontend::getABtn() {
+        return sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Z);
+    }
 
-        bool Frontend::getBBtn() {
-            return false;
-        }
+    bool Frontend::getBBtn() {
+        return sf::Keyboard::isKeyPressed(sf::Keyboard::Key::X);
+    }
 
-        bool Frontend::getExitBtn() {
-            return false;
+    bool Frontend::getExitBtn() {
+        return sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Escape) || !window.isOpen();
+    }
+
+    void handleSFMLEvents() {
+        if(window.isOpen()) {
+            while (const std::optional event = window.pollEvent())
+            {
+                // Request for closing the window
+                if (event->is<sf::Event::Closed>())
+                    window.close();
+            }
         }
-    #endif
+    }
 #endif
 
 void throwFrontendError(std::string message) {

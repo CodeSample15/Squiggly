@@ -15,6 +15,8 @@
 #define SCREEN_HEIGHT_VAR_NAME "SCREEN_HEIGHT"
 
 #define COLLISION_FLAG_VAR_NAME "COL_FLAG"
+#define FLOAT_RETURN_BUCKET_VAR_NAME "F_RET" //bypass the whole "squiggly can't return values from functions" issue. Float values returned from functions can be stored in this bucket variable
+#define INT_RETURN_BUCKET_VAR_NAME "I_RET"
 
 namespace Runner {
     //delete all old values stored in memory
@@ -29,5 +31,5 @@ namespace Runner {
     void execute();
 
     //allow external cpp files to access variables
-    Utils::SVariable* fetchVariable(std::string varName);
+    Utils::SVariable* fetchVariable(std::string varName, bool allowArrays=false);
 }

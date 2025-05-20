@@ -1,8 +1,7 @@
 #include <string>
-#include <vector>
 #include <memory>
-#include <stdexcept>
 #include <chrono>
+#include <stdexcept>
 
 #include "runner.hpp"
 #include "built-in.hpp"
@@ -36,6 +35,7 @@ void runObjectFunction(std::string name, std::vector<std::string>& args, size_t&
 void setVariable(const std::shared_ptr<void>& dst, const std::shared_ptr<void>& src, Utils::VarType type, std::string assignType="="); //assign one value to another value
 void createVariable(std::vector<Utils::SVariable>& memory, std::string name, Utils::VarType type, std::shared_ptr<void> ptr); //quick shortcut for adding a new variable to memory
 void executeBranch(std::vector<TOKENIZED_PTR>& tokens, std::vector<Utils::SVariable>& memory, size_t stackFrameIdx, size_t& prgCounter);
+int parseArrayDecl(std::string& name); //returns the size of the initialized array
 void throwRunnerError(std::string message); //throw a runner error
 
 //useful for debugging to have these run functions separated:
@@ -72,6 +72,11 @@ void Runner::executeVars() {
 
     //flags for built in functions to set
     createVariable(bVars, COLLISION_FLAG_VAR_NAME, Utils::VarType::BOOL, Utils::createSharedPtr(false));
+    createVariable(bVars, FLOAT_RETURN_BUCKET_VAR_NAME, Utils::VarType::FLOAT, Utils::createSharedPtr((float)0.0));
+    createVariable(bVars, INT_RETURN_BUCKET_VAR_NAME, Utils::VarType::INTEGER, Utils::createSharedPtr((int)0));
+
+    //set up built-in function pointers for quick access to built-in variables
+    BuiltIn::fetchBuiltInReturnVariables();
 
     //run global variable section of the Squiggly code and add created variables to global scope (gVars)
     runProgram(varsBlock_tok, gVars, gVars.size(), false, 0, 0, true);
@@ -83,6 +88,7 @@ void Runner::executeUpdate() { runProgram(mainLoop_tok, sVars, 0, true, 0, 0, tr
 void Runner::flushMem() {
     gVars.clear();
     sVars.clear();
+    bVars.clear();
 }
 
 bool runningProgram = false;
@@ -113,10 +119,11 @@ void Runner::execute()
             runningProgram = false;
     }
 
+    flushMem(); //avoid memory leaks
     Frontend::cleanUp();
 }
 
-Utils::SVariable* Runner::fetchVariable(std::string name) 
+Utils::SVariable* Runner::fetchVariable(std::string name, bool allowArrays) 
 {
     if(name.length()<1)
         return nullptr;
@@ -128,6 +135,11 @@ Utils::SVariable* Runner::fetchVariable(std::string name)
         memberName = name.substr(splitLocation+1, name.length()-(splitLocation+1));
         name = name.substr(0, splitLocation);
     }
+    
+    int arrIndex = -1; //for use with array variables
+    //check if this is an array index and parse the correct name
+    if(name.find("[") != std::string::npos)
+        arrIndex = parseArrayDecl(name);
 
     if(name[0] == BUILT_IN_VAR_PREFIX) {
         name = name.substr(1, name.length()-1); //get rid of the prefix before searching
@@ -159,6 +171,30 @@ Utils::SVariable* Runner::fetchVariable(std::string name)
                 tmp = &var;
                 break;
             }
+        }
+
+        //variable fetched is array, return the SVariable at the requested array index
+        if(tmp && tmp->isArray) {
+            if(allowArrays) //ONLY IF ALLOWED: return the array object and not an indexed Squiggly variable
+                return tmp;
+
+            if(arrIndex<0 || arrIndex>=tmp->arrSize)
+                throwRunnerError("Array index [" + std::to_string(arrIndex) + "] out of range for array: " + tmp->name);
+
+            try {
+                //good lord, where do I start on this one-liner
+                //basically, this line casts the shared pointer into a vector of squiggly variables (which should be what the SVariable pointer is pointing to if it is marked as an array)
+                //and then gets the location of the Squiggly variable at the parsed array index. That location is then stored in the tmp pointer to be returned to whatever part of the program requested it.
+                //anyway, here it is:
+                tmp = &((std::vector<Utils::SVariable>*)tmp->ptr.get())->at(arrIndex);
+
+            } catch(const std::exception& e) {
+                //if the above code fails in anyway, catch the error and let the programmer know they messed up
+                throwRunnerError("Variable \"" + tmp->name + "\" was marked as array, but was unable to be dereferenced properly!");
+            }
+        } else if(tmp && arrIndex != -1) {
+            //variable was indexed as an array but is not an array
+            throwRunnerError("Variable \"" + tmp->name + "\" is not an array!");
         }
 
         if(tmp && tmp->type==Utils::VarType::OBJECT && memberName!="") {
@@ -244,9 +280,27 @@ void runProgram(std::vector<TOKENIZED_PTR>& tokens, std::vector<Utils::SVariable
                 if(fetchVariable(declareLine->varName))
                     throwRunnerError("Variable '" + declareLine->varName + "' is already defined!");
 
-                newVariableHolder.name = declareLine->varName;
-                newVariableHolder.type = Utils::stringToVarType(declareLine->varType);
-                newVariableHolder.ptr = Utils::createEmptyShared(newVariableHolder.type);
+                if(declareLine->varName.find("[")==std::string::npos) {
+                    //create a normal variable
+                    newVariableHolder.name = declareLine->varName;
+                    newVariableHolder.type = Utils::stringToVarType(declareLine->varType);
+                    newVariableHolder.ptr = Utils::createEmptyShared(newVariableHolder.type);
+                    newVariableHolder.isArray = false;
+                } else {
+                    //create an array
+                    std::string tmpName = declareLine->varName;
+                    int arrSize = parseArrayDecl(tmpName);
+
+                    //make sure arrSize is valid
+                    if(arrSize <= 0)
+                        throwRunnerError("Cannot create an array with size 0 or less! Parsed array size '" + std::to_string(arrSize) + "' from '" + tmpName + "'");
+
+                    newVariableHolder.name = tmpName;
+                    newVariableHolder.type = Utils::stringToVarType(declareLine->varType);
+                    newVariableHolder.ptr = Utils::createEmptyShared(newVariableHolder.type, arrSize);
+                    newVariableHolder.isArray = true;
+                    newVariableHolder.arrSize = arrSize;
+                }
 
                 memory.push_back(newVariableHolder); //push new variable to stack
                 break;
@@ -256,9 +310,14 @@ void runProgram(std::vector<TOKENIZED_PTR>& tokens, std::vector<Utils::SVariable
                 if(fetchVariable(assignLine->assignDst))
                     throwRunnerError("Variable '" + assignLine->assignDst + "' is already defined!");
 
-                newVariableHolder.name = assignLine->assignDst;
-                newVariableHolder.type = Utils::stringToVarType(assignLine->assignType);
-                newVariableHolder.ptr = Utils::createEmptyShared(newVariableHolder.type);
+                if(assignLine->assignDst.find("[")==std::string::npos) {
+                    newVariableHolder.name = assignLine->assignDst;
+                    newVariableHolder.type = Utils::stringToVarType(assignLine->assignType);
+                    newVariableHolder.ptr = Utils::createEmptyShared(newVariableHolder.type);
+                    newVariableHolder.isArray = false;
+                } else {
+                    throwRunnerError("Squiggly does not yet support assign-initialization of arrays! Please initialize each value in array '" + assignLine->assignDst + "' with a loop"); //this is just from laziness/lack of time :/
+                }
 
                 setVariable( newVariableHolder.ptr, 
                         Utils::convertToVariable(assignLine->assignSrc, newVariableHolder.type).ptr, 
@@ -277,8 +336,9 @@ void runProgram(std::vector<TOKENIZED_PTR>& tokens, std::vector<Utils::SVariable
     //clear out stack frame
     if(clearStackWhenDone) {
         size_t numVars = memory.size() - stackFrameIdx; //number of variables created in this stack frame
-        for(size_t i=0; i<numVars; i++)
+        for(size_t i=0; i<numVars; i++) {
             memory.erase(memory.begin() + stackFrameIdx);
+        }
     }
 }
 
@@ -317,8 +377,23 @@ void runUserFunction(std::string name, std::vector<std::string>& args) {
                     std::string etype = expected.substr(0, spaceLocation);
                     std::string ename = expected.substr(spaceLocation+1, expected.length()-spaceLocation-1);
 
-                    Utils::SVariable nextVar = Utils::convertToVariable(args[i], Utils::stringToVarType(etype));
-                    nextVar.name = ename; //split expected arg into type and name, get the name
+                    Utils::SVariable nextVar;
+
+                    if(ename.find("[]") != std::string::npos) {
+                        //variable is expected to be an array
+                        nextVar = *fetchVariable(args[i], true);
+
+                        //get rid of brackets in ename
+                        size_t bracket_loc = ename.find('[');
+                        nextVar.name = ename.substr(0, bracket_loc);
+
+                        if(!nextVar.isArray)
+                            throwRunnerError("Expected \"" + args[i] + "\" to be an array, but it isn't.");
+                    }
+                    else {
+                        nextVar = Utils::convertToVariable(args[i], Utils::stringToVarType(etype));
+                        nextVar.name = ename; //split expected arg into type and name, get the name
+                    }
 
                     sVars.push_back(nextVar); //push to stack
                 }
@@ -438,6 +513,7 @@ void createVariable(std::vector<Utils::SVariable>& memory, std::string name, Uti
     temp.name = name;
     temp.type = type;
     temp.ptr = ptr;
+    temp.isArray = false;
 
     memory.push_back(temp);
 }
@@ -505,6 +581,9 @@ void executeBranch(std::vector<TOKENIZED_PTR>& tokens, std::vector<Utils::SVaria
     }
 }
 
+/*
+    Set all of the built in variable values that Squiggly programmers will have access to
+*/
 void setBIVars() {
     //input control
     std::string temp = JOYSTICK_X_VAR_NAME;
@@ -559,6 +638,35 @@ void setBIVars() {
     setVariable(fetchVariable(temp)->ptr, 
                 Utils::createSharedPtr(SCREEN_HEIGHT),
                 Utils::VarType::INTEGER, "=");
+}
+
+/*
+    From a declaration statement of an array, convert the size of the array to a valid integer, rename the variable
+    to itself without the brackets, and return the size of the array. Throw an error if anything goes wrong.
+
+    Examples:
+        int test[43] -> parseArrayDecl(name="test[43]") -> returns 43 and sets 'name' to "test"
+        double other[]
+*/
+int parseArrayDecl(std::string& name) 
+{
+    //get the value in between the brackets
+    size_t bracketStart = name.find("[");    
+    size_t bracketEnd = name.find_last_of("]");
+
+    if(bracketStart >= bracketEnd)
+        throwRunnerError("Unable to parse array size from '" + name + "'");
+
+    std::string bracketVal = name.substr(bracketStart+1, bracketEnd-bracketStart-1);
+
+    //parse string for integer using Utils
+    int arrSize = *(int*)Utils::convertToVariable(bracketVal, Utils::VarType::INTEGER).ptr.get();
+
+    //remove the brackets from the name
+    name = name.substr(0, bracketStart);
+
+    //return the size of the array
+    return arrSize;
 }
 
 void throwRunnerError(std::string message) {

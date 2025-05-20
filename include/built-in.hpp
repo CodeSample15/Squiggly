@@ -12,6 +12,9 @@
 
 namespace BuiltIn 
 {
+    //set variables to avoid having to constantly refetch built-in variable pointers
+    void fetchBuiltInReturnVariables();
+
     //scan for a function and run it with the provided arguments
     void runFunction(std::string name, std::vector<std::string>& args);
 
@@ -20,6 +23,9 @@ namespace BuiltIn
 
     void PrintErr(std::string message); //same thing as print, just print to error stream
     void PrintErr(char c);
+
+    void GenRandNum(int min, int max);
+    void GenRandNum();
 
     enum ObjectShape { //not implemented yet
         RECT,
