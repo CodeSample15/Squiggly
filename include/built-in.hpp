@@ -30,8 +30,7 @@ namespace BuiltIn
     enum ObjectShape { //not implemented yet
         RECT,
         TRIANGLE,
-        CIRCLE,
-        CROSS
+        ELLIPSE,
     };
 
     //built in class types
@@ -66,6 +65,7 @@ namespace BuiltIn
 
             void draw();
             bool isTouching(Object& other);
+            void setObjShape(std::string img);
 
             //pointers to variables in main memory that objects will need access to
             bool* collisionFlag;
