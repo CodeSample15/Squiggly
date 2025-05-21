@@ -2,11 +2,13 @@
 #include <iostream>
 #include <climits>
 #include <cstdlib>
+#include <algorithm>
 
 #include "built-in.hpp"
 #include "utils.hpp"
 #include "runner.hpp"
 #include "linter.hpp"
+#include "graphics.hpp"
 
 using namespace BuiltIn;
 
@@ -31,6 +33,12 @@ void BuiltIn::fetchBuiltInReturnVariables() {
     srand(time(0));
 }
 
+/**
+ * @brief Run a built in function and pass arguments as strings
+ * 
+ * @param name 
+ * @param args 
+ */
 void BuiltIn::runFunction(std::string name, std::vector<std::string>& args) 
 {
     if(name == "PRINT") {
@@ -57,9 +65,11 @@ void BuiltIn::runFunction(std::string name, std::vector<std::string>& args)
         if(args.size() != 2)
             throwError("I_RAND: expected 2 arguments, got " + std::to_string(args.size()));
 
+        //convert minimum and maximum arguments to int literals
         int min = *((int*)Utils::convertToVariable(args[0], Utils::VarType::INTEGER).ptr.get());
         int max = *((int*)Utils::convertToVariable(args[1], Utils::VarType::INTEGER).ptr.get());
 
+        //generate random number and store in I_RET squiggly flag
         GenRandNum(min, max);
     }
     else if(name == "F_RAND") {
@@ -67,6 +77,37 @@ void BuiltIn::runFunction(std::string name, std::vector<std::string>& args)
             throwError("F_RAND: no arguments expected, got " + std::to_string(args.size()));
 
         GenRandNum();
+    }
+    else if(name == "DRAW_LINE") {
+        if(args.size() != 4 && args.size() != 7)
+            throwError("DRAW_LINE: expected either 4 or 7 arguments, got " + std::to_string(args.size()));
+
+        SGraphics::Color color;
+        SGraphics::pixel p1;
+        SGraphics::pixel p2;
+
+        p1.x = *((float*)Utils::convertToVariable(args[0], Utils::VarType::FLOAT).ptr.get());
+        p1.y = *((float*)Utils::convertToVariable(args[1], Utils::VarType::FLOAT).ptr.get());
+        p2.x = *((float*)Utils::convertToVariable(args[2], Utils::VarType::FLOAT).ptr.get());
+        p2.y = *((float*)Utils::convertToVariable(args[3], Utils::VarType::FLOAT).ptr.get());
+
+        if(args.size() == 7) {
+            //user did in fact specify color, use it
+            int r = *((int*)Utils::convertToVariable(args[4], Utils::VarType::INTEGER).ptr.get());
+            int g = *((int*)Utils::convertToVariable(args[5], Utils::VarType::INTEGER).ptr.get());
+            int b = *((int*)Utils::convertToVariable(args[6], Utils::VarType::INTEGER).ptr.get());
+
+            //clamp values to avoid over/underflow
+            color.r = std::clamp(r, 0, 255);
+            color.g = std::clamp(g, 0, 255);
+            color.b = std::clamp(b, 0, 255);
+        } else {
+            color.r = 255;
+            color.g = 255;
+            color.b = 255;
+        }
+
+        SGraphics::draw_line(p1, p2, color);
     }
     else {
         //throw error

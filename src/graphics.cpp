@@ -6,39 +6,49 @@
 
 #include "graphics.hpp"
 
+/*
+    Simple helper method to draw a pixel on the screen without causing an OOB error
+ */
+void draw_pixel(SGraphics::pixel p, SGraphics::Color c) 
+{
+    if(p.x>=0 && p.x<SCREEN_WIDTH && p.y>=0 && p.y<SCREEN_HEIGHT) {
+        screen.screenBuff[p.x][p.y][0] = c.r;
+        screen.screenBuff[p.x][p.y][1] = c.g;
+        screen.screenBuff[p.x][p.y][2] = c.b;
+    }
+}
+
 /**
  * @brief Draws a rectangle to screenBuff
  * 
- * Center of the rectangle is at x, y. Rectangle can be at any rotation rot in degrees. 
+ * Center of the rectangle is at location loc. Rectangle can be at any rotation rot in degrees. 
  * 
- * @param x 
- * @param y 
+ * @param loc
  * @param width 
  * @param height 
  * @param rot 
  * @param color 
  * @param fill 
  */
-void SGraphics::draw_rect(int x, int y, int width, int height, float rot, Color color, bool fill) 
+void SGraphics::draw_rect(pixel loc, int width, int height, float rot, Color color, bool fill) 
 {
-
+    
 }
 
 /**
  * @brief Draw a simple triangle to screenBuff. 
  * 
- * Center of triangle is located at x, y. 
+ * Center of triangle is located at location loc. 
  * Triangle is an equilateral triangle that can be stretched using width and height.
  * 
- * @param x 
- * @param y 
+ * @param loc
  * @param width 
  * @param height 
  * @param rot 
  * @param color 
  * @param fill 
  */
-void SGraphics::draw_triangle(int x, int y, int width, int height, float rot, Color color, bool fill) 
+void SGraphics::draw_triangle(pixel loc, int width, int height, float rot, Color color, bool fill) 
 {
 
 }
@@ -46,17 +56,16 @@ void SGraphics::draw_triangle(int x, int y, int width, int height, float rot, Co
 /**
  * @brief Draw a circle to screenBuff
  * 
- * Center is located at x, y. Circles are ellipses that have width==height.
+ * Center is located at location loc. Circles are ellipses that have width==height.
  * 
- * @param x 
- * @param y 
+ * @param loc
  * @param width 
  * @param height 
  * @param rot 
  * @param color 
  * @param fill 
  */
-void SGraphics::draw_ellipse(int x, int y, int width, int height, float rot, Color color, bool fill) 
+void SGraphics::draw_ellipse(pixel loc, int width, int height, float rot, Color color, bool fill) 
 {
 
 }
@@ -64,30 +73,68 @@ void SGraphics::draw_ellipse(int x, int y, int width, int height, float rot, Col
 /**
  * @brief Draw a polygon (triangle) between three different points on the screen
  * 
- * @param x1 
- * @param y1 
- * @param x2 
- * @param y2 
- * @param x3 
- * @param y3 
+ * @param one
+ * @param two
+ * @param three
  * @param color 
  * @param fill 
  */
-void SGraphics::draw_polygon(int x1, int y1, int x2, int y2, int x3, int y3, Color color, bool fill) 
+void SGraphics::draw_polygon(pixel one, pixel two, pixel three, Color color, bool fill) 
 {
-
+    
 }
 
 /**
  * @brief Draw a line between two points on the screen
  * 
- * @param x1 
- * @param y1 
- * @param x2 
- * @param y2 
+ * @param one
+ * @param two
  * @param color 
  */
-void SGraphics::draw_line(int x1, int y1, int x2, int y2, Color color) 
+void SGraphics::draw_line(pixel one, pixel two, Color color) 
 {
+    //  Slopes calculation
+    int x0 = one.x, x1 = two.x;
+    int y0 = one.y, y1 = two.y;
 
+    int dx = abs(two.x - one.x);
+    int dy = abs(two.y - one.y);
+
+    int signx = (one.x < two.x) ? 1 : -1;
+    int signy = (one.y < two.y) ? 1 : -1;
+
+    int err = dx - dy;
+
+    //  First pixel
+    SGraphics::pixel p;
+    p.x = x0;
+    p.y = y0;
+    draw_pixel(p, color);
+
+    //  Draw Pixels
+    while(true)
+    {
+        // End condition
+        if (x0 == x1 && y0 == y1)
+            break;
+
+        int err2 = 2 * err;
+
+        if (err2 > -dy)
+        {
+            err -= dy;
+            x0 += signx;
+        }
+
+        if (err2 < dx)
+        {
+            err += dx;
+            y0 += signy;
+        }
+
+        //  Draw to screen buffer
+        p.x = x0;
+        p.y = y0;
+        draw_pixel(p, color);
+    }
 }
