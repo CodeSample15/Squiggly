@@ -45,6 +45,8 @@ namespace BuiltIn
             float getHeight();
             void getColor(uint8_t buffer[3]);
 
+            ObjectShape shape;
+
             void callFunction(std::string name, std::vector<std::string>& args);
             Utils::SVariable* fetchVariable(std::string name);
 
@@ -61,8 +63,6 @@ namespace BuiltIn
             Utils::SVariable color_r;
             Utils::SVariable color_g;
             Utils::SVariable color_b;
-
-            ObjectShape shape;
 
             void draw();
             bool isTouching(Object& other);

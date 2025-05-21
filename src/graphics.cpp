@@ -81,7 +81,52 @@ void SGraphics::draw_ellipse(pixel loc, int width, int height, float rot, Color 
  */
 void SGraphics::draw_polygon(pixel one, pixel two, pixel three, Color color, bool fill) 
 {
-    
+    if(fill) {
+        //  Bounding box for triangle
+        int startX = std::min({one.x, two.x, three.x});
+        int endX = std::max({one.x, two.x, three.x});
+
+        int startY = std::min({one.y, two.y, three.y});
+        int endY = std::max({one.y, two.y, three.y});
+
+        // Compute the area of the triangle (using the determinant)
+        float denom = (two.y - three.y) * (one.x - three.x) + (three.x - two.x) * (one.y - three.y);
+
+        //  No divide by 0 or very small triangles
+        if (std::abs(denom) < 1e-5f)
+            return;
+
+        //temp variable for holding coordinates
+        pixel p;
+
+        //  Barycentric to determine if point is in triangle
+        for(int x = startX; x <= endX; x++)
+        {
+            for(int y = startY; y <= endY; y++)
+            {
+                float w0, w1, w2;
+
+                // Compute the barycentric weights
+                w0 = ((two.y - three.y) * (x - three.x) + (three.x - two.x) * (y - three.y)) / denom;
+                w1 = ((three.y - one.y) * (x - three.x) + (one.x - three.x) * (y - three.y)) / denom;
+                w2 = 1.0f - w0 - w1;
+
+                //  If weights are all valid, inside triangle
+                if(w0 >= 0 && w1 >= 0 && w2 >= 0)
+                {
+                    p.x = x;
+                    p.y = y;
+                    draw_pixel(p, color);
+                }
+            }
+        }
+    }
+    else {
+        //we are not filling the triangle, just draw lines
+        draw_line(one, two, color);
+        draw_line(one, three, color);
+        draw_line(three, two, color);
+    }
 }
 
 /**

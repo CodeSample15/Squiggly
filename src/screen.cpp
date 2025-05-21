@@ -17,6 +17,14 @@ void Screen::clear() {
 
 void Screen::drawObj(BuiltIn::Object& obj)
 {
+    switch(obj.shape) {
+        case BuiltIn::ObjectShape::RECT:
+            break;
+
+        case BuiltIn::ObjectShape::CIRCLE:
+            break;
+    }
+
     for(int y=0; y<obj.getHeight(); y++) {
         for(int x=0; x<obj.getWidth(); x++) {
             int xDraw = x+(int)obj.getX();
