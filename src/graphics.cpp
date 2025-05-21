@@ -101,7 +101,7 @@ void SGraphics::draw_triangle(pixel loc, int width, int height, float rot, Color
     rotate_point(p1, loc, rot);
     rotate_point(p2, loc, rot);
     rotate_point(p3, loc, rot);
-    
+
     //draw polygon
     draw_polygon(p1, p2, p3, color, fill);
 }
@@ -252,7 +252,22 @@ void draw_pixel(SGraphics::pixel p, SGraphics::Color c)
 /*
     Rotate a pixel p around point c in r degrees
 */
-void rotate_point(SGraphics::pixel& p, SGraphics::pixel& c, float r) 
+void rotate_point(SGraphics::pixel& p, SGraphics::pixel& center, float r) 
 {
-    //TODO: implement this plz :)
+    r = r * (3.1415926 / 180); //degrees to radians
+    
+    float s = sin(r);
+    float c = cos(r);
+
+    // translate point back to origin:
+    p.x -= center.x;
+    p.y -= center.y;
+
+    // rotate point
+    float xnew = p.x * c - p.y * s;
+    float ynew = p.x * s + p.y * c;
+
+    // translate point back:
+    p.x = xnew + center.x;
+    p.y = ynew + center.y;
 }

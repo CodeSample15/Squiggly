@@ -11,16 +11,11 @@
 
     test.x = 0
     test.y = 0
-    test.width = 10
-    test.height = 10
+    test.width = 20
+    test.height = 20
 
     test.setColor(173, 245, 66)
-    test.setShape(@RECT)
     test.setShape(@TRIANGLE)
-    test.setShape(@ELLIPSE)
-    test.setShape(@RECT)
-
-    test.rotation = 10
 }
 
 :UPDATE: {
@@ -36,11 +31,11 @@
     ^PRINT("X: " + test.x + "   Y: " + test.y + "    Rot: " + test.rotation)
 
     if($A_BTN) {
-        test.rotation += 5
+        test.rotation -= 5
     }
 
     if($B_BTN) {
-        test.rotation -= 5
+        test.rotation += 5
     }
 
     test.draw()
