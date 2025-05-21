@@ -2,6 +2,7 @@
 #include <stdexcept>
 #include <memory>
 #include <string>
+#include <algorithm>
 
 #include "built-in.hpp"
 #include "linter.hpp"
@@ -52,7 +53,7 @@ BuiltIn::Object::Object()
     color_b.type = Utils::VarType::INTEGER;
     color_b.ptr = Utils::createEmptyShared(Utils::VarType::INTEGER);
 
-    shape = ObjectShape::RECT; //TODO: allow other shapes to be used for object
+    shape = ObjectShape::RECT;
 
     //get variables from memory (flags set by functions)
     std::string flagName = COLLISION_FLAG_VAR_NAME;
@@ -61,7 +62,7 @@ BuiltIn::Object::Object()
     if(tmp)
         collisionFlag = (bool*)tmp->ptr.get();
     else
-        throwObjectError("Unable to fetch collision flag!"); //another error that should never be seen by regular Squiggly users, just devs
+        throwObjectError("Unable to fetch collision flag!"); //error that should never be seen by regular Squiggly users, just devs
 
     //default color (pink)
     setColor(255, 0, 255);
@@ -96,15 +97,41 @@ void BuiltIn::Object::callFunction(std::string name, std::vector<std::string>& a
     }
     else if(name == "testCollision") {
         if(args.size() != 1)
-            throwObjectError("'isTouching' expected 1 argument, got " + std::to_string(args.size()));
+            throwObjectError("'testCollision' expected 1 argument, got " + std::to_string(args.size()));
 
         Utils::SVariable* tmp = Runner::fetchVariable(args[0]);
         if(tmp && tmp->type == Utils::VarType::OBJECT) {
             Object* other = (Object*)tmp->ptr.get();
-            *collisionFlag = isTouching(*other);
+            *collisionFlag = isTouching(*other); //set collision flag 
         } else {
             throwObjectError("'isTouching' -> '" + args[0] + "' is not an Object variable");
         }
+    }
+    else if(name == "setColor") {
+        if(args.size() != 3)
+            throwObjectError("'setColor' expected 3 arguments, got "+ std::to_string(args.size()));
+
+        //convert arguments to literal values
+        int r = *(int*)Utils::convertToVariable(args[0], Utils::VarType::INTEGER).ptr.get();
+        int g = *(int*)Utils::convertToVariable(args[1], Utils::VarType::INTEGER).ptr.get();
+        int b = *(int*)Utils::convertToVariable(args[2], Utils::VarType::INTEGER).ptr.get();
+
+        //avoid under/overflow
+        r = std::clamp(r, 0, 255);
+        g = std::clamp(g, 0, 255);
+        b = std::clamp(b, 0, 255);
+
+        //call builtin method
+        setColor(r, g, b);
+    }
+    else if(name == "setShape") {
+        if(args.size() != 1)
+            throwObjectError("'setShape' expected 1 argument, got " + std::to_string(args.size()));
+        if(args[0][0] != IMAGE_DECLARATION_PREFIX)
+            throwObjectError("Argument passed to 'setImage' is not an image declaration! (Should start with @)");
+
+        args[0] = args[0].substr(1, args[0].length() - 1);
+        setObjShape(args[0]);
     }
     else {
         throwObjectError("Function name \'" + name + "\' does not exist.");
@@ -148,6 +175,16 @@ bool BuiltIn::Object::isTouching(Object& other)
                 || valueInRange(other.getY(), getY(), getY()+getHeight());
     
     return xOverlap && yOverlap;
+}
+
+void BuiltIn::Object::setObjShape(std::string img) 
+{
+    if(img == "TRIANGLE")
+        shape = ObjectShape::TRIANGLE;
+    else if(img == "RECT")
+        shape = ObjectShape::RECT;
+    else if(img == "ELLIPSE")
+        shape = ObjectShape::ELLIPSE;
 }
 
 /*

@@ -2,16 +2,8 @@
     This file contains handles for each display function needed to make Squiggly work
 
     The aim of this file is to loosly couple the frontend side of Squiggly so that, when porting
-    the language to arduino, the function names used by other parts of the code can remain the
+    the language to dedicated raspberry pi console, the function names used by other parts of the code can remain the
     same while the actual implementation can be treated differently.
-
-    Basically, everything that interfaces with Squiggly that is external to the language itself will go through
-    this header file.
-
-    For the PC version of Squiggly, games will be rendered to an opencv window and game input will
-    be taken from the keyboard.
-    For the arduino version of Squiggly, games will be rendered to a physical screen wired to the arduino
-    and game input will be taken from physical buttons also wired to the arduino.
 */
 
 #pragma once
@@ -22,10 +14,6 @@
 #if BUILD_FOR_RASPI
 #include "ST7735_TFT.hpp"
 #endif
-
-//for windows builds
-#define WIN_A_BTN_CODE 0x5A
-#define WIN_B_BTN_CODE 0x58
 
 namespace Frontend {
     //input control: -------------------------------

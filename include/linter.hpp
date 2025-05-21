@@ -13,7 +13,7 @@
 //Special characters to look for
 #define COMMENT_PREFIX '#'
 #define BUILT_IN_VAR_PREFIX '$'
-
+#define IMAGE_DECLARATION_PREFIX '@'
 #define STRING_CONCAT_CHAR '+'
 
 namespace Linter {
