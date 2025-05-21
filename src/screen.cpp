@@ -1,5 +1,6 @@
 #include "screen.hpp"
 #include "built-in.hpp"
+#include "graphics.hpp"
 
 Screen::Screen() {
     clear();
@@ -17,27 +18,34 @@ void Screen::clear() {
 
 void Screen::drawObj(BuiltIn::Object& obj)
 {
+    //extract object color and store in graphics color struct
+    SGraphics::Color objColor;
+
+    uint8_t c[3];
+    obj.getColor(c);
+
+    objColor.r = c[0];
+    objColor.g = c[1];
+    objColor.b = c[2];
+
+    //extract object position
+    SGraphics::pixel objLoc;
+
+    objLoc.x = obj.getX();
+    objLoc.y = obj.getY();
+
     switch(obj.shape) {
         case BuiltIn::ObjectShape::RECT:
+            SGraphics::draw_rect(objLoc, obj.getWidth(), obj.getHeight(), obj.getRotation(), objColor, true);
             break;
 
-        case BuiltIn::ObjectShape::CIRCLE:
+        case BuiltIn::ObjectShape::ELLIPSE:
+            SGraphics::draw_ellipse(objLoc, obj.getWidth(), obj.getHeight(), obj.getRotation(), objColor, true);
             break;
-    }
 
-    for(int y=0; y<obj.getHeight(); y++) {
-        for(int x=0; x<obj.getWidth(); x++) {
-            int xDraw = x+(int)obj.getX();
-            int yDraw = y+(int)obj.getY();
-            if(xDraw < 0 || xDraw >= SCREEN_WIDTH || yDraw < 0 || yDraw >= SCREEN_HEIGHT)
-                continue;
-
-            uint8_t objColor[3];
-            obj.getColor(objColor);
-            screenBuff[yDraw][xDraw][0] = objColor[0];
-            screenBuff[yDraw][xDraw][1] = objColor[1];
-            screenBuff[yDraw][xDraw][2] = objColor[2];
-        }
+        case BuiltIn::ObjectShape::TRIANGLE:
+            SGraphics::draw_triangle(objLoc, obj.getWidth(), obj.getHeight(), obj.getRotation(), objColor, true);
+            break;
     }
 }
 

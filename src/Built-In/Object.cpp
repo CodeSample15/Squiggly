@@ -53,7 +53,7 @@ BuiltIn::Object::Object()
     color_b.type = Utils::VarType::INTEGER;
     color_b.ptr = Utils::createEmptyShared(Utils::VarType::INTEGER);
 
-    shape = ObjectShape::RECT;
+    shape = ObjectShape::RECT; //default object shape
 
     //get variables from memory (flags set by functions)
     std::string flagName = COLLISION_FLAG_VAR_NAME;
@@ -82,6 +82,10 @@ float BuiltIn::Object::getWidth() {
 
 float BuiltIn::Object::getHeight() {
     return *(float*)height.ptr.get();
+}
+
+float BuiltIn::Object::getRotation() {
+    return *(float*)rotation.ptr.get();
 }
 
 void BuiltIn::Object::getColor(uint8_t buffer[3]) {

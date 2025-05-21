@@ -4,19 +4,11 @@
     Each function in the SGraphics namespace will draw to the screen buffer in screen.hpp: uint8_t screenBuff[SCREEN_HEIGHT][SCREEN_WIDTH][3]
 */
 
+#include <algorithm>
 #include "graphics.hpp"
 
-/*
-    Simple helper method to draw a pixel on the screen without causing an OOB error
- */
-void draw_pixel(SGraphics::pixel p, SGraphics::Color c) 
-{
-    if(p.x>=0 && p.x<SCREEN_WIDTH && p.y>=0 && p.y<SCREEN_HEIGHT) {
-        screen.screenBuff[p.x][p.y][0] = c.r;
-        screen.screenBuff[p.x][p.y][1] = c.g;
-        screen.screenBuff[p.x][p.y][2] = c.b;
-    }
-}
+void draw_pixel(SGraphics::pixel p, SGraphics::Color c);
+void rotate_point(SGraphics::pixel& p, SGraphics::pixel& c, float r);
 
 /**
  * @brief Draws a rectangle to screenBuff
@@ -32,7 +24,45 @@ void draw_pixel(SGraphics::pixel p, SGraphics::Color c)
  */
 void SGraphics::draw_rect(pixel loc, int width, int height, float rot, Color color, bool fill) 
 {
-    
+    //get points for rect
+    pixel p1;
+    pixel p2;
+    pixel p3;
+    pixel p4;
+
+    width /= 2;
+    height /= 2;
+
+    p1.x = loc.x - width;
+    p1.y = loc.y - height;
+
+    p2.x = loc.x + width;
+    p2.y = loc.y - height;
+
+    p3.x = loc.x + width;
+    p3.y = loc.y + height;
+
+    p4.x = loc.x - width;
+    p4.y = loc.y + height;
+
+    //rotate points
+    rotate_point(p1, loc, rot);
+    rotate_point(p2, loc, rot);
+    rotate_point(p3, loc, rot);
+    rotate_point(p4, loc, rot);
+
+    if(fill) {
+        //draw two filled polygons
+        draw_polygon(p1, p2, p3, color, true);
+        draw_polygon(p1, p4, p3, color, true);
+    }
+    else {
+        //draw line outlines
+        draw_line(p1, p2, color);
+        draw_line(p2, p3, color);
+        draw_line(p3, p4, color);
+        draw_line(p4, p1, color);
+    }
 }
 
 /**
@@ -50,11 +80,34 @@ void SGraphics::draw_rect(pixel loc, int width, int height, float rot, Color col
  */
 void SGraphics::draw_triangle(pixel loc, int width, int height, float rot, Color color, bool fill) 
 {
+    //get points for triangle
+    pixel p1;
+    pixel p2;
+    pixel p3;
 
+    width /= 2;
+    height /= 2;
+
+    p1.x = loc.x;
+    p1.y = loc.y - height;
+
+    p2.x = loc.x - width;
+    p2.y = loc.y + height;
+
+    p3.x = loc.x + width;
+    p3.y = loc.y + height;
+
+    //rotate points
+    rotate_point(p1, loc, rot);
+    rotate_point(p2, loc, rot);
+    rotate_point(p3, loc, rot);
+    
+    //draw polygon
+    draw_polygon(p1, p2, p3, color, fill);
 }
 
 /**
- * @brief Draw a circle to screenBuff
+ * @brief Draw an ellipse to screenBuff
  * 
  * Center is located at location loc. Circles are ellipses that have width==height.
  * 
@@ -182,4 +235,24 @@ void SGraphics::draw_line(pixel one, pixel two, Color color)
         p.y = y0;
         draw_pixel(p, color);
     }
+}
+
+/*
+    Simple helper method to draw a pixel on the screen without causing an OOB error
+*/
+void draw_pixel(SGraphics::pixel p, SGraphics::Color c) 
+{
+    if(p.x>=0 && p.x<SCREEN_WIDTH && p.y>=0 && p.y<SCREEN_HEIGHT) {
+        screen.screenBuff[p.y][p.x][0] = c.r;
+        screen.screenBuff[p.y][p.x][1] = c.g;
+        screen.screenBuff[p.y][p.x][2] = c.b;
+    }
+}
+
+/*
+    Rotate a pixel p around point c in r degrees
+*/
+void rotate_point(SGraphics::pixel& p, SGraphics::pixel& c, float r) 
+{
+    //TODO: implement this plz :)
 }

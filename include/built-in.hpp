@@ -42,6 +42,7 @@ namespace BuiltIn
             float getY();
             float getWidth();
             float getHeight();
+            float getRotation();
             void getColor(uint8_t buffer[3]);
 
             ObjectShape shape;

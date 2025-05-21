@@ -4,8 +4,8 @@
 
 namespace SGraphics {
     typedef struct {
-        uint16_t x;
-        uint16_t y;
+        int x;
+        int y;
     } pixel;
 
     typedef struct {

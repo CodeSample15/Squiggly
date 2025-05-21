@@ -1,11 +1,23 @@
 :VARS: {
-    
+    OBJECT testobj
 }
 
 :START: {
-	
+    testobj.x = $SCREEN_WIDTH / 2
+    testobj.y = $SCREEN_HEIGHT / 2
+
+    testobj.width = 30
+    testobj.height = 20
+
+    testobj.setColor(173, 245, 66)
+    testobj.setShape(@TRIANGLE)
 }
 
 :UPDATE: {
-	^DRAW_LINE(0, 0, 255, 255, 255, 0, 0)
+	^DRAW_LINE(0, 0, testobj.x, testobj.y, 255, 0, 0)
+
+    testobj.x += 500 * $JOYSTICK_X * $DTIME
+    testobj.y += 500 * -$JOYSTICK_Y * $DTIME
+
+    testobj.draw()
 }
