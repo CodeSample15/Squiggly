@@ -120,7 +120,34 @@ void SGraphics::draw_triangle(pixel loc, int width, int height, float rot, Color
  */
 void SGraphics::draw_ellipse(pixel loc, int width, int height, float rot, Color color, bool fill) 
 {
+    //TODO: allow for height and width to
+    int radius = width;
 
+    //  Bounding box for scanline drawing
+    int startX = loc.x - radius;
+    int endX = loc.x + radius;
+
+    int startY = loc.y - radius;
+    int endY = loc.y + radius;
+
+    pixel p;
+
+    //  Draws circle via scanline
+    for(int x = startX; x <= endX; x++)
+    {
+        for (int y = startY; y <= endY; y++)
+        {
+            int distX = abs(loc.x - x), distY = abs(loc.y - y); 
+
+            //  If inside circle 
+            if(distX * distX + distY * distY <= radius * radius)
+            {
+                p.x = x;
+                p.y = y;
+                draw_pixel(p, color);
+            }
+        }
+    }
 }
 
 /**

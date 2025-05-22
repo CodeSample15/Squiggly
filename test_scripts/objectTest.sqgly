@@ -15,7 +15,7 @@
     test.height = 20
 
     test.setColor(173, 245, 66)
-    test.setShape(@TRIANGLE)
+    test.setShape(@ELLIPSE)
 }
 
 :UPDATE: {

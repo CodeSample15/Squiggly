@@ -49,4 +49,5 @@ void Screen::drawObj(BuiltIn::Object& obj)
     }
 }
 
+//initialize external variable
 Screen screen = Screen();
