@@ -36,15 +36,15 @@ void Screen::drawObj(BuiltIn::Object& obj)
 
     switch(obj.shape) {
         case BuiltIn::ObjectShape::RECT:
-            SGraphics::draw_rect(objLoc, obj.getWidth(), obj.getHeight(), obj.getRotation(), objColor, true);
+            SGraphics::draw_rect(objLoc, obj.getWidth(), obj.getHeight(), obj.getRotation(), objColor, obj.solid);
             break;
 
         case BuiltIn::ObjectShape::ELLIPSE:
-            SGraphics::draw_ellipse(objLoc, obj.getWidth(), obj.getHeight(), obj.getRotation(), objColor, true);
+            SGraphics::draw_ellipse(objLoc, obj.getWidth(), obj.getHeight(), obj.getRotation(), objColor, obj.solid);
             break;
 
         case BuiltIn::ObjectShape::TRIANGLE:
-            SGraphics::draw_triangle(objLoc, obj.getWidth(), obj.getHeight(), obj.getRotation(), objColor, true);
+            SGraphics::draw_triangle(objLoc, obj.getWidth(), obj.getHeight(), obj.getRotation(), objColor, obj.solid);
             break;
     }
 }

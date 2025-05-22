@@ -54,6 +54,7 @@ BuiltIn::Object::Object()
     color_b.ptr = Utils::createEmptyShared(Utils::VarType::INTEGER);
 
     shape = ObjectShape::RECT; //default object shape
+    solid = true;
 
     //get variables from memory (flags set by functions)
     std::string flagName = COLLISION_FLAG_VAR_NAME;
@@ -134,8 +135,16 @@ void BuiltIn::Object::callFunction(std::string name, std::vector<std::string>& a
         if(args[0][0] != IMAGE_DECLARATION_PREFIX)
             throwObjectError("Argument passed to 'setImage' is not an image declaration! (Should start with @)");
 
+        //remove prefix
         args[0] = args[0].substr(1, args[0].length() - 1);
         setObjShape(args[0]);
+    }
+    else if(name == "setSolid") {
+        if(args.size() != 1)
+            throwObjectError("'setSolid' expected 1 argument, got " + std::to_string(args.size()));
+
+        //set internal variable
+        solid = *(bool*)Utils::convertToVariable(args[0], Utils::VarType::BOOL).ptr.get();
     }
     else {
         throwObjectError("Function name \'" + name + "\' does not exist.");

@@ -46,6 +46,7 @@ namespace BuiltIn
             void getColor(uint8_t buffer[3]);
 
             ObjectShape shape;
+            bool solid;
 
             void callFunction(std::string name, std::vector<std::string>& args);
             Utils::SVariable* fetchVariable(std::string name);
