@@ -18,7 +18,5 @@
 
 namespace Linter {
     void preprocess(std::vector<std::string>& lines);
-
-    //TODO: pre check for syntax correctness
-    //TODO: post tokenizer test for correct function calls (correct number of arguments, correct variable types)
+    void lint(std::vector<std::string>& lines);
 }

@@ -51,3 +51,11 @@ void Linter::preprocess(std::vector<std::string>& lines)
 
     BuiltIn::Print("Done");
 }
+
+/*
+    
+*/
+void Linter::lint(std::vector<std::string>& lines) 
+{
+
+}
