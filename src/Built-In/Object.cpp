@@ -9,6 +9,7 @@
 #include "runner.hpp"
 #include "screen.hpp"
 #include "utils.hpp"
+#include "physics.hpp"
 
 using namespace BuiltIn;
 
@@ -181,13 +182,23 @@ void BuiltIn::Object::draw()
 
 bool BuiltIn::Object::isTouching(Object& other) 
 {
-    bool xOverlap = valueInRange(getX(), other.getX(), other.getX()+other.getWidth())
-                || valueInRange(other.getX(), getX(), getX()+getWidth());
+    //get the bounding boxes for each object
+    Physics::Rect2D one = Physics::ObjBoundingBox(*this);
+    Physics::Rect2D two = Physics::ObjBoundingBox(other);
 
-    bool yOverlap = valueInRange(getY(), other.getY(), other.getY()+other.getHeight())
-                || valueInRange(other.getY(), getY(), getY()+getHeight());
-    
-    return xOverlap && yOverlap;
+    //check if any point of either objects is within each other
+    //pretty sure this is super bulky and inefficient, so TODO: make this algorithm the SAT collision algorithm
+    for(Physics::Vector2D& point : one.get_points()) {
+        if(Physics::PointInRect(point, two))
+            return true;
+    }
+
+    for(Physics::Vector2D& point : two.get_points()) {
+        if(Physics::PointInRect(point, one))
+            return true;
+    }
+
+    return false;
 }
 
 void BuiltIn::Object::setObjShape(std::string img) 

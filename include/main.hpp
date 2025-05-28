@@ -21,7 +21,7 @@ int parse_args(int argc, char** argv, std::vector<std::string>& fileLines) {
     //check to make sure file was passed as input to the program
     if(argc < 2) {
         std::cout << "No file not provided. Exiting..." << std::endl;
-        return 0;
+        return 2;
     }
 
     return read_file(argv[1], fileLines);
