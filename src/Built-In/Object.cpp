@@ -68,6 +68,10 @@ BuiltIn::Object::Object()
 
     //default color (pink)
     setColor(255, 0, 255);
+
+    //default values
+    setWidth(OBJ_DEF_WIDTH);
+    setHeight(OBJ_DEF_HEIGHT);
 }
 
 float BuiltIn::Object::getX() {
@@ -90,6 +94,26 @@ float BuiltIn::Object::getRotation() {
     return *(float*)rotation.ptr.get();
 }
 
+void BuiltIn::Object::setX(float v) {
+    *(float*)x.ptr.get() = v;
+}
+
+void BuiltIn::Object::setY(float v) {
+    *(float*)y.ptr.get() = v;
+}
+
+void BuiltIn::Object::setWidth(float v) {
+    *(float*)width.ptr.get() = v;
+}
+
+void BuiltIn::Object::setHeight(float v) {
+    *(float*)height.ptr.get() = v;
+}
+
+void BuiltIn::Object::setRotation(float v) {
+    *(float*)rotation.ptr.get() = v;
+}
+
 void BuiltIn::Object::getColor(uint8_t buffer[3]) {
     buffer[0] = *(uint8_t*)color_r.ptr.get();
     buffer[1] = *(uint8_t*)color_g.ptr.get();
@@ -110,7 +134,20 @@ void BuiltIn::Object::callFunction(std::string name, std::vector<std::string>& a
             Object* other = (Object*)tmp->ptr.get();
             *collisionFlag = isTouching(*other); //set collision flag 
         } else {
-            throwObjectError("'isTouching' -> '" + args[0] + "' is not an Object variable");
+            throwObjectError("'testCollision' -> '" + args[0] + "' is not an Object variable");
+        }
+    }
+    else if(name == "collide") {
+        if(args.size() != 1)
+            throwObjectError("'collide' expected 1 argument, got " + std::to_string(args.size()));
+
+        Utils::SVariable* tmp = Runner::fetchVariable(args[0]);
+        if(tmp && tmp->type == Utils::VarType::OBJECT) {
+            //collide the two objects using the physics library
+            Object* other = (Object*)tmp->ptr.get();
+            collideWith(*other);
+        } else {
+            throwObjectError("'collide' -> '" + args[0] + "' is not an Object variable");
         }
     }
     else if(name == "setColor") {
@@ -199,6 +236,39 @@ bool BuiltIn::Object::isTouching(Object& other)
     }
 
     return false;
+}
+
+void BuiltIn::Object::collideWith(Object& other) 
+{
+    //get bounding boxes for both objects
+    Physics::Rect2D thisBox = Physics::ObjBoundingBox(*this);
+    Physics::Rect2D otherBox = Physics::ObjBoundingBox(other);
+
+    Physics::MovePointOutOfRect(thisBox.top_left, otherBox);
+
+    //find points inside of another object
+
+    // for(Physics::Vector2D& point : thisBox.get_points()) {
+    //     if(Physics::PointInRect(point, otherBox)) {
+
+    //     }
+    // }
+
+    // for(Physics::Vector2D& point : otherBox.get_points()) {
+    //     if(Physics::PointInRect(point, thisBox)) {
+
+    //     }
+    // }    
+
+    //for each point inside of an object:
+        //find point which is closest to a border
+        //move object back distance 
+
+    //find points which are in other object
+
+    //apply bounding box to object
+    // setX(thisBox.center.x);
+    // setY(thisBox.center.y);
 }
 
 void BuiltIn::Object::setObjShape(std::string img) 

@@ -1,0 +1,45 @@
+:VARS: {
+    OBJECT player
+    OBJECT test
+}
+
+:START: {
+    test.x = $SCREEN_WIDTH / 2
+    test.y = $SCREEN_HEIGHT / 2
+    test.width = 20
+    test.height = 50
+    test.setSolid(false)
+    test.setColor(255, 0, 0)
+
+    player.x = test.x - 20
+    player.y = test.y - 20
+    player.width = 20
+    player.height = 10
+    player.setSolid(false)
+    player.setColor(20, 200, 60)
+}
+
+:UPDATE: {
+    player.x += $JOYSTICK_X * 2
+    player.y -= $JOYSTICK_Y * 2
+
+    player.testCollision(test)
+    player.collide(test)
+
+    if($COL_FLAG) {
+        test.setColor(0, 255, 0)
+    } else {
+        test.setColor(255, 0, 0)
+    }
+
+    if($A_BTN) {
+        player.rotation -= 5
+    }
+
+    if($B_BTN) {
+        player.rotation += 5
+    }
+
+    player.draw()
+    test.draw()
+}

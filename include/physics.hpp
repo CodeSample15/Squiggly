@@ -31,6 +31,9 @@ namespace Physics {
 
     class Rect2D {
         public:
+            void translateX(int amount);
+            void translateY(int amount);
+
             std::vector<Vector2D> get_points();
 
             Vector2D top_right;
@@ -47,4 +50,6 @@ namespace Physics {
 
     bool PointInPollygon(point& one, point& two, point& three, point& p);
     void RotateRect(Rect2D& rect, float rot); //rotate a Rect2D in place
+
+    Vector2D MovePointOutOfRect(Vector2D& p, Rect2D& rect);
 }

@@ -1,3 +1,5 @@
+#include <cmath>
+
 #include "physics.hpp"
 
 using namespace Physics;
@@ -36,11 +38,26 @@ std::vector<Vector2D> Rect2D::get_points() {
     std::vector<Vector2D> points;
     points.push_back(top_right);
     points.push_back(top_left);
-    points.push_back(bottom_right);
     points.push_back(bottom_left);
+    points.push_back(bottom_right);
     return points;
 }
 
+void Physics::Rect2D::translateX(int amount) {
+    top_right.x += amount;
+    top_left.x += amount;
+    bottom_right.x += amount;
+    bottom_left.x += amount;
+    center.x += amount;
+}
+
+void Physics::Rect2D::translateY(int amount) {
+    top_right.y += amount;
+    top_left.y += amount;
+    bottom_right.y += amount;
+    bottom_left.y += amount;
+    center.y += amount;
+}
 
 /**
  * @brief Calculate the individual points of the physics bounding box of a Squiggly Object
@@ -140,6 +157,40 @@ void Physics::RotateRect(Rect2D& rect, float rot)
     rotate_point(rect.bottom_right.x, rect.bottom_right.y, rect.center.x, rect.center.y, rot);
     rotate_point(rect.top_left.x, rect.top_left.y, rect.center.x, rect.center.y, rot);
     rotate_point(rect.top_right.x, rect.top_right.y, rect.center.x, rect.center.y, rot);
+}
+
+/**
+ * @brief Return the correction needed to move a point out of a rectangle
+ * (used for collisions)
+ */
+Vector2D Physics::MovePointOutOfRect(Vector2D& p, Rect2D& rect) 
+{
+    //distances from the point to each line in the rectangle
+    float minDistance = -1;
+    Vector2D minDistanceVect;
+
+    std::vector<Vector2D> rectPoints = rect.get_points();
+    rectPoints.push_back(rectPoints[0]);
+    for(int i=0; i<4; i++) {
+        //calculate line from rectPoints
+        int x1 = rectPoints[i].x;
+        int y1 = rectPoints[i].y;
+        int x2 = rectPoints[i+1].x; //this right here is why I did an extra rectPoints.pushBack at the beginning of the loop
+        int y2 = rectPoints[i+1].y;
+
+        int dy = y2-y1;
+        int dx = x2-x1;
+
+        //calculate distance from line (thanks Wikipedia)
+        float distance = abs(((y2-y1)*p.x) - ((x2-x1)*p.y) + (x2*y1) - (y2*x1));
+        distance /= sqrt((dy*dy) - (dx*dx));
+
+        if(distance < minDistance || minDistance == -1) {
+            minDistance = distance;
+        }
+    }
+
+    BuiltIn::Print("Smallest Distance: " + std::to_string(minDistance));
 }
 
 //helper functions

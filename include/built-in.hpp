@@ -6,6 +6,10 @@
 
 #include "utils.hpp"
 
+//default values when new objects are initialized
+#define OBJ_DEF_WIDTH 10
+#define OBJ_DEF_HEIGHT 10
+
 /*
     All of the built-in functions and objects that come with Squiggly
 */
@@ -45,6 +49,12 @@ namespace BuiltIn
             float getRotation();
             void getColor(uint8_t buffer[3]);
 
+            void setX(float v);
+            void setY(float v);
+            void setWidth(float v);
+            void setHeight(float v);
+            void setRotation(float v);
+
             ObjectShape shape;
             bool solid;
 
@@ -67,6 +77,7 @@ namespace BuiltIn
 
             void draw();
             bool isTouching(Object& other);
+            void collideWith(Object& other);
             void setObjShape(std::string img);
 
             //pointers to variables in main memory that objects will need access to
