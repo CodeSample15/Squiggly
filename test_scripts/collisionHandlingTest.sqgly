@@ -17,13 +17,14 @@
     player.height = 10
     player.setSolid(false)
     player.setColor(20, 200, 60)
+
+    player.addWall(test)
 }
 
 :UPDATE: {
-    player.x += $JOYSTICK_X * 1
-    player.y -= $JOYSTICK_Y * 1
+    player.move($JOYSTICK_X * 2, -$JOYSTICK_Y * 2, true)
 
-    player.testCollision(test)
+    #player.testCollision(test)
 
     if($COL_FLAG) {
         test.setColor(0, 255, 0)

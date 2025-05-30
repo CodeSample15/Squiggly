@@ -9,14 +9,19 @@
 #include "runner.hpp"
 #include "screen.hpp"
 #include "utils.hpp"
+#include "physics.hpp"
 
 using namespace BuiltIn;
 
-bool valueInRange(int val, int one, int two); //helper method for detecting collisions
 void throwObjectError(std::string message);
+
+size_t BuiltIn::Object::obj_count = 0;
 
 BuiltIn::Object::Object() 
 {
+    //assign unique ID value
+    id = obj_count++;
+
     //location
     x.name = "x";
     x.type = Utils::VarType::FLOAT;
@@ -67,6 +72,12 @@ BuiltIn::Object::Object()
 
     //default color (pink)
     setColor(255, 0, 255);
+
+    walls.clear(); //no reason why this should have anything in it, but hey what the heck clear it anyway
+
+    //default values
+    setWidth(OBJ_DEF_WIDTH);
+    setHeight(OBJ_DEF_HEIGHT);
 }
 
 float BuiltIn::Object::getX() {
@@ -89,6 +100,26 @@ float BuiltIn::Object::getRotation() {
     return *(float*)rotation.ptr.get();
 }
 
+void BuiltIn::Object::setX(float v) {
+    *(float*)x.ptr.get() = v;
+}
+
+void BuiltIn::Object::setY(float v) {
+    *(float*)y.ptr.get() = v;
+}
+
+void BuiltIn::Object::setWidth(float v) {
+    *(float*)width.ptr.get() = v;
+}
+
+void BuiltIn::Object::setHeight(float v) {
+    *(float*)height.ptr.get() = v;
+}
+
+void BuiltIn::Object::setRotation(float v) {
+    *(float*)rotation.ptr.get() = v;
+}
+
 void BuiltIn::Object::getColor(uint8_t buffer[3]) {
     buffer[0] = *(uint8_t*)color_r.ptr.get();
     buffer[1] = *(uint8_t*)color_g.ptr.get();
@@ -109,7 +140,38 @@ void BuiltIn::Object::callFunction(std::string name, std::vector<std::string>& a
             Object* other = (Object*)tmp->ptr.get();
             *collisionFlag = isTouching(*other); //set collision flag 
         } else {
-            throwObjectError("'isTouching' -> '" + args[0] + "' is not an Object variable");
+            throwObjectError("'testCollision' -> '" + args[0] + "' is not an Object variable");
+        }
+    }
+    else if(name == "move") {
+        if(args.size() != 2 && args.size() != 3)
+            throwObjectError("'move' expected 2 or 3 arguments, got " + std::to_string(args.size()));
+
+        float x = *(float*)Utils::convertToVariable(args[0], Utils::VarType::FLOAT).ptr.get();
+        float y = *(float*)Utils::convertToVariable(args[1], Utils::VarType::FLOAT).ptr.get();
+        bool collide = false;
+        if(args.size() == 3)
+            collide = *(bool*)Utils::convertToVariable(args[2], Utils::VarType::BOOL).ptr.get();
+        
+        move(x, y, collide);
+    }
+    else if(name == "addWall") {
+        //add an object that this object will be a wall for (other object can't pass through)
+        if(args.size() != 1 && args.size() != 2)
+            throwObjectError("'addWall' expected 1 or 2 arguments, got " + std::to_string(args.size()));
+
+        Utils::SVariable* tmp = Runner::fetchVariable(args[0]);
+        if(tmp && tmp->type == Utils::VarType::OBJECT) {
+            Object* other = (Object*)tmp->ptr.get();
+            
+            //get other argument (default is true)
+            bool add = true;
+
+            if(args.size() == 2)
+                add = *(bool*)Utils::convertToVariable(args[1], Utils::VarType::BOOL).ptr.get();
+            addWall(other, add);
+        } else {
+            throwObjectError("'addWall' -> '" + args[0] + "' is not an Object variable");
         }
     }
     else if(name == "setColor") {
@@ -181,13 +243,23 @@ void BuiltIn::Object::draw()
 
 bool BuiltIn::Object::isTouching(Object& other) 
 {
-    bool xOverlap = valueInRange(getX(), other.getX(), other.getX()+other.getWidth())
-                || valueInRange(other.getX(), getX(), getX()+getWidth());
+    //get the bounding boxes for each object
+    Physics::Rect2D one = Physics::ObjBoundingBox(*this);
+    Physics::Rect2D two = Physics::ObjBoundingBox(other);
 
-    bool yOverlap = valueInRange(getY(), other.getY(), other.getY()+other.getHeight())
-                || valueInRange(other.getY(), getY(), getY()+getHeight());
-    
-    return xOverlap && yOverlap;
+    //check if any point of either objects is within each other
+    //pretty sure this is super bulky and inefficient, so TODO: make this algorithm the SAT collision algorithm
+    for(Physics::Vector2D& point : one.get_points()) {
+        if(Physics::PointInRect(point, two))
+            return true;
+    }
+
+    for(Physics::Vector2D& point : two.get_points()) {
+        if(Physics::PointInRect(point, one))
+            return true;
+    }
+
+    return false;
 }
 
 void BuiltIn::Object::setObjShape(std::string img) 
@@ -200,6 +272,70 @@ void BuiltIn::Object::setObjShape(std::string img)
         shape = ObjectShape::ELLIPSE;
 }
 
+/**
+ * @brief Move an object in 2D space. Optionally collide with barriers
+ * 
+ * @param x
+ * @param y
+ * @param collide
+ */
+void BuiltIn::Object::move(float x, float y, bool collide)
+{
+    float oldX = getX();
+    float oldY = getY();
+
+    float newX = oldX+x;
+    float newY = oldY+y;
+
+    setX(newX);
+    setY(newY);
+
+    if(collide) {
+        //calculate normalized vector of position change for amount to move player
+        Physics::Vector2D diff(newX-oldX, newY-oldY);
+        Physics::Vector2D segmented_movement = diff / OBJ_COL_RESP_SEGMENTS; //divide the area between the new and old positions into discrete sections to check for a resolution to a collision
+        Physics::Vector2D tempDelta;
+        int currSegment = OBJ_COL_RESP_SEGMENTS; //this value will decrease for each position checked
+
+        //check all objects which are walls for collisions
+        for(Object* wall : walls) {
+            while(currSegment > 0 && isTouching(*wall)) {
+                currSegment--;
+                tempDelta = segmented_movement*currSegment; //calculate where the object needs to move from new location
+
+                newX = oldX + tempDelta.x;
+                newY = oldY + tempDelta.y;
+
+                setX(newX);
+                setY(newY);
+            }
+        }
+    }
+}
+
+/**
+ * @brief Make this object a wall for the other object
+ * 
+ * @param other
+ * @param add
+ * If add is true, add object to wallForIDs, if false, remove item if it's already in the list
+ */
+void BuiltIn::Object::addWall(Object* wall, bool add) 
+{
+    for(int i=0; i<walls.size(); i++) {
+        if(walls[i]->id == wall->id) {
+            if(add)
+                return;
+            else {
+                walls.erase(walls.begin()+i);
+                return;
+            }
+        }
+    }
+
+    walls.push_back(wall);
+}
+
 /*
     This is just here mainly to make setting the color of the object through c++ code much easier to do
 */
@@ -207,10 +343,6 @@ void BuiltIn::Object::setColor(uint8_t r, uint8_t g, uint8_t b) {
     *(int*)color_r.ptr.get() = r;
     *(int*)color_g.ptr.get() = g;
     *(int*)color_b.ptr.get() = b;
-}
-
-bool valueInRange(int val, int one, int two) {
-    return (val >= one && val <= two) || (val <= one && val >= two);
 }
 
 void throwObjectError(std::string message) {
