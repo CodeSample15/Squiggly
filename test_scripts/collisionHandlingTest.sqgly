@@ -18,7 +18,7 @@
     player.setSolid(false)
     player.setColor(20, 200, 60)
 
-    player.addWall(test, true)
+    player.addWall(test)
 }
 
 :UPDATE: {

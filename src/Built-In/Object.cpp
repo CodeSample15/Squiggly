@@ -157,15 +157,18 @@ void BuiltIn::Object::callFunction(std::string name, std::vector<std::string>& a
     }
     else if(name == "addWall") {
         //add an object that this object will be a wall for (other object can't pass through)
-        if(args.size() != 2)
-            throwObjectError("'addWall' expected 2 arguments, got " + std::to_string(args.size()));
+        if(args.size() != 1 && args.size() != 2)
+            throwObjectError("'addWall' expected 1 or 2 arguments, got " + std::to_string(args.size()));
 
         Utils::SVariable* tmp = Runner::fetchVariable(args[0]);
         if(tmp && tmp->type == Utils::VarType::OBJECT) {
             Object* other = (Object*)tmp->ptr.get();
             
-            //get other argument
-            bool add = *(bool*)Utils::convertToVariable(args[1], Utils::VarType::BOOL).ptr.get();
+            //get other argument (default is true)
+            bool add = true;
+
+            if(args.size() == 2)
+                add = *(bool*)Utils::convertToVariable(args[1], Utils::VarType::BOOL).ptr.get();
             addWall(other, add);
         } else {
             throwObjectError("'addWall' -> '" + args[0] + "' is not an Object variable");
