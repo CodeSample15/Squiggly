@@ -25,10 +25,18 @@ int parse_args(int argc, char** argv, std::vector<std::string>& fileLines) {
         std::cout << "SQUIGGLY PROGRAMMING LANGUAGE:" << std::endl;
         std::cout << "------------------------------" << std::endl;
         std::cout << std::endl;
-        std::cout << "Usage: squiggly <filename>" << std::endl;
+        std::cout << "Usage: " << std::endl;
+        std::cout << " - Run program: squiggly <filename>" << std::endl;
+        std::cout << " - Print template: squiggly template" << std::endl;
         std::cout << std::endl;
         std::cout << "Stuck? Check out some example scripts: " << std::endl;
         std::cout << "https://github.com/CodeSample15/Squiggly/tree/main/test_scripts" << std::endl;
+        return 2;
+    } else if(strcmp(argv[1], "template")==0) {
+        //print out template project so that it can be copy-pasted into a file
+        std::cout << "# PROJECT TEMPLATE: copy-paste this into a file to get started on a project" << std::endl;
+        std::cout << std::endl;
+        std::cout << ":VARS: {\n    # global variables go here\n}\n\n:START: {\n    # initialization code goes here\n}\n\n:UPDATE: {\n    # game loop logic goes here\n}\n" << std::endl;
         return 2;
     }
 
