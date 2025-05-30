@@ -4,3 +4,6 @@
 [submodule "lib/joystick"]
 	path = lib/joystick
 	url = https://github.com/drewnoakes/joystick.git
+[submodule "lib/exprtk"]
+	path = lib/exprtk
+	url = https://github.com/ArashPartow/exprtk.git
