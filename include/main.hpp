@@ -20,7 +20,15 @@ int run_squiggly(std::vector<std::string>& fileLines);
 int parse_args(int argc, char** argv, std::vector<std::string>& fileLines) {
     //check to make sure file was passed as input to the program
     if(argc < 2) {
-        std::cout << "No file not provided. Exiting..." << std::endl;
+        //no filename provided, print instructions
+        std::cout << "------------------------------" << std::endl;
+        std::cout << "SQUIGGLY PROGRAMMING LANGUAGE:" << std::endl;
+        std::cout << "------------------------------" << std::endl;
+        std::cout << std::endl;
+        std::cout << "Usage: squiggly <filename>" << std::endl;
+        std::cout << std::endl;
+        std::cout << "Stuck? Check out some example scripts: " << std::endl;
+        std::cout << "https://github.com/CodeSample15/Squiggly/tree/main/test_scripts" << std::endl;
         return 2;
     }
 
