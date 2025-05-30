@@ -4,7 +4,7 @@
 
 using namespace Physics;
 
-void rotate_point(int& x, int& y, int cx, int cy, float r); //helper function for RotateRect
+void rotate_point(float& x, float& y, float cx, float cy, float r); //helper function for RotateRect
 
 //Vector2D class:
 Vector2D::Vector2D() {
@@ -12,7 +12,7 @@ Vector2D::Vector2D() {
     y = 0;
 }
 
-Vector2D::Vector2D(int x, int y) {
+Vector2D::Vector2D(float x, float y) {
     this->x = x;
     this->y = y;
 }
@@ -22,8 +22,16 @@ Vector2D::Vector2D(point p) {
     y = p.y;
 }
 
+float Vector2D::length() {
+    return sqrt(x*x + y*y);
+}
+
 int Vector2D::dot(Vector2D& other) {
     return (x*other.x) + (y*other.y);
+}
+
+Vector2D Vector2D::normalize() {
+    return *this / length();
 }
 
 point Vector2D::to_point() {
@@ -159,42 +167,8 @@ void Physics::RotateRect(Rect2D& rect, float rot)
     rotate_point(rect.top_right.x, rect.top_right.y, rect.center.x, rect.center.y, rot);
 }
 
-/**
- * @brief Return the correction needed to move a point out of a rectangle
- * (used for collisions)
- */
-Vector2D Physics::MovePointOutOfRect(Vector2D& p, Rect2D& rect) 
-{
-    //distances from the point to each line in the rectangle
-    float minDistance = -1;
-    Vector2D minDistanceVect;
-
-    std::vector<Vector2D> rectPoints = rect.get_points();
-    rectPoints.push_back(rectPoints[0]);
-    for(int i=0; i<4; i++) {
-        //calculate line from rectPoints
-        int x1 = rectPoints[i].x;
-        int y1 = rectPoints[i].y;
-        int x2 = rectPoints[i+1].x; //this right here is why I did an extra rectPoints.pushBack at the beginning of the loop
-        int y2 = rectPoints[i+1].y;
-
-        int dy = y2-y1;
-        int dx = x2-x1;
-
-        //calculate distance from line (thanks Wikipedia)
-        float distance = abs(((y2-y1)*p.x) - ((x2-x1)*p.y) + (x2*y1) - (y2*x1));
-        distance /= sqrt((dy*dy) - (dx*dx));
-
-        if(distance < minDistance || minDistance == -1) {
-            minDistance = distance;
-        }
-    }
-
-    BuiltIn::Print("Smallest Distance: " + std::to_string(minDistance));
-}
-
 //helper functions
-void rotate_point(int& x, int& y, int cx, int cy, float r) 
+void rotate_point(float& x, float& y, float cx, float cy, float r) 
 {
     r = r * (3.1415926 / 180); //degrees to radians
     

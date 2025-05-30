@@ -13,10 +13,10 @@ namespace Physics {
     class Vector2D {
         public:
             Vector2D();
-            Vector2D(int x, int y);
+            Vector2D(float x, float y);
             Vector2D(point p);
 
-            int x, y;
+            float x, y;
 
             Vector2D operator+(Vector2D& other) {
                 return Vector2D(x+other.x, y+other.y);
@@ -24,9 +24,17 @@ namespace Physics {
             Vector2D operator-(Vector2D& other) {
                 return Vector2D(x-other.x, y-other.y);
             }
+            Vector2D operator*(float val) {
+                return Vector2D(x*val, y*val);
+            }
+            Vector2D operator/(float val) {
+                return Vector2D(x/val, y/val);
+            }
 
+            float length();
             int dot(Vector2D& other);
-            point to_point();
+            Vector2D normalize();
+            point to_point(); //convert vector to a point
     };
 
     class Rect2D {
@@ -50,6 +58,4 @@ namespace Physics {
 
     bool PointInPollygon(point& one, point& two, point& three, point& p);
     void RotateRect(Rect2D& rect, float rot); //rotate a Rect2D in place
-
-    Vector2D MovePointOutOfRect(Vector2D& p, Rect2D& rect);
 }

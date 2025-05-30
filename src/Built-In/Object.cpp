@@ -13,11 +13,15 @@
 
 using namespace BuiltIn;
 
-bool valueInRange(int val, int one, int two); //helper method for detecting collisions
 void throwObjectError(std::string message);
+
+size_t BuiltIn::Object::obj_count = 0;
 
 BuiltIn::Object::Object() 
 {
+    //assign unique ID value
+    id = obj_count++;
+
     //location
     x.name = "x";
     x.type = Utils::VarType::FLOAT;
@@ -68,6 +72,8 @@ BuiltIn::Object::Object()
 
     //default color (pink)
     setColor(255, 0, 255);
+
+    walls.clear(); //no reason why this should have anything in it, but hey what the heck clear it anyway
 
     //default values
     setWidth(OBJ_DEF_WIDTH);
@@ -137,17 +143,32 @@ void BuiltIn::Object::callFunction(std::string name, std::vector<std::string>& a
             throwObjectError("'testCollision' -> '" + args[0] + "' is not an Object variable");
         }
     }
-    else if(name == "collide") {
-        if(args.size() != 1)
-            throwObjectError("'collide' expected 1 argument, got " + std::to_string(args.size()));
+    else if(name == "move") {
+        if(args.size() != 2 && args.size() != 3)
+            throwObjectError("'move' expected 2 or 3 arguments, got " + std::to_string(args.size()));
+
+        float x = *(float*)Utils::convertToVariable(args[0], Utils::VarType::FLOAT).ptr.get();
+        float y = *(float*)Utils::convertToVariable(args[1], Utils::VarType::FLOAT).ptr.get();
+        bool collide = false;
+        if(args.size() == 3)
+            collide = *(bool*)Utils::convertToVariable(args[2], Utils::VarType::BOOL).ptr.get();
+        
+        move(x, y, collide);
+    }
+    else if(name == "addWall") {
+        //add an object that this object will be a wall for (other object can't pass through)
+        if(args.size() != 2)
+            throwObjectError("'addWall' expected 2 arguments, got " + std::to_string(args.size()));
 
         Utils::SVariable* tmp = Runner::fetchVariable(args[0]);
         if(tmp && tmp->type == Utils::VarType::OBJECT) {
-            //collide the two objects using the physics library
             Object* other = (Object*)tmp->ptr.get();
-            collideWith(*other);
+            
+            //get other argument
+            bool add = *(bool*)Utils::convertToVariable(args[1], Utils::VarType::BOOL).ptr.get();
+            addWall(other, add);
         } else {
-            throwObjectError("'collide' -> '" + args[0] + "' is not an Object variable");
+            throwObjectError("'addWall' -> '" + args[0] + "' is not an Object variable");
         }
     }
     else if(name == "setColor") {
@@ -238,39 +259,6 @@ bool BuiltIn::Object::isTouching(Object& other)
     return false;
 }
 
-void BuiltIn::Object::collideWith(Object& other) 
-{
-    //get bounding boxes for both objects
-    Physics::Rect2D thisBox = Physics::ObjBoundingBox(*this);
-    Physics::Rect2D otherBox = Physics::ObjBoundingBox(other);
-
-    Physics::MovePointOutOfRect(thisBox.top_left, otherBox);
-
-    //find points inside of another object
-
-    // for(Physics::Vector2D& point : thisBox.get_points()) {
-    //     if(Physics::PointInRect(point, otherBox)) {
-
-    //     }
-    // }
-
-    // for(Physics::Vector2D& point : otherBox.get_points()) {
-    //     if(Physics::PointInRect(point, thisBox)) {
-
-    //     }
-    // }    
-
-    //for each point inside of an object:
-        //find point which is closest to a border
-        //move object back distance 
-
-    //find points which are in other object
-
-    //apply bounding box to object
-    // setX(thisBox.center.x);
-    // setY(thisBox.center.y);
-}
-
 void BuiltIn::Object::setObjShape(std::string img) 
 {
     if(img == "TRIANGLE")
@@ -281,6 +269,70 @@ void BuiltIn::Object::setObjShape(std::string img)
         shape = ObjectShape::ELLIPSE;
 }
 
+/**
+ * @brief Move an object in 2D space. Optionally collide with barriers
+ * 
+ * @param x
+ * @param y
+ * @param collide
+ */
+void BuiltIn::Object::move(float x, float y, bool collide)
+{
+    float oldX = getX();
+    float oldY = getY();
+
+    float newX = oldX+x;
+    float newY = oldY+y;
+
+    setX(newX);
+    setY(newY);
+
+    if(collide) {
+        //calculate normalized vector of position change for amount to move player
+        Physics::Vector2D diff(newX-oldX, newY-oldY);
+        Physics::Vector2D segmented_movement = diff / OBJ_COL_RESP_SEGMENTS; //divide the area between the new and old positions into discrete sections to check for a resolution to a collision
+        Physics::Vector2D tempDelta;
+        int currSegment = OBJ_COL_RESP_SEGMENTS; //this value will decrease for each position checked
+
+        //check all objects which are walls for collisions
+        for(Object* wall : walls) {
+            while(currSegment > 0 && isTouching(*wall)) {
+                currSegment--;
+                tempDelta = segmented_movement*currSegment; //calculate where the object needs to move from new location
+
+                newX = oldX + tempDelta.x;
+                newY = oldY + tempDelta.y;
+
+                setX(newX);
+                setY(newY);
+            }
+        }
+    }
+}
+
+/**
+ * @brief Make this object a wall for the other object
+ * 
+ * @param other
+ * @param add
+ * If add is true, add object to wallForIDs, if false, remove item if it's already in the list
+ */
+void BuiltIn::Object::addWall(Object* wall, bool add) 
+{
+    for(int i=0; i<walls.size(); i++) {
+        if(walls[i]->id == wall->id) {
+            if(add)
+                return;
+            else {
+                walls.erase(walls.begin()+i);
+                return;
+            }
+        }
+    }
+
+    walls.push_back(wall);
+}
+
 /*
     This is just here mainly to make setting the color of the object through c++ code much easier to do
 */
@@ -288,10 +340,6 @@ void BuiltIn::Object::setColor(uint8_t r, uint8_t g, uint8_t b) {
     *(int*)color_r.ptr.get() = r;
     *(int*)color_g.ptr.get() = g;
     *(int*)color_b.ptr.get() = b;
-}
-
-bool valueInRange(int val, int one, int two) {
-    return (val >= one && val <= two) || (val <= one && val >= two);
 }
 
 void throwObjectError(std::string message) {
