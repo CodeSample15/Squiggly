@@ -39,8 +39,8 @@ int read_file(char* path, std::vector<std::string>& fileLines) {
     //read from the input file
     std::string temp;
     while(std::getline(file, temp)) {
-        if(temp.empty())
-            continue; //skip empty lines
+        // if(temp.empty())
+        //     continue; //skip empty lines
 
         fileLines.push_back(temp);
     }
@@ -50,11 +50,14 @@ int read_file(char* path, std::vector<std::string>& fileLines) {
 }
 
 int run_squiggly(std::vector<std::string>& fileLines) {
-    // try {
-    // Linter::lint(fileLines);
-    // }
+    try {
+        Linter::lint(fileLines);
+    } catch(const std::exception& e) {
+        std::cerr << "\n" << e.what() << std::endl;
+        return 0;
+    }
 
-
+    //preprocess raw strings
     Linter::preprocess(fileLines);
 
     //Run tokenizer
@@ -65,7 +68,7 @@ int run_squiggly(std::vector<std::string>& fileLines) {
         return 0;
     }
 
-    //Execute script
+    //Execute script (stored in tokenizer)
     try {
         Runner::execute();
     } catch(const std::exception& e) {
