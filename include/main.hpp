@@ -50,7 +50,11 @@ int read_file(char* path, std::vector<std::string>& fileLines) {
 }
 
 int run_squiggly(std::vector<std::string>& fileLines) {
-    //TODO: Run linter for precheck
+    // try {
+    // Linter::lint(fileLines);
+    // }
+
+
     Linter::preprocess(fileLines);
 
     //Run tokenizer

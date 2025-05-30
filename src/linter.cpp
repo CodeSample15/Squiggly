@@ -53,9 +53,20 @@ void Linter::preprocess(std::vector<std::string>& lines)
 }
 
 /*
-    
+    "lint" is my fancy way of saying "make sure the programmer used proper formatting"
+    This means:
+        - all open braces have matching close braces
+        - all strings are opened and closed on the same line
+        - etc
 */
 void Linter::lint(std::vector<std::string>& lines) 
 {
+    BuiltIn::Print("Checking script syntax...\t", false);
+    std::vector<char> stack;
 
+    // for(size_t i=0; i<lines.size(); i++) {
+    //     for()
+    // }
+
+    BuiltIn::Print("Done");
 }
