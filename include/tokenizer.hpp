@@ -44,6 +44,7 @@ namespace Tokenizer {
             std::string loopTimes;
             size_t loopStart;
             size_t loopEnd;
+            bool isWhile;
     };
 
     class AssignLine : public TokenizedLine {

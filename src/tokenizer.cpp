@@ -342,7 +342,7 @@ void tokenizeSection(std::vector<std::string>& lines, std::vector< std::shared_p
 
             i = ifEnd-1;
         }
-        else if((found = lines[i].find(LOOP_HEADER)) != std::string::npos) {
+        else if((found = lines[i].find(LOOP_HEADER)) != std::string::npos || (found = lines[i].find(WHILE_LOOP_HEADER)) != std::string::npos) {
             std::shared_ptr<LoopLine> line = std::make_shared<LoopLine>(LoopLine());
 
             line->type = LineType::LOOP;
@@ -350,8 +350,13 @@ void tokenizeSection(std::vector<std::string>& lines, std::vector< std::shared_p
             /*
                 Loop linetype:
                     std::string loopTimes;
+                    size_t loopStart;
                     size_t loopEnd;
+                    bool isWhile;
             */
+
+            //determine if this is a while loop or a repeat statement
+            line->isWhile = lines[i].find(WHILE_LOOP_HEADER) != std::string::npos;
 
             //find the scope of the loop
             size_t loopStart = i;
@@ -738,7 +743,10 @@ void printTokenBuff(std::vector< std::shared_ptr<TokenizedLine> >& buffer) {
 
             case LineType::LOOP:
                 loopLine = (LoopLine*)buffer[i].get();
-                ss << "LOOP " << loopLine->loopTimes << " TIMES START=" << loopLine->loopStart << ", END=" << loopLine->loopEnd;
+                if(loopLine->isWhile)
+                    ss << "WHILE (" << loopLine->loopTimes << "): START=" << loopLine->loopStart << ", END=" << loopLine->loopEnd;
+                else
+                    ss << "LOOP (" << loopLine->loopTimes << ") TIMES: START=" << loopLine->loopStart << ", END=" << loopLine->loopEnd;
                 BuiltIn::Print(ss.str());
                 break;
 

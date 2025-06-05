@@ -226,6 +226,7 @@ void runProgram(std::vector<TOKENIZED_PTR>& tokens, std::vector<Utils::SVariable
     Utils::SVariable newVariableHolder;
 
     int intBuff = 0; // a place for the switch statement to throw integer values into temporarily
+    bool boolBuff = false;
     size_t sizeBuff = 0;
     
     //iterate through the program
@@ -256,11 +257,23 @@ void runProgram(std::vector<TOKENIZED_PTR>& tokens, std::vector<Utils::SVariable
 
             case Tokenizer::LineType::LOOP:
                 loopLine = (Tokenizer::LoopLine*)line.get();
-                intBuff = *((int*)Utils::convertToVariable(loopLine->loopTimes, Utils::VarType::INTEGER).ptr.get());
 
-                for(int i=0; i<intBuff; i++)
-                    runProgram(tokens, memory, memory.size(), true, loopLine->loopStart, loopLine->loopEnd);
+                if(loopLine->isWhile) {
+                    //run while loop
+                    boolBuff = *((bool*)Utils::convertToVariable(loopLine->loopTimes, Utils::VarType::BOOL).ptr.get());
 
+                    while(boolBuff) {
+                        runProgram(tokens, memory, memory.size(), true, loopLine->loopStart, loopLine->loopEnd);
+                        boolBuff = *((bool*)Utils::convertToVariable(loopLine->loopTimes, Utils::VarType::BOOL).ptr.get());
+                    }
+                }
+                else {
+                    //run repeat loop (evaluate loopTimes once)
+                    intBuff = *((int*)Utils::convertToVariable(loopLine->loopTimes, Utils::VarType::INTEGER).ptr.get());
+
+                    for(int i=0; i<intBuff; i++)
+                        runProgram(tokens, memory, memory.size(), true, loopLine->loopStart, loopLine->loopEnd);
+                }
                 //jump to end of loop
                 prgCounter = loopLine->loopEnd-1;
                 break;

@@ -15,6 +15,12 @@
         }
     }
 
+    count = 0
+    while(count < 20) {
+        ^PRINT(count)
+        count += 1
+    }
+
     ^PRINT("Done")
 }
 

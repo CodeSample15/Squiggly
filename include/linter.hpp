@@ -9,6 +9,7 @@
 #define UPDATE_FUNC_HEAD ":UPDATE:"
 
 #define LOOP_HEADER "repeat"
+#define WHILE_LOOP_HEADER "while"
 
 //Special characters to look for
 #define COMMENT_PREFIX '#'
