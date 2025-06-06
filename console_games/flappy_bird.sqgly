@@ -1,0 +1,46 @@
+:VARS: {
+    # global variables go here
+    OBJECT walls_u[10]
+    OBJECT walls_d[10]
+
+    OBJECT player
+    player.x = $SCREEN_WIDTH / 3 
+    player.y = $SCREEN_HEIGHT / 2
+    player.setColor(166, 155, 2)
+    player.setShape(@TRIANGLE)
+
+    float yVel = 0
+    float gravity = 0.2
+    float flapForce = 10
+
+    bool flapped = false
+}
+
+:START: {
+    # initialization code goes here
+}
+
+:UPDATE: {
+    # game loop logic goes here
+    yVel += gravity
+
+    if($A_BTN and not flapped) {
+        yVel = -flapForce
+        flapped = true
+    }
+    else if(not $A_BTN) {
+        flapped = false
+    }
+
+    player.y += yVel
+
+    player.draw()
+}
+
+setUpWalls() {
+
+}
+
+tickWalls() {
+
+}

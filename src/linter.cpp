@@ -75,6 +75,9 @@ void Linter::lint(std::vector<std::string>& lines)
             if(skippingString && c != '"')
                 continue;
 
+            if (c == COMMENT_PREFIX)
+                break; //comment found, stop scanning line
+
             switch(c) {
                 case '{':
                     stack.push_back(c);
@@ -92,7 +95,7 @@ void Linter::lint(std::vector<std::string>& lines)
                     break;
 
                 case ']':
-                    if(!stack.empty() && stack.back() == '{')
+                    if(!stack.empty() && stack.back() == '[')
                         stack.pop_back();
                     else
                         throwLinterError("Error at line " + std::to_string(i+1) + ": ']' has no open bracket!");
@@ -105,7 +108,7 @@ void Linter::lint(std::vector<std::string>& lines)
                         stack.push_back(c);
                     skippingString = !skippingString;
                     break;
-
+                    
                 default:
                     continue;
             }
@@ -113,7 +116,7 @@ void Linter::lint(std::vector<std::string>& lines)
 
         //check stack at the end of each line, make sure everything is closed on the same line except for braces
         if(!stack.empty() && stack.back() != '{')
-                throwLinterError("Error at line " + std::to_string(i+1) + ": Expected closing '" + getCloseForOpen(stack.back()) + "' in line");
+            throwLinterError("Error at line " + std::to_string(i+1) + ": Expected closing '" + getCloseForOpen(stack.back()) + "' in line");
     }
 
     if(!stack.empty())
