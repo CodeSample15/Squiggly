@@ -17,6 +17,8 @@ A standalone [esoteric language](https://en.wikipedia.org/wiki/Esoteric_programm
 * Run Squiggly with: `./squiggly <filename>`
 * Install: `make install`
 
+> WINDOWS USERS: If you plan to build from source, I recommend using [clang](https://releases.llvm.org/download.html) and [ninja](https://ninja-build.org/) to build the project.
+
 ## *...why?*
 
 - **Why did you make this project?** 
