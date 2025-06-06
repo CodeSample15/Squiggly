@@ -103,6 +103,28 @@ Running `squiggly template` will print a project template to the console which y
 
 <br/>
 
+## Supported operations
+
+Squiggly uses the [exprtk library](https://github.com/ArashPartow/exprtk) to parse mathmatical and boolean statements. Below is a list of operations which Squiggly supports with the use of this library:
+
+### Mathmatics:
+These are the ONLY functions in Squiggly which return values in-line:
+- `sqrt()`
+- `ceil()`
+- `cos()`
+- `sin()`
+- `tan()`
+- `abs()`
+
+### Boolean:
+> Note: Squiggly does not support `&&`, `||`, or `!` for boolean expressions. Only the following are supported:
+- `and`
+- `or`
+- `not`
+- `xor`
+
+<br/>
+
 ## Loops:
 
 > Loop functions have the same brace rules as `if` statements (code can't be on the same line as an open or close brace `{}`, braces must exist around looped code, etc)
@@ -147,6 +169,18 @@ In addition to these "primitive" data types, Squiggly come built in with an addi
 ```
 OBJECT player
 ```
+
+All variable types can be turned into 1D arrays by following the following syntax when declaring a variable:
+```python
+int i[LENGTH] # replace LENGTH with the length that you wish your array to be (auto casted to an integer)
+```
+> Note: due to another limitation with Squiggly's tokenizer, multidimensional arrays are not currently supported.
+
+Referencing items in an array is similar to other popular languages:
+``` python
+i[INDEX] # replace INDEX with the index you wish to reference in your array
+```
+
 
 <br/>
 
@@ -211,3 +245,22 @@ Below is the current list of built-in variables accessible in Squiggly programs.
 - `$COL_FLAG` **(bool)**: flag set by built in objects when .testCollision() is called (true if the two objects are touching, false otherwise)
 - `$F_RET` **(float)**: float return bucket for functions to dump values in (workaround to the fact that Squiggly doesn't support functions which return values)
 - `I_RET` **(int)**: int return bucket
+
+<br/>
+
+## Built-in functions:
+
+> Built-in functions are referenced using the `^` symbol
+
+- `^PRINT(string s)`
+    - Print a string to the console. Useful for debugging.
+- `^LEN(array)`
+    - Passing an array to this function will store the length of the array in `$I_RET`
+- `^I_RAND(int min, int max)`
+    - Generate a pseudo random number in the range [min, max)
+    - Sets `I_RET` with generated number
+- `^F_RAND()`
+    - Generate a pseudo random number in the range [0.0, 1.0)
+    - Sets `F_RET` with generated number
+- `^DRAW_LINE(float x1, float y1, float x2, float y2, int r=255, int g=255, int b=255)`
+    - Draw a line to screen starting at (x1,y1) and ending at (x2,y2) with color (r,g,b)

@@ -1,6 +1,11 @@
 # Squiggly
 
-An [esoteric language](https://en.wikipedia.org/wiki/Esoteric_programming_language) designed for simple game development
+A standalone [esoteric language](https://en.wikipedia.org/wiki/Esoteric_programming_language) designed for simple game development
+
+## Want to write a program in this language?
+
+1. [Download the latest release]()
+2. Check out the [language guide](/guide.md) to get started!
 
 ## Build/Run instructions:
 
@@ -22,7 +27,7 @@ An [esoteric language](https://en.wikipedia.org/wiki/Esoteric_programming_langua
     - Squiggly was built with portability in mind, so games written in this langauge can be played on many different devices. 
     - If you like experimenting with crappy software, this is definitely a fun way to do so (in my unbiased opinion).
 - **Why did you call it that?**
-    - This project is named "squiggly" due to the different built-in functionalities provided by this language which are accessed by "squiggly" shapes (@, $, ^). More information about these symbols in the [syntax information file](test_scripts/syntax.md)
+    - This project is named "squiggly" due to the different built-in functionalities provided by this language which are accessed by "squiggly" shapes (@, $, ^). More information about these symbols in the [syntax information file](/guide.md)
     - The project was going to be named "squiggle" but according to [the complete list of esoteric languages](https://esolangs.org/wiki/Language_list), the name "squiggle" is already taken.
 
 ## How does it work?
