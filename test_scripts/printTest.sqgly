@@ -5,8 +5,15 @@
 :START: {
 	# initialization code goes here
 	int test = 43
+	double other = 32;
+	string sTest = "String test"
+	sTest += " addition test"
+	string otherS = sTest + " bad ending"
 
 	^PRINT("TEST: " + test)
+	^PRINT(sTest + " " + sTest)
+	^PRINT(other)
+	^PRINT(otherS)
 	helloWorld("test")
 }
 

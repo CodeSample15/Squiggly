@@ -18,6 +18,7 @@
     player.setSolid(false)
     player.setColor(20, 200, 60)
 
+    #tell the player object it can't pass through test when using .move()
     player.addWall(test)
 }
 

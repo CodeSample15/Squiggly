@@ -2,6 +2,8 @@
 
 > Squiggly is inspired from languages like Java, C++, and Python. If you've programmed in any of these languages before, Squiggly should seem somewhat familiar. You will also find, however, some limitations to Squiggly's syntax which mainly come from the basic tokenization method I've decided to use for this project. In this file I will cover most of these limitations, and will update the contents as I discover more potential issues.
 
+<br/>
+
 ## Basics
 
 Running `squiggly template` will print a project template to the console which you can copy paste into any file:
@@ -35,6 +37,21 @@ Running `squiggly template` will print a project template to the console which y
 - :UPDATE:
     - Here is where game loop logic lives. Code put here will run once per frame until the game is stopped.
 
+<br/>
+
+## Special characters:
+- **#** : Comment. Similar to Python. Squiggly (as of right now) does not support multi-line comments
+
+- **@** : Built in image reference. Squiggly will look for built-images/shapes with the name that follows the symbol (all caps)
+     - Example: `@TRIANGLE`
+
+- **$** : Built in variable reference. Squiggly will provide values to the program and will automatically update them, handling all input to the program (names are also all caps)
+     - Example: `$JOYSTICK_X` --> value of the game joystick 'x' value (between -1.0 and 1.0)
+
+- **^** : Built in function reference. Squiggly will provide built in functions for the user to be able to create output from their program (function names are all caps)
+     - Example: ^PRINT("Hello World!")
+
+<br/>
 
 ## If-else statements:
 
@@ -84,9 +101,13 @@ Running `squiggly template` will print a project template to the console which y
         runFunction()
 ```
 
+<br/>
+
 ## Loops:
 
-- Squiggly uses the `repeat` function for looping:
+> Loop functions have the same brace rules as `if` statements (code can't be on the same line as an open or close brace `{}`, braces must exist around looped code, etc)
+
+### *repeat*
 
 ```cpp
 repeat(AMOUNT) {
@@ -94,8 +115,99 @@ repeat(AMOUNT) {
 }
 ```
 
-- The loop functions have the same brace rules as `if` statements (code can't be on the same line as an open or close brace `{}`, braces must exist around looped code, etc)
 - `repeat` will evaluate the argument passed as `AMOUNT` once, and loop that amount of times
 - AMOUNT is auto casted into an integer after being evaluated
 
-> TODO: Add support for while loops
+### *while*
+
+```python
+while(BOOLEAN) {
+    #looped code goes here
+}
+```
+
+- `while` works just like while loops in other programming languages. Anything passed as the boolean statement will evaluate each time the loop is ran.
+
+<br/>
+
+## Variables
+
+Squiggly supports the following datatypes which work similar to other languages:
+```c++
+int i #integer values
+float f #float values
+double # double values
+bool b #boolean values
+string s #string literals
+string stwo = "example"
+```
+
+In addition to these "primitive" data types, Squiggly come built in with an additional object data type:
+
+```
+OBJECT player
+```
+
+<br/>
+
+## The OBJECT variable
+
+The OBJECT variable allows for the creation of a controllable icon which can be drawn in the game window. Check out [this script](/test_scripts/objectTest.sqgly) to see an example of how OBJECTs can be used.
+
+OBJECTs have the following variables which can be assigned and referenced as any other variable in Squiggly:
+```
+OBJECT test
+test.x
+test.y
+test.width
+test.height
+test.rotation
+test.color_r
+test.color_g
+test.color_b
+```
+
+<br/>
+
+### OBJECT functions
+
+- `.draw()`
+    - Draws object onto the game screen
+    - Must be called each frame you wish to draw the object (screen is automatically cleared after each gameloop)
+- `.move(float x, float y, bool collide=false)`
+    - Move the object by x and y amount. Arguments are added to current x and y position
+    - Optionally collide with objects that are marked for collision (see `.addWall`)
+        - If collide==true, object will not pass through walls when moving
+- `.setColor(int r, int g, int b)`
+    - Set the color of the object (values should be 0-255)
+- `.setShape(SHAPE)`
+    - Set the shape of the object. Shapes are referenced in Squiggly by using the `@` symbol. Currently, only three different shapes are supported:
+        - `@TRIANGLE`
+        - `@RECT`
+        - `@ELLIPSE`
+            - > Note for ellipse: control over height and width is not yet supported. The ellipse shape draws a circle which can change size using only the `.width` property of the object.
+- `.setSolid(bool solid)`
+    - Set whether or not the object is drawn with fill (`.setSolid(false)` draws a hollow shape)
+    - This function does not affect collision calculations
+- `.testCollision(OBJECT other)`
+    - Test to see if the object is touching `other`. 
+    - Sets built-in variable `$COL_FLAG` as a return value (true for collision, false otherwise)
+- `.addWall(OBJECT other, bool add=true)`
+    - Registers `other` as a wall to the object (useful for `.move` with collision)
+        - To remove `other` as a wall, pass false as the second argument
+    - See [this script](/test_scripts/collisionHandlingTest.sqgly) for an example of this function's use
+
+<br/>
+
+## Built-in variables:
+
+Below is the current list of built-in variables accessible in Squiggly programs. This should also be kept up to date as the project develops:
+
+- `$JOYSTICK_X / $JOYSTICK_Y` **(float)**: analog values between -1.0 and 1.0 of the input provided to the controller used to play a Squiggly game (keyboard arrow keys for Windows build)
+- `$A_BTN / $B_BTN` **(bool)**: additional input buttons to Squiggly programs (for Windows build: <u>A = Z keyboard button</u> and <u>B = X keyboard button</u>)
+- `$FPS` **(int)**: current frames per second of the Squiggly window. Useful for debugging and benchmarking purposes
+- `$DTIME` **(float)**: time between each frame. Useful for consistent value changes (like position) across different frame rates
+- `$SCREEN_WIDTH / $SCREEN_HEIGHT` **(int)**: dimensions (in pixels) of the screen being drawn to
+- `$COL_FLAG` **(bool)**: flag set by built in objects when .testCollision() is called (true if the two objects are touching, false otherwise)
+- `$F_RET` **(float)**: float return bucket for functions to dump values in (workaround to the fact that Squiggly doesn't support functions which return values)
+- `I_RET` **(int)**: int return bucket
