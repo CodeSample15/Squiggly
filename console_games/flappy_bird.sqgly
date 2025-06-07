@@ -1,19 +1,33 @@
 :VARS: {
     # global variables go here
-    OBJECT walls_u[10]
-    OBJECT walls_d[10]
+    int wallPoolSize = 3
+
+    OBJECT walls_u[wallPoolSize]
+    OBJECT walls_d[wallPoolSize]
 
     OBJECT player
-    player.x = $SCREEN_WIDTH / 3 
+    player.x = $SCREEN_WIDTH / 5 
     player.y = $SCREEN_HEIGHT / 2
     player.setColor(166, 155, 2)
+    player.rotation = 90
     player.setShape(@TRIANGLE)
 
     float yVel = 0
-    float gravity = 0.2
+    float gravity = 20
     float flapForce = 10
 
+    float wallMoveSpeed = 100
+    int wallSize = 20
+    int gapSizeMin = 60
+    int gapSizeMax = 100
+    int wallDistance = 200
+
+    int score = 0
+    bool dead = false
+
     bool flapped = false
+
+    setUpWalls()
 }
 
 :START: {
@@ -22,26 +36,117 @@
 
 :UPDATE: {
     # game loop logic goes here
-    yVel += gravity
+    yVel += gravity * $DTIME
 
-    if($A_BTN and not flapped) {
+    if($A_BTN and not(flapped) and not(dead)) {
         yVel = -flapForce
         flapped = true
     }
-    else if(not $A_BTN) {
+    else if(not($A_BTN)) {
         flapped = false
-        ^PRINT("here")
     }
 
-    player.y += yVel
+    player.y += yVel * $DTIME * 20
+
+    if(not(dead)) {
+        checkCollision() #check to see if player collides with any of the walls
+        drawWalls()
+        tickWalls()
+    } else if($B_BTN) {
+        #start new game
+        setUpWalls()
+        player.y = $SCREEN_HEIGHT / 2
+        yVel = 0
+        dead = false
+
+        ^PRINT("New Game")
+    }
 
     player.draw()
 }
 
 setUpWalls() {
+    int i = 0
+    repeat(wallPoolSize) {
+        ^I_RAND(-$SCREEN_HEIGHT/4.3, $SCREEN_HEIGHT/4.3)
+        int wallOffset = $I_RET
 
+        ^I_RAND(gapSizeMin, gapSizeMax)
+        int gapSize = $I_RET
+
+        walls_u[i].setColor(0, 255, 0)
+        walls_u[i].width = wallSize
+        walls_u[i].height = $SCREEN_HEIGHT
+        walls_u[i].x = $SCREEN_WIDTH + (i*wallDistance)
+        walls_u[i].y = wallOffset
+
+        walls_d[i].setColor(0, 255, 0)
+        walls_d[i].width = wallSize
+        walls_d[i].height = $SCREEN_HEIGHT
+        walls_d[i].x = $SCREEN_WIDTH + (i*wallDistance)
+        walls_d[i].y = wallOffset + $SCREEN_HEIGHT + gapSize
+
+        i += 1
+    }
 }
 
 tickWalls() {
+    int i = 0
+    repeat(wallPoolSize) {
+        walls_u[i].move(-wallMoveSpeed*$DTIME, 0)
+        walls_d[i].move(-wallMoveSpeed*$DTIME, 0)
 
+        if(walls_u[i].x < -(wallSize/2)) {
+            walls_u[i].x += (wallDistance*wallPoolSize)
+            walls_d[i].x += (wallDistance*wallPoolSize)
+
+            #calculate random wall gapSize
+            ^I_RAND(gapSizeMin, gapSizeMax)
+            int gapSize = $I_RET
+
+            #calculate random wall position
+            ^I_RAND(-$SCREEN_HEIGHT/4.3, $SCREEN_HEIGHT/4.3)
+            int wallOffset = $I_RET
+            walls_u[i].y = wallOffset
+            walls_d[i].y = wallOffset + $SCREEN_HEIGHT + gapSize
+
+            #update score
+            score += 1
+            ^PRINT("SCORE: " + score)
+        }
+
+        i += 1
+    }
+}
+
+drawWalls() {
+    int i=0
+    repeat(wallPoolSize) {
+        walls_u[i].draw()
+        walls_d[i].draw()
+        i += 1
+    }
+}
+
+checkCollision() {
+    int i=0
+    repeat(wallPoolSize) {
+        walls_u[i].testCollision(player)
+        if($COL_FLAG) {
+            dead = true
+        }
+
+        walls_d[i].testCollision(player)
+        if($COL_FLAG) {
+            dead = true
+        }
+
+        i += 1
+    }
+
+    if(dead) {
+        ^PRINT("YOU DIED! Final Score: " + score)
+        ^PRINT("Press B to play again.")
+        score = 0
+    }
 }
