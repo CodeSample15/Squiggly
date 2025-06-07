@@ -31,7 +31,7 @@ void Linter::preprocess(std::vector<std::string>& lines)
 
             if(lines[i][j] == ' ' || lines[i][j] == '\t') {
                 //check to see if there is whitespace, that it's not being used to separate two distinct strings
-                bool rightGood = j+1 >= lines[i].length() || !std::isalpha(lines[i][j+1]);
+                bool rightGood = j+1 >= lines[i].length() || !(std::isalpha(lines[i][j+1]) || lines[i][j+1]==BUILT_IN_VAR_PREFIX);
                 bool leftGood = j==0 || !std::isalpha(lines[i][j-1]);
 
                 if(lines[i][j] == '\t' || rightGood || leftGood) {
