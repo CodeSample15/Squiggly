@@ -58,6 +58,7 @@
         player.y = $SCREEN_HEIGHT / 2
         yVel = 0
         dead = false
+        player.setColor(166, 155, 2)
 
         ^PRINT("New Game")
     }
@@ -147,6 +148,7 @@ checkCollision() {
     if(dead) {
         ^PRINT("YOU DIED! Final Score: " + score)
         ^PRINT("Press B to play again.")
+        player.setColor(255, 0, 0)
         score = 0
     }
 }
