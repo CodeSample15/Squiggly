@@ -167,6 +167,10 @@ SVariable Utils::convertToVariable(std::string input, VarType expectedType) {
         if(expectedType != VarType::STRING) {
             //run expression through expression parser library
             double res = expressionToDouble(ss.str());
+
+            if(res!=res) //Nan
+                throwUtilError("Error parsing '" + input + "': Expression evaluated to NaN (Tip: make sure variable names are correct, values are valid for equation, and operations have correct format)");
+
             tmp.type = expectedType;
             tmp.ptr = createSharedPtr(expectedType, res);
         } else {

@@ -30,6 +30,7 @@
     }
     else if(not $A_BTN) {
         flapped = false
+        ^PRINT("here")
     }
 
     player.y += yVel

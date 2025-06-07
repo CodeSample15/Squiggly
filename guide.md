@@ -120,7 +120,7 @@ These are the ONLY functions in Squiggly which return values in-line:
 > Note: Squiggly does not support `&&`, `||`, or `!` for boolean expressions. Only the following are supported:
 - `and`
 - `or`
-- `not`
+- `not()`
 - `xor`
 
 <br/>
