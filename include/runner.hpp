@@ -18,6 +18,9 @@
 #define FLOAT_RETURN_BUCKET_VAR_NAME "F_RET" //bypass the whole "squiggly can't return values from functions" issue. Float values returned from functions can be stored in this bucket variable
 #define INT_RETURN_BUCKET_VAR_NAME "I_RET"
 
+//important constants
+#define MEM_RESERVE_SIZE 1000
+
 namespace Runner {
     //delete all old values stored in memory
     void flushMem();

@@ -207,6 +207,19 @@ Utils::SVariable* Runner::fetchVariable(std::string name, bool allowArrays)
     return nullptr; //no variable was found, return a nullptr as a safety guard
 }
 
+//bufferes used inside of runProgram
+Tokenizer::CallLine* callLine;
+Tokenizer::LoopLine* loopLine;
+Tokenizer::AssignLine* assignLine;
+Tokenizer::DeclareLine* declareLine;
+
+Utils::SVariable* varBuff;
+Utils::SVariable newVariableHolder;
+
+int intBuff = 0; // a place for the switch statement to throw integer values into temporarily
+bool boolBuff = false;
+size_t sizeBuff = 0;
+
 /*
     Execute a block of the program.
 
@@ -216,18 +229,6 @@ Utils::SVariable* Runner::fetchVariable(std::string name, bool allowArrays)
 void runProgram(std::vector<TOKENIZED_PTR>& tokens, std::vector<Utils::SVariable>& memory, size_t stackFrameIdx, bool clearStackWhenDone, size_t startIdx, size_t endIdx, bool isFunction) 
 {
     endIdx = endIdx==0 ? tokens.size() : endIdx;
-
-    Tokenizer::CallLine* callLine;
-    Tokenizer::LoopLine* loopLine;
-    Tokenizer::AssignLine* assignLine;
-    Tokenizer::DeclareLine* declareLine;
-
-    Utils::SVariable* varBuff;
-    Utils::SVariable newVariableHolder;
-
-    int intBuff = 0; // a place for the switch statement to throw integer values into temporarily
-    bool boolBuff = false;
-    size_t sizeBuff = 0;
     
     //iterate through the program
     for(size_t prgCounter = startIdx; prgCounter < endIdx; prgCounter++) {
@@ -347,12 +348,8 @@ void runProgram(std::vector<TOKENIZED_PTR>& tokens, std::vector<Utils::SVariable
     }
 
     //clear out stack frame
-    if(clearStackWhenDone) {
-        size_t numVars = memory.size() - stackFrameIdx; //number of variables created in this stack frame
-        for(size_t i=0; i<numVars; i++) {
-            memory.erase(memory.begin() + stackFrameIdx);
-        }
-    }
+    if(clearStackWhenDone)
+        memory.erase(memory.begin()+stackFrameIdx, memory.end());
 }
 
 /*

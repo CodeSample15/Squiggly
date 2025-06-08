@@ -12,8 +12,8 @@
 }
 
 :START: {
-	color.x = 0
-    color.y = 0
+	color.x = $SCREEN_WIDTH/2
+    color.y = $SCREEN_HEIGHT/2
     color.width = $SCREEN_WIDTH
     color.height = $SCREEN_HEIGHT
 }
