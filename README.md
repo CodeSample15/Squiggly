@@ -4,7 +4,7 @@ A standalone [esoteric language](https://en.wikipedia.org/wiki/Esoteric_programm
 
 ## Want to write a program in this language?
 
-1. [Download the latest release]()
+1. [Download the latest release](https://github.com/CodeSample15/Squiggly/releases)
 2. Check out the [language guide](/guide.md) to get started!
 
 ## Build/Run instructions:
