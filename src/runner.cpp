@@ -98,6 +98,9 @@ void Runner::execute()
 {
     flushMem();
 
+    //reserve memory space
+    sVars.reserve(MEM_RESERVE_SIZE);
+
     executeVars();
     executeStart();
 
