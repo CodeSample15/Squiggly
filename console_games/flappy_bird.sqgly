@@ -145,6 +145,10 @@ checkCollision() {
         i += 1
     }
 
+    if(player.y > $SCREEN_HEIGHT) {
+        dead = true
+    }
+
     if(dead) {
         ^PRINT("YOU DIED! Final Score: " + score)
         ^PRINT("Press B to play again.")

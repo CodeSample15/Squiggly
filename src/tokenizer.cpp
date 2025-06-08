@@ -14,6 +14,9 @@ std::vector< std::shared_ptr<TokenizedLine> > startBlock_tok = std::vector< std:
 std::vector< std::shared_ptr<TokenizedLine> > mainLoop_tok = std::vector< std::shared_ptr<TokenizedLine> >();
 std::vector< std::vector< std::shared_ptr<TokenizedLine> > > functions_tok = std::vector<std::vector< std::shared_ptr<TokenizedLine> >>();
 
+//for keeping track of if-statement tokenization
+size_t branch_id = 0;
+
 //helper functions prototypes--------------------------------------------------------------------------------------------
 
 //find the line of code which contains a specific header (used for finding functions)
@@ -27,7 +30,7 @@ void findOpenCloseStrings(std::string line, size_t start, size_t& end);
 //tokenize a section starting from a start location and an end location, storing the result in tokenBuff
 void tokenizeSection(std::vector<std::string>& lines, std::vector< std::shared_ptr<TokenizedLine> >& tokenBuff, size_t baseBuffSize, size_t start, size_t end);
 //tokenize an if statement, return the end line of the if statement in the source code
-size_t tokenizeIf(std::vector<std::string>& lines, std::vector< std::shared_ptr<TokenizedLine> >& tokenBuff, size_t& i, size_t baseBuffSize, bool isElseIf);
+size_t tokenizeIf(std::vector<std::string>& lines, std::vector< std::shared_ptr<TokenizedLine> >& tokenBuff, size_t& i, size_t baseBuffSize, bool isElseIf, size_t id);
 //use the ',' delimiter to get the individual arguments passed to a function and stored them in argBuff
 void parseArgsFromString(std::string s, std::vector<std::string>& argBuff);
 //search for functions defined by the programmer
@@ -59,6 +62,8 @@ void printTokenBuff(std::vector< std::shared_ptr<TokenizedLine> >& buffer);
 void Tokenizer::tokenize(std::vector<std::string>& lines)
 {
     BuiltIn::Print("Tokenizing code...\t", false);
+
+    branch_id = 0; //reset branch tracking
 
     //delete old tokens if there are any (for when code is ported to embedded devices that shouldn't exit)
     clearTokens();
@@ -324,7 +329,7 @@ void tokenizeSection(std::vector<std::string>& lines, std::vector< std::shared_p
             tokenBuff.push_back(line);
         }
         else if((found = lines[i].find("if(")) == 0) { //should be found at 0 (first thing in the string)
-            size_t ifEnd = tokenizeIf(lines, tokenBuff, i, baseBuffSize, true);
+            size_t ifEnd = tokenizeIf(lines, tokenBuff, i, baseBuffSize, true, ++branch_id);
             
             size_t elseLocation = 0;
             while(checkForElse(lines, ifEnd, elseLocation)) {
@@ -334,7 +339,7 @@ void tokenizeSection(std::vector<std::string>& lines, std::vector< std::shared_p
                 i = elseLocation;
                 bool elseIf = lines[i].find("if(") != std::string::npos;
                 
-                ifEnd = tokenizeIf(lines, tokenBuff, i, baseBuffSize, elseIf);
+                ifEnd = tokenizeIf(lines, tokenBuff, i, baseBuffSize, elseIf, branch_id);
 
                 if(!elseIf) //just a regular else statement
                     break;
@@ -471,7 +476,7 @@ void tokenizeSection(std::vector<std::string>& lines, std::vector< std::shared_p
 /*
 
 */
-size_t tokenizeIf(std::vector<std::string>& lines, std::vector< std::shared_ptr<TokenizedLine> >& tokenBuff, size_t& i, size_t baseBuffSize, bool isElseIf)
+size_t tokenizeIf(std::vector<std::string>& lines, std::vector< std::shared_ptr<TokenizedLine> >& tokenBuff, size_t& i, size_t baseBuffSize, bool isElseIf, size_t id)
 {
     std::shared_ptr<BranchLine> line = std::make_shared<BranchLine>(BranchLine());
 
@@ -489,6 +494,7 @@ size_t tokenizeIf(std::vector<std::string>& lines, std::vector< std::shared_ptr<
     line->branchLineNumTRUE = 0;
     line->branchLineNumELSE = 0;
     line->ifElse = isElseIf;
+    line->id = id;
 
     //don't do this if this is an else statement only
     if(isElseIf) {
@@ -731,13 +737,13 @@ void printTokenBuff(std::vector< std::shared_ptr<TokenizedLine> >& buffer) {
             
             case LineType::BRANCH:
                 branchLine = (BranchLine*)buffer[i].get();
-                ss << "BRANCH " << branchLine->booleanExpression << "   TRUE: " << branchLine->branchLineNumTRUE << "   " << (branchLine->ifElse ? "IF ELSE: " : "ELSE ") << branchLine->branchLineNumELSE;
+                ss << "BRANCH " << branchLine->booleanExpression << " (ID: " << branchLine->id << ")   TRUE: " << branchLine->branchLineNumTRUE << "   " << (branchLine->ifElse ? "IF ELSE: " : "ELSE ") << branchLine->branchLineNumELSE;
                 BuiltIn::Print(ss.str());
                 break;
 
             case LineType::BRANCH_ELSE:
                 branchLine = (BranchLine*)buffer[i].get();
-                ss << "ELSE END: " << branchLine->branchLineNumELSE;
+                ss << "ELSE END: " << branchLine->branchLineNumELSE << " (ID: " << branchLine->id << ")";
                 BuiltIn::Print(ss.str());
                 break;
 

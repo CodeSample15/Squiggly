@@ -546,6 +546,8 @@ void executeBranch(std::vector<TOKENIZED_PTR>& tokens, std::vector<Utils::SVaria
     bool outOfBranch = false;
     bool expectIfElse = false;
 
+    size_t eBranchID = 0; //expected branch ID
+
     for(; prgCounter<tokens.size(); prgCounter++) {
         TOKENIZED_PTR line = tokens[prgCounter];
 
@@ -555,6 +557,15 @@ void executeBranch(std::vector<TOKENIZED_PTR>& tokens, std::vector<Utils::SVaria
 
                 if(expectIfElse && !branchLine->ifElse) { // if expecting an if else/else and the program reads just an if, the program has reached the beginning of a new branching statement, exit this loop
                     outOfBranch = true;
+                    break;
+                }
+
+                if(eBranchID == 0)
+                    eBranchID = branchLine->id;
+
+                if(branchLine->id != eBranchID) {
+                    outOfBranch = true;
+                    prgCounter--;
                     break;
                 }
 

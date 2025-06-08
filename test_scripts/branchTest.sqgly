@@ -8,15 +8,17 @@
     float damage = 0.5
 
     if (damage > 0) {
-        ^PRINT("True statement")
+        ^PRINT("This should run")
         if(damage == 0.5) {
-            ^PRINT("Nested True")
+            ^PRINT("This should run")
         }
         else {
-            ^PRINT("Nested False")
+            ^PRINT("This should not run")
         }
-    } else {
-        ^PRINT("False statement")
+    }
+
+    if(true) {
+        ^PRINT("THIS SHOULD RUN!")
     }
 
     ^PRINT("End of branching")

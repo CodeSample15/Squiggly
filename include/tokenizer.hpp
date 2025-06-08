@@ -37,6 +37,7 @@ namespace Tokenizer {
             size_t branchLineNumTRUE;
             size_t branchLineNumELSE;
             bool ifElse;
+            size_t id; //keep track of different branch statements lined up next to each other
     };
 
     class LoopLine : public TokenizedLine {
