@@ -195,11 +195,10 @@ void BuiltIn::Object::callFunction(std::string name, std::vector<std::string>& a
         if(args.size() != 1)
             throwObjectError("'setShape' expected 1 argument, got " + std::to_string(args.size()));
         if(args[0][0] != IMAGE_DECLARATION_PREFIX)
-            throwObjectError("Argument passed to 'setImage' is not an image declaration! (Should start with @)");
+            throwObjectError("Argument passed to 'setShape' (" + args[0] + ") is not an image declaration! (Should start with @)");
 
         //remove prefix
-        args[0] = args[0].substr(1, args[0].length() - 1);
-        setObjShape(args[0]);
+        setObjShape(args[0].substr(1, args[0].length() - 1));
     }
     else if(name == "setSolid") {
         if(args.size() != 1)

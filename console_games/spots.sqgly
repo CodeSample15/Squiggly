@@ -1,0 +1,72 @@
+:VARS: {
+    int numObjs = 20
+
+    OBJECT objs[numObjs]
+    float movex[numObjs]
+    float movey[numObjs]
+}
+
+:START: {
+    int i = 0
+
+    repeat(numObjs) {
+        #set up objects
+        ^I_RAND(10, 40)
+        int size = $I_RET
+
+        ^I_RAND(size, $SCREEN_WIDTH - size)
+        int x = $I_RET
+        ^I_RAND(size, $SCREEN_HEIGHT - size)
+        int y = $I_RET
+
+        ^I_RAND(10, 255)
+        int g = $I_RET
+        ^I_RAND(10, 255)
+        int b = $I_RET
+
+        objs[i].x = x
+        objs[i].y = y
+        objs[i].setColor(10, g, b)
+        objs[i].width = size
+        objs[i].setShape(@ELLIPSE)
+
+        #set up movements of objects
+        ^F_RAND()
+        movex[i] = $F_RET * 5
+        ^F_RAND()
+        movey[i] = $F_RET * 5
+
+        i+=1
+    }
+}
+
+:UPDATE: {
+    int i=0
+    repeat(numObjs) {
+        objs[i].draw()
+        i += 1
+    }
+
+    ^PRINT($FPS)
+
+    updateObjs()
+}
+
+updateObjs() {
+    int i=0
+    repeat(numObjs) {
+        objs[i].move(movex[i], movey[i])
+
+        if(objs[i].x > $SCREEN_WIDTH-objs[i].width or objs[i].x < objs[i].width)
+        {
+            movex[i] *= -1
+        } 
+        
+        if(objs[i].y > $SCREEN_HEIGHT-objs[i].width or objs[i].y < objs[i].width)
+        {
+            movey[i] *= -1
+        } 
+
+        i+=1
+    }
+}
