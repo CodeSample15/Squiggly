@@ -513,7 +513,7 @@ size_t tokenizeIf(std::vector<std::string>& lines, std::vector< std::shared_ptr<
 
     //tokenize the lines inside of the braces and store in a temp buffer
     std::vector< std::shared_ptr<TokenizedLine> > tempBuff;
-    tokenizeSection(lines, tempBuff, tokenBuff.size()+1, ifStart, ifEnd);
+    tokenizeSection(lines, tempBuff, tokenBuff.size()+1+baseBuffSize, ifStart, ifEnd);
 
     line->branchLineNumELSE = tokenBuff.size() + tempBuff.size() + 1 + baseBuffSize;
     

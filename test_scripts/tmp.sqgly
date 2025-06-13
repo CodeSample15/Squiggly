@@ -1,18 +1,26 @@
+# PROJECT TEMPLATE: copy-paste this into a file to get started on a project
+
 :VARS: {
-    
+    # global variables go here
 }
 
 :START: {
-    repeat(5) {
-        repeat(5) {
-                if(true) {
-                    ^PRINT("")
-                }
+    repeat(4) {
+        if(true) {
+            if(false) {
+                ^PRINT("")
+            } else if(false) {
+                ^PRINT("")
+            } else {
+                ^PRINT("")
+            }
+        } else{
+            ^PRINT("")
         }
     }
 }
 
 :UPDATE: {
-    
+    # game loop logic goes here
 }
 
