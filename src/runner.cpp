@@ -294,6 +294,7 @@ void runProgram(std::vector<TOKENIZED_PTR>& tokens, std::vector<Utils::SVariable
 
             case Tokenizer::LineType::DECLARE:
                 declareLine = (Tokenizer::DeclareLine*)line.get();
+                
                 if(fetchVariable(declareLine->varName))
                     throwRunnerError("Variable '" + declareLine->varName + "' is already defined!");
 
@@ -324,8 +325,11 @@ void runProgram(std::vector<TOKENIZED_PTR>& tokens, std::vector<Utils::SVariable
 
             case Tokenizer::LineType::DECLARE_ASSIGN:
                 assignLine = (Tokenizer::AssignLine*)line.get();
-                if(fetchVariable(assignLine->assignDst))
-                    throwRunnerError("Variable '" + assignLine->assignDst + "' is already defined!");
+
+                if(fetchVariable(assignLine->assignDst)) {
+                    Tokenizer::printTokenBuff(tokens);
+                    throwRunnerError("Variable '" + assignLine->assignDst + "' is already defined! (prgCounter=" + std::to_string(prgCounter) + ")");
+                }
 
                 if(assignLine->assignDst.find("[")==std::string::npos) {
                     newVariableHolder.name = assignLine->assignDst;
@@ -345,7 +349,8 @@ void runProgram(std::vector<TOKENIZED_PTR>& tokens, std::vector<Utils::SVariable
                 break;
 
             default:
-                throwRunnerError("Unknown line encountered!");
+                Tokenizer::printTokenBuff(tokens);
+                throwRunnerError("Unknown line encountered! (prgCounter=" + std::to_string(prgCounter) + ")");
                 break;
         }
     }

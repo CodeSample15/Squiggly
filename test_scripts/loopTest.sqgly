@@ -6,13 +6,14 @@
     int count = 0
 
     repeat (5) {
-        count += 1
         ^PRINT("Counter: " + count)
 
         repeat(10) {
             count += 2
             ^PRINT("Inner: " + count)
         }
+
+        count += 1
     }
 
     count = 0

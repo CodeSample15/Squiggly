@@ -1,0 +1,18 @@
+:VARS: {
+    
+}
+
+:START: {
+    repeat(5) {
+        repeat(5) {
+                if(true) {
+                    ^PRINT("")
+                }
+        }
+    }
+}
+
+:UPDATE: {
+    
+}
+

@@ -51,8 +51,6 @@ std::string searchForObjectFunctions(std::string line);
 void clearTokens();
 //for errors (exit program)
 inline void tokenizerError(std::string msg);
-//for debug purposes
-void printTokenBuff(std::vector< std::shared_ptr<TokenizedLine> >& buffer);
 
 /*
     Parse the code line by line and build a tokenized version of the script.
@@ -122,7 +120,7 @@ void Tokenizer::tokenize(std::vector<std::string>& lines)
     BuiltIn::Print("Done\n");
 
     #if TOK_DEBUGGING
-        printTokenBuff(startBlock_tok);
+        Tokenizer::printTokenBuff(startBlock_tok);
     #endif
 }
 
@@ -386,7 +384,7 @@ void tokenizeSection(std::vector<std::string>& lines, std::vector< std::shared_p
 
                 //tokenize the insize of the loop
                 std::vector< std::shared_ptr<TokenizedLine> > tempBuff;
-                tokenizeSection(lines, tempBuff, tokenBuff.size()+1, loopStart, loopEnd);
+                tokenizeSection(lines, tempBuff, tokenBuff.size()+1+baseBuffSize, loopStart, loopEnd);
 
                 //determine which instruction the loop should jump to when finished
                 line->loopEnd = tempBuff.size() + tokenBuff.size() + 1 + baseBuffSize;
@@ -703,7 +701,7 @@ inline void tokenizerError(std::string message) {
 
     USE THIS AS A REFERENCE FOR HOW THE TOKENS SHOULD BE PARSED
 */
-void printTokenBuff(std::vector< std::shared_ptr<TokenizedLine> >& buffer) {
+void Tokenizer::printTokenBuff(std::vector< std::shared_ptr<TokenizedLine> >& buffer) {
     //for casting the TokenizedLine into its childrens' forms
     CallLine* callLine;
     BranchLine* branchLine;

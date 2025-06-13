@@ -65,7 +65,23 @@ updateObjs() {
         if(objs[i].y > $SCREEN_HEIGHT-objs[i].width or objs[i].y < objs[i].width)
         {
             movey[i] *= -1
-        } 
+        }
+
+        int j=0
+        repeat(numObjs) {
+            if(j!=i) {
+                objs[i].testCollision(objs[j])
+
+                if($COL_FLAG) {
+                    objs[i].color_r = 255
+                } 
+                else {
+                    objs[i].color_r = 0
+                }
+            }
+
+            j += 1
+        }
 
         i+=1
     }

@@ -71,6 +71,9 @@ namespace Tokenizer {
 
     //method that other scripts will be using
     void tokenize(std::vector<std::string>& lines);
+
+    //for debug purposes
+    void printTokenBuff(std::vector< std::shared_ptr<TokenizedLine> >& buffer);
 }
 
 //pointers for different methods in the program (keeps code separate and easier to manage in memory imo)

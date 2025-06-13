@@ -21,6 +21,35 @@
         ^PRINT("THIS SHOULD RUN!")
     }
 
+    if(true) {
+        ^PRINT("This should run")
+    } else {
+        ^PRINT("This should not run")
+    }
+
+    int i=1
+    repeat(2) {
+        if(i>0) {
+            ^PRINT("This should run")
+        } else if(false) {
+            ^PRINT("This should not run!")
+        } 
+        else {
+            ^PRINT("This should not run")
+        }
+
+        repeat(2) {
+            if(true) {
+                ^PRINT("This should run")
+            }
+            else {
+                ^PRINT("This should not run!")
+            }
+        }
+
+        i = i+1
+    }
+
     ^PRINT("End of branching")
 }
 
