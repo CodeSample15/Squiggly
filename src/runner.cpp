@@ -355,9 +355,22 @@ void runProgram(std::vector<TOKENIZED_PTR>& tokens, std::vector<Utils::SVariable
         }
     }
 
+    BuiltIn::Print("BEFORE---------------------------");
+    for(size_t i=0; i<sVars.size(); i++) {
+        BuiltIn::Print(std::to_string(i) + ": " + sVars[i].name);
+    }
+    BuiltIn::Print("BEFORE--------------------------- (" + std::to_string(currStackFrame));
+
+
     //clear out stack frame
     if(clearStackWhenDone)
         memory.erase(memory.begin()+stackFrameIdx, memory.end());
+
+    BuiltIn::Print("AFTER---------------------------");
+    for(size_t i=0; i<sVars.size(); i++) {
+        BuiltIn::Print(std::to_string(i) + ": " + sVars[i].name);
+    }
+    BuiltIn::Print("AFTER--------------------------- (" + std::to_string(currStackFrame));
 }
 
 /*

@@ -4,7 +4,7 @@
 #include "linter.hpp"
 #include "built-in.hpp"
 
-#define TOK_DEBUGGING false
+#define TOK_DEBUGGING true
 
 using namespace Tokenizer;
 
@@ -120,7 +120,7 @@ void Tokenizer::tokenize(std::vector<std::string>& lines)
     BuiltIn::Print("Done\n");
 
     #if TOK_DEBUGGING
-        Tokenizer::printTokenBuff(startBlock_tok);
+        Tokenizer::printTokenBuff(functions_tok[0]);
     #endif
 }
 
