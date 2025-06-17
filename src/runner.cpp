@@ -413,6 +413,7 @@ void runUserFunction(std::string name, std::vector<std::string>& args) {
                     else {
                         nextVar = Utils::convertToVariable(args[i], Utils::stringToVarType(etype));
                         nextVar.name = ename; //split expected arg into type and name, get the name
+                        nextVar.isArray = false;
                     }
 
                     sVars.push_back(nextVar); //push to stack
