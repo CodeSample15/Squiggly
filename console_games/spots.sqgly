@@ -1,5 +1,5 @@
 :VARS: {
-    int numObjs = 20
+    int numObjs = 5
 
     OBJECT objs[numObjs]
     float movex[numObjs]
@@ -11,7 +11,7 @@
 
     repeat(numObjs) {
         #set up objects
-        ^I_RAND(10, 40)
+        ^I_RAND(20, 40)
         int size = $I_RET
 
         ^I_RAND(size, $SCREEN_WIDTH - size)
@@ -28,6 +28,7 @@
         objs[i].y = y
         objs[i].setColor(10, g, b)
         objs[i].width = size
+        objs[i].height = size
         objs[i].setShape(@ELLIPSE)
 
         #set up movements of objects

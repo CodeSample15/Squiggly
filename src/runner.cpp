@@ -210,19 +210,6 @@ Utils::SVariable* Runner::fetchVariable(std::string name, bool allowArrays)
     return nullptr; //no variable was found, return a nullptr as a safety guard
 }
 
-//bufferes used inside of runProgram
-Tokenizer::CallLine* callLine;
-Tokenizer::LoopLine* loopLine;
-Tokenizer::AssignLine* assignLine;
-Tokenizer::DeclareLine* declareLine;
-
-Utils::SVariable* varBuff;
-Utils::SVariable newVariableHolder;
-
-int intBuff = 0; // a place for the switch statement to throw integer values into temporarily
-bool boolBuff = false;
-size_t sizeBuff = 0;
-
 /*
     Execute a block of the program.
 
@@ -232,7 +219,20 @@ size_t sizeBuff = 0;
 void runProgram(std::vector<TOKENIZED_PTR>& tokens, std::vector<Utils::SVariable>& memory, size_t stackFrameIdx, bool clearStackWhenDone, size_t startIdx, size_t endIdx, bool isFunction) 
 {
     endIdx = endIdx==0 ? tokens.size() : endIdx;
-    
+
+    //buffers
+    Tokenizer::CallLine* callLine;
+    Tokenizer::LoopLine* loopLine;
+    Tokenizer::AssignLine* assignLine;
+    Tokenizer::DeclareLine* declareLine;
+
+    Utils::SVariable* varBuff;
+    Utils::SVariable newVariableHolder;
+
+    int intBuff = 0; // a place for the switch statement to throw integer values into temporarily
+    bool boolBuff = false;
+    size_t sizeBuff = 0;
+
     //iterate through the program
     for(size_t prgCounter = startIdx; prgCounter < endIdx; prgCounter++) {
         if(isFunction)
@@ -288,8 +288,10 @@ void runProgram(std::vector<TOKENIZED_PTR>& tokens, std::vector<Utils::SVariable
 
                 if(varBuff)
                     setVariable(varBuff->ptr, Utils::convertToVariable(assignLine->assignSrc, varBuff->type).ptr, varBuff->type, assignLine->assignOperator);
-                else 
-                    throwRunnerError("Unable to find variable '" + assignLine->assignDst + "'");
+                else {
+                    Tokenizer::printTokenBuff(tokens);
+                    throwRunnerError("Error (prgCounter=" + std::to_string(prgCounter) + "): Unable to find variable '" + assignLine->assignDst + "'");
+                }
                 break;
 
             case Tokenizer::LineType::DECLARE:
@@ -353,24 +355,11 @@ void runProgram(std::vector<TOKENIZED_PTR>& tokens, std::vector<Utils::SVariable
                 throwRunnerError("Unknown line encountered! (prgCounter=" + std::to_string(prgCounter) + ")");
                 break;
         }
-    }
-
-    BuiltIn::Print("BEFORE---------------------------");
-    for(size_t i=0; i<sVars.size(); i++) {
-        BuiltIn::Print(std::to_string(i) + ": " + sVars[i].name);
-    }
-    BuiltIn::Print("BEFORE--------------------------- (" + std::to_string(currStackFrame));
-
+    } // for(size_t prgCounter = startIdx; prgCounter < endIdx; prgCounter++)
 
     //clear out stack frame
     if(clearStackWhenDone)
         memory.erase(memory.begin()+stackFrameIdx, memory.end());
-
-    BuiltIn::Print("AFTER---------------------------");
-    for(size_t i=0; i<sVars.size(); i++) {
-        BuiltIn::Print(std::to_string(i) + ": " + sVars[i].name);
-    }
-    BuiltIn::Print("AFTER--------------------------- (" + std::to_string(currStackFrame));
 }
 
 /*
