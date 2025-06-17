@@ -50,6 +50,7 @@
 
     ^PRINT($FPS)
 
+    resetColors()
     updateObjs()
 }
 
@@ -75,15 +76,20 @@ updateObjs() {
 
                 if($COL_FLAG) {
                     objs[i].color_r = 255
-                } 
-                else {
-                    objs[i].color_r = 0
                 }
             }
 
             j += 1
         }
 
+        i+=1
+    }
+}
+
+resetColors() {
+    int i=0
+    repeat(numObjs) {
+        objs[i].color_r = 0
         i+=1
     }
 }
