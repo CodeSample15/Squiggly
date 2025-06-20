@@ -1,5 +1,6 @@
 #include <string>
 #include <stdexcept>
+#include <stack>
 
 #include "linter.hpp"
 #include "built-in.hpp"
@@ -67,7 +68,7 @@ void Linter::preprocess(std::vector<std::string>& lines)
 void Linter::lint(std::vector<std::string>& lines) 
 {
     BuiltIn::Print("Checking script...\t", false);
-    std::vector<char> stack; //throwback to freshmen datastructures and algorithms: make sure each open bracket/brace has a close bracket/brace
+    std::stack<char> stack; //throwback to freshmen datastructures and algorithms: make sure each open bracket/brace has a close bracket/brace
 
     for(size_t i=0; i<lines.size(); i++) {
         bool skippingString = false;
@@ -80,32 +81,32 @@ void Linter::lint(std::vector<std::string>& lines)
 
             switch(c) {
                 case '{':
-                    stack.push_back(c);
+                    stack.push(c);
                     break;
 
                 case '}':
-                    if(!stack.empty() && stack.back() == '{')
-                        stack.pop_back();
+                    if(!stack.empty() && stack.top() == '{')
+                        stack.pop();
                     else
                         throwLinterError("Error at line " + std::to_string(i+1) + ": '}' has no open brace!");
                     break;
 
                 case '[':
-                    stack.push_back(c);
+                    stack.push(c);
                     break;
 
                 case ']':
-                    if(!stack.empty() && stack.back() == '[')
-                        stack.pop_back();
+                    if(!stack.empty() && stack.top() == '[')
+                        stack.pop();
                     else
                         throwLinterError("Error at line " + std::to_string(i+1) + ": ']' has no open bracket!");
                     break;
 
                 case '"':
                     if(skippingString)
-                        stack.pop_back();
+                        stack.pop();
                     else
-                        stack.push_back(c);
+                        stack.push(c);
                     skippingString = !skippingString;
                     break;
                     
@@ -115,8 +116,8 @@ void Linter::lint(std::vector<std::string>& lines)
         }
 
         //check stack at the end of each line, make sure everything is closed on the same line except for braces
-        if(!stack.empty() && stack.back() != '{')
-            throwLinterError("Error at line " + std::to_string(i+1) + ": Expected closing '" + getCloseForOpen(stack.back()) + "' in line");
+        if(!stack.empty() && stack.top() != '{')
+            throwLinterError("Error at line " + std::to_string(i+1) + ": Expected closing '" + getCloseForOpen(stack.top()) + "' in line");
     }
 
     if(!stack.empty())
