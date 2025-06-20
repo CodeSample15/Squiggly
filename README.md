@@ -7,6 +7,21 @@ A standalone [esoteric language](https://en.wikipedia.org/wiki/Esoteric_programm
 1. [Download the latest release](https://github.com/CodeSample15/Squiggly/releases/latest)
 2. Check out the [language guide](/guide.md) to get started!
 
+## Examples:
+
+Below are some examples of programs written in Squiggly.
+
+![Flappy Bird](media/Flappy%20Bird.gif)
+[flappy_bird.sqgly](/console_games/flappy_bird.sqgly)
+
+![Spots](media/Balls.gif)
+[spots.sqgly](/console_games/spots.sqgly)
+
+![colorTest.sqgly](/media/ColorTest.gif)
+[colorTest.sqgly](/console_games/colorTest.sqgly)
+
+As you can see, the idea of this language is to create simple programs with relatively simple code.
+
 ## Build/Run instructions:
 
 > Note: make sure all submodules have been pulled in your local clone of the repo before building for the first time

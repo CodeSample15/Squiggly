@@ -226,6 +226,8 @@ test.color_b
 - `.testCollision(OBJECT other)`
     - Test to see if the object is touching `other`. 
     - Sets built-in variable `$COL_FLAG` as a return value (true for collision, false otherwise)
+    - Below is an example of this function in use:
+    ![Example](/media/Collisions.gif)
 - `.addWall(OBJECT other, bool add=true)`
     - Registers `other` as a wall to the object (useful for `.move` with collision)
         - To remove `other` as a wall, pass false as the second argument
