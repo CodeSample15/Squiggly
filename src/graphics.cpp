@@ -121,7 +121,7 @@ void SGraphics::draw_triangle(pixel loc, int width, int height, float rot, Color
 void SGraphics::draw_ellipse(pixel loc, int width, int height, float rot, Color color, bool fill) 
 {
     //TODO: allow for height and width to
-    int radius = width;
+    int radius = width/2;
 
     //  Bounding box for scanline drawing
     int startX = loc.x - radius;
