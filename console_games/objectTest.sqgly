@@ -11,8 +11,12 @@
 
     test.x = 0
     test.y = 0
-    test.width = 10
-    test.height = 10
+    test.width = 20
+    test.height = 20
+
+    test.setColor(173, 245, 66)
+    test.setShape(@TRIANGLE)
+    test.setSolid(true) #turn fill off
 }
 
 :UPDATE: {
@@ -25,18 +29,16 @@
     xVel *= 0.8
     yVel *= 0.8
 
-    ^PRINT("X: " + test.x + "   Y: " + test.y)
+    ^PRINT("X: " + test.x + "   Y: " + test.y + "    Rot: " + test.rotation)
 
     if($A_BTN) {
-        test.color_r = 0
-    } else {
-        test.color_r = 255
+        test.rotation -= 5
+        test.setSolid(true)
     }
 
     if($B_BTN) {
-        test.color_g = 255
-    } else {
-        test.color_g = 0
+        test.rotation += 5
+        test.setSolid(false)
     }
 
     test.draw()

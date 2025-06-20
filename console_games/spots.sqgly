@@ -1,5 +1,5 @@
 :VARS: {
-    int numObjs = 5
+    int numObjs = 6
 
     OBJECT objs[numObjs]
     float movex[numObjs]
@@ -11,7 +11,7 @@
 
     repeat(numObjs) {
         #set up objects
-        ^I_RAND(20, 40)
+        ^I_RAND(50, 100)
         int size = $I_RET
 
         ^I_RAND(size, $SCREEN_WIDTH - size)

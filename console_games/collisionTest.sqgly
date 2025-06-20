@@ -1,82 +1,44 @@
 :VARS: {
+    OBJECT player
     OBJECT test
-    OBJECT ground
-
-    float xVel
-    float yVel
-    float fallSpeed = 20
-    float fallAccel = 0.5
-
-    bool onGround = false
 }
 
 :START: {
-    createGround()
-    xVel = 0
-    yVel = 0
+    test.x = $SCREEN_WIDTH / 2
+    test.y = $SCREEN_HEIGHT / 2
+    test.width = 20
+    test.height = 50
+    test.setSolid(false)
+    test.setColor(255, 0, 0)
 
-    test.x = 0
-    test.y = 0
-    test.width = 10
-    test.height = 10
+    player.x = test.x - 20
+    player.y = test.y - 20
+    player.width = 20
+    player.height = 10
+    player.setSolid(false)
+    player.setColor(20, 200, 60)
 }
 
 :UPDATE: {
-    int f = 0
+    player.x += $JOYSTICK_X * 1
+    player.y -= $JOYSTICK_Y * 1
 
-	test.x += 40 * xVel * $DTIME
-    test.y += fallSpeed * yVel * $DTIME
+    player.testCollision(test)
 
-    keepWithinBounds(test) #make sure the player is within the bounds of the screen
-
-    landOnGround(test, ground)
-
-    xVel += $JOYSTICK_X
-    xVel *= 0.8
-
-    if(not(onGround)) {
-        yVel += fallAccel
-    } else if($A_BTN) {
-        #jump
-        yVel = -8  # jump force
-        onGround = false
+    if($COL_FLAG) {
+        test.setColor(0, 255, 0)
+    } else {
+        test.setColor(255, 0, 0)
     }
 
-    ground.draw()
+    if($A_BTN) {
+        player.rotation -= 5
+    }
+
+    if($B_BTN) {
+        player.rotation += 5
+    }
+
+    player.draw()
     test.draw()
-}
-
-createGround() {
-    #set up ground
-    ground.width = $SCREEN_WIDTH
-    ground.height = 20
-    ground.y = $SCREEN_HEIGHT - ground.height
-
-    ground.color_r = 0
-    ground.color_g = 255
-    ground.color_b = 0
-}
-
-keepWithinBounds(OBJECT player) {
-    if(player.x + player.width > $SCREEN_WIDTH) {
-        player.x = $SCREEN_WIDTH - player.width
-    }
-    else if(player.x < 0) {
-        player.x = 0
-    }
-}
-
-landOnGround(OBJECT player, OBJECT ground) 
-{
-    if(not(onGround)) {
-        #player is falling
-        player.testCollision(ground)
-        if($COL_FLAG) {
-            #ground the player to the ground
-            player.y = ground.y - player.height
-            onGround = true
-
-            yVel = 0
-        }
-    }
 }
