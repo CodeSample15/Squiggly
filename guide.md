@@ -6,7 +6,7 @@
 
 ## Basics
 
-Running `squiggly template` will print a project template to the console which you can copy paste into any file:
+Running `squiggly template` will print a project template to the console. You can either copy and paste this template into a file or run `squiggly template > program_name.sqgly`
 
 ```
 :VARS: {

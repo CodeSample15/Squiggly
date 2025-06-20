@@ -37,20 +37,21 @@ As you can see, the idea of this language is to create simple programs with rela
 ## *...why?*
 
 - **Why did you make this project?** 
-    - Good question! The goal of this project is to eventually have an interpreter capable of being easily ported to different devices (such as the handheld Raspberry Pi game console I made as a test). This allows anyone to easily develop and test game scripts on their own computer before downloading them to any device with Squiggly installed.
+    - Good question! My goal for this project was to make an interpreter capable of being easily ported to different devices (such as the handheld Raspberry Pi game console I made as a test). This allows anyone to easily develop and test game scripts on their own computer before downloading them to any device with Squiggly installed.
     - This language is designed around game development, so I believe it will be a unique way to develop simple games. I love using scripting languages to throw something cool together, and I hope that Squiggly will be a fun way to do just that.
+    - The main reason however: fun! I wanted to see what I could do with what little I know of programming languages. I've learned a lot from building Squiggly and hope to eventually revisit this idea with a more... intelligent way of designing it.
 - **Why should I use this project?**
-    - This interpreter (when built and ran from the `main` branch) will open it's own graphical window when running a script where you can play and test games!
-    - Squiggly was built with portability in mind, so games written in this langauge can be played on many different devices. 
+    - This interpreter will open it's own graphical window when running a script where you can play and test games. If game dev is your thing and you're bored, I recommend trying to make your own Squiggly program.
+    - Squiggly was built with portability in mind, so games written in this langauge can be played on many different devices. Currently, I have a port of Squiggly that runs on a Raspberry Pi 02W with a small TFT screen.
     - If you like experimenting with crappy software, this is definitely a fun way to do so (in my unbiased opinion).
 - **Why did you call it that?**
-    - This project is named "squiggly" due to the different built-in functionalities provided by this language which are accessed by "squiggly" shapes (@, $, ^). More information about these symbols in the [syntax information file](/guide.md)
+    - This project is named "squiggly" due to the different built-in functionalities provided by this language which are accessed by "squiggly" shapes (@, $, ^). More information about these symbols in the [project's guide](/guide.md)
     - The project was going to be named "squiggle" but according to [the complete list of esoteric languages](https://esolangs.org/wiki/Language_list), the name "squiggle" is already taken.
 
 ## How does it work?
 
 - Since Squiggly was a challenge for myself, I did very little research behind how interpreted languages are supposed to be made (bad idea, I know).
-- The methods I came up with are briefly outlined below:
+- The system I came up with is briefly outlined below:
 - Squiggly has 3 main components:
     - **Linter**:
         - The Linter is what runs before everything else. It ensures syntax is somewhat correct and removes unnecessary whitespace and comments. After this process, parsing the raw text becomes much more controlled.
@@ -67,11 +68,11 @@ As you can see, the idea of this language is to create simple programs with rela
     - [exprtk](https://github.com/ArashPartow/exprtk): Mathmatical equation string parsing
     - [SFML](https://github.com/SFML/SFML): Graphical frontend (creating a window, drawing frames to window)
 
-- For the Raspberry Pi console build, Squiggly also uses a [fork](https://github.com/CodeSample15/ST7735_TFT_RPI) of [this TFT device library](https://github.com/gavinlyonsrepo/ST7735_TFT_RPI) to interface with an external TFT screen device. The fork includes an in-memory screen buffer which is used for more consistent frame rates and more efficient data-writing.
+- For the Raspberry Pi console build, Squiggly also uses a [fork](https://github.com/CodeSample15/ST7735_TFT_RPI) of [this TFT device library](https://github.com/gavinlyonsrepo/ST7735_TFT_RPI) to interface with an external TFT screen device. The fork includes an in-memory screen buffer which is used for more consistent frame rates and more efficient data-writing. For input control, Squiggly uses a simple [joystick library](https://github.com/drewnoakes/joystick/tree/master) to get values from a USB controller.
 
 ## Example squiggly syntax:
 
-Test code can be found in the [/test_scripts](/test_scripts/) folder, but the general syntax looks like the following:
+Test code can be found in the [/test_scripts](/test_scripts/) folder, but here's a small sample of what Squiggly code looks like:
 
 ``` Python
 :VARS: {
