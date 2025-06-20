@@ -2,6 +2,13 @@
     # global variables go here
     int wallPoolSize = 3
 
+    OBJECT sky
+    sky.setColor(58, 205, 242)
+    sky.x = $SCREEN_WIDTH / 2
+    sky.y = $SCREEN_HEIGHT / 2
+    sky.width = $SCREEN_WIDTH
+    sky.height = $SCREEN_HEIGHT
+
     OBJECT walls_u[wallPoolSize]
     OBJECT walls_d[wallPoolSize]
 
@@ -37,6 +44,8 @@
 :UPDATE: {
     # game loop logic goes here
     yVel += gravity * $DTIME
+
+    sky.draw() #draw this before everything else
 
     if($A_BTN and not(flapped) and not(dead)) {
         yVel = -flapForce

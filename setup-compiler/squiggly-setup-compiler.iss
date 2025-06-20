@@ -26,7 +26,7 @@ ChangesAssociations=yes
 DefaultGroupName={#MyAppName}
 ; Remove the following line to run in administrative install mode (install for all users.)
 PrivilegesRequired=lowest
-OutputDir=C:\Users\lukec\OneDrive\Documents\GitHub\Squiggly\setup-compiler
+OutputDir=./
 OutputBaseFilename=squiggly-setup
 Compression=lzma
 SolidCompression=yes
@@ -36,7 +36,7 @@ WizardStyle=modern
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Files]
-Source: "C:\Users\lukec\OneDrive\Documents\GitHub\Squiggly\build\bin\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\build\bin\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Registry]
