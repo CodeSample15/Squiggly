@@ -20,7 +20,7 @@ Below are some examples of programs written in Squiggly.
 ![colorTest.sqgly](/media/ColorTest.gif)
 [colorTest.sqgly](/console_games/colorTest.sqgly)
 
-As you can see, the idea of this language is to create simple programs with relatively simple code.
+As you can see from these example scripts, the idea behind this language is to create simple programs with relatively simple code.
 
 ## Build/Run instructions:
 
