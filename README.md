@@ -54,7 +54,7 @@ As you can see from these example scripts, the idea behind this language is to c
 - The system I came up with is briefly outlined below:
 - Squiggly has 3 main components:
     - **Linter**:
-        - The Linter is what runs before everything else. It ensures syntax is somewhat correct and removes unnecessary whitespace and comments. After this process, parsing the raw text becomes much more controlled.
+        - The Linter is what runs before everything else. It ensures syntax is somewhat correct and removes unnecessary whitespace and comments. After this process, parsing the raw text becomes much easier to do.
     - **Tokenizer**:
         - The Tokenizer runs after the Linter and converts the raw text into a vector of "tokens". These tokens are representations of each line and is a somewhat "compiled" version of the main code. For example, a line which declares a variable would be tokenized into a declare token, with the name and type of the declared variable stored in variables which will remove the need to parse the raw text again.
         - The tokenizer deletes the raw text from memory after tokenizing a program, freeing a small bit of memory.
@@ -93,7 +93,7 @@ Test code can be found in the [/test_scripts](/test_scripts/) folder, but here's
 
     test.setColor(173, 245, 66)
     test.setShape(@TRIANGLE)
-    test.setSolid(true) #turn fill off
+    test.setSolid(false) #turn fill off
 }
 
 :UPDATE: {
