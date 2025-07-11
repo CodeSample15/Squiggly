@@ -5,7 +5,7 @@ PROJECT (squiggly LANGUAGES CXX)
 add_compile_options(-Wall -Werror)
 file( GLOB SOURCES "src/*.cpp" "src/Built-In/*.cpp" )
 
-if(true)
+if(false)
     #regular build (pc)
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
