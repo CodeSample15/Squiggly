@@ -2,11 +2,11 @@ cmake_minimum_required(VERSION 3.28)
 
 PROJECT (squiggly LANGUAGES CXX)
 
-#add_compile_options(-Wall -Werror) #use this for development, GET RID OF ALL WARNINGS BEFORE PUSHING
-add_compile_options(-Wall)
+add_compile_options(-Wall -Werror) #use this for development, GET RID OF ALL WARNINGS BEFORE PUSHING
+#add_compile_options(-Wall)
 file( GLOB SOURCES "src/*.cpp" "src/Built-In/*.cpp" )
 
-if(false)
+if(true)
     #regular build (pc)
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
