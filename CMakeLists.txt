@@ -2,7 +2,8 @@ cmake_minimum_required(VERSION 3.28)
 
 PROJECT (squiggly LANGUAGES CXX)
 
-add_compile_options(-Wall -Werror)
+#add_compile_options(-Wall -Werror) #use this for development, GET RID OF ALL WARNINGS BEFORE PUSHING
+add_compile_options(-Wall)
 file( GLOB SOURCES "src/*.cpp" "src/Built-In/*.cpp" )
 
 if(false)
