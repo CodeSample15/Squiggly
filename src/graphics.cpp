@@ -5,6 +5,7 @@
 */
 
 #include <algorithm>
+#include <cmath>
 #include "graphics.hpp"
 
 void draw_pixel(SGraphics::pixel p, SGraphics::Color c);
