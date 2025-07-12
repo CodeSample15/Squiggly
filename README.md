@@ -43,7 +43,7 @@ As you can see from these example scripts, the idea behind this language is to c
 - **Why should I use this project?**
     - This interpreter will open it's own graphical window when running a script where you can play and test games. If game dev is your thing and you're bored, I recommend trying to make your own Squiggly program.
     - Squiggly was built with portability in mind, so games written in this langauge can be played on many different devices. Currently, I have a port of Squiggly that runs on a Raspberry Pi 02W with a small TFT screen.
-    - If you like experimenting with crappy software, this is definitely a fun way to do so (in my unbiased opinion).
+    - If you like experimenting with random software, this is definitely a fun way to do so (in my unbiased opinion).
 - **Why did you call it that?**
     - This project is named "squiggly" due to the different built-in functionalities provided by this language which are accessed by "squiggly" shapes (@, $, ^). More information about these symbols in the [project's guide](/guide.md)
     - The project was going to be named "squiggle" but according to [the complete list of esoteric languages](https://esolangs.org/wiki/Language_list), the name "squiggle" is already taken.
