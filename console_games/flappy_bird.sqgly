@@ -13,15 +13,17 @@
     OBJECT walls_d[wallPoolSize]
 
     OBJECT player
-    player.x = $SCREEN_WIDTH / 5 
-    player.y = $SCREEN_HEIGHT / 2
+    player.x = $SCREEN_WIDTH / 5
+    player.y = $SCREEN_HEIGHT / 4
+    player.width = $SCREEN_WIDTH / 20
+    player.height = $SCREEN_HEIGHT / 20
     player.setColor(166, 155, 2)
     player.rotation = 90
     player.setShape(@TRIANGLE)
 
     float yVel = 0
-    float gravity = 20
-    float flapForce = 10
+    float gravity = 14
+    float flapForce = 7
 
     float wallMoveSpeed = 100
     int wallSize = 20
@@ -155,7 +157,8 @@ checkCollision() {
     }
 
     if(player.y > $SCREEN_HEIGHT) {
-        dead = true
+        yVel = 0
+        player.y = $SCREEN_HEIGHT
     }
 
     if(dead) {
