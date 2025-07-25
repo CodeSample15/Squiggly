@@ -9,7 +9,7 @@
 #pragma once
 
 //this will allow both the raspi port and the pc port to be in the same codebase
-#define BUILD_FOR_RASPI true
+#define BUILD_FOR_RASPI false
 
 #if BUILD_FOR_RASPI
 #include "ST7735_TFT.hpp"
