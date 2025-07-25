@@ -321,7 +321,7 @@ void BuiltIn::Object::move(float x, float y, bool collide)
  */
 void BuiltIn::Object::addWall(Object* wall, bool add) 
 {
-    for(int i=0; i<walls.size(); i++) {
+    for(size_t i=0; i<walls.size(); i++) {
         if(walls[i]->id == wall->id) {
             if(add)
                 return;
